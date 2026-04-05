@@ -2,8 +2,10 @@
 Bin/
 Bin-Obj/
 nul
-wallpaper_debug.log
-compile_commands.json
+
+**/.qwen
+
+.qwen/
 
 # Editor
 .vscode/

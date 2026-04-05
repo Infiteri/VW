@@ -3,7 +3,7 @@ OBJ=Bin-Obj
 DLL=VW
 EXE=VW
 
-.PHONY: help always dev win run kill compile_commands
+.PHONY: help always dev win run kill vendor
 
 help:
 	@echo "VW build: "
@@ -12,7 +12,7 @@ help:
 	@echo "				dev - Builds the dev executable"
 	@echo "				run - Run the executable"
 	@echo "				kill - Kill the running executable"
-	@echo "				compile_commands - Generate compile_commands.json for clangd"
+	@echo "				vendor - Builds vendor files"
 
 always:
 	@mkdir -p $(BIN)
@@ -29,3 +29,6 @@ run:
 
 kill:
 	@taskkill /F /IM $(EXE).exe 2>nul || true
+
+vendor:
+	@make -j12 -C VW/Vendor/glad --no-print-directory

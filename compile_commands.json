@@ -1,12 +1,7 @@
 [
   {
-    "directory": "D:\\Users\\user\\Desktop\\vw",
-    "command": "g++ -c WinApp\\Source\\Main.cpp -o /dev/null",
-    "file": "WinApp\\Source\\Main.cpp"
-  },
-  {
-    "directory": "D:\\Users\\user\\Desktop\\vw",
-    "command": "g++ -c VW\\Source\\Main.cpp -o /dev/null",
-    "file": "VW\\Source\\Main.cpp"
+    "directory": "D:/Users/user/Desktop/vw",
+    "file": "VW/Source/Core/main.cpp",
+    "command": "C:/msys64/ucrt64/bin/clang++.exe --target=x86_64-w64-mingw32 -isystem C:/msys64/ucrt64/include/c++/15.1.0 -isystem C:/msys64/ucrt64/include/c++/15.1.0/x86_64-w64-mingw32 -isystem C:/msys64/ucrt64/include/c++/15.1.0/backward -isystem C:/msys64/ucrt64/lib/clang/20/include -isystem C:/msys64/ucrt64/include -IVW/Source"
   }
 ]
