@@ -1,0 +1,19 @@
+---
+BreakBeforeBraces: Allman
+ColumnLimit: 100
+NamespaceIndentation: All
+AccessModifierOffset: -4
+AlignEscapedNewlines: DontAlign
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+Standard: c++17
+DerivePointerAlignment: false
+PointerAlignment: Right
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+FixNamespaceComments: true
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+...

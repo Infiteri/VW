@@ -1,0 +1,12 @@
+# Build output
+Bin/
+Bin-Obj/
+nul
+wallpaper_debug.log
+compile_commands.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
