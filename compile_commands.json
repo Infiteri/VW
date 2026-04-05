@@ -1,0 +1,12 @@
+[
+  {
+    "directory": "D:\\Users\\user\\Desktop\\vw",
+    "command": "g++ -c WinApp\\Source\\Main.cpp -o /dev/null",
+    "file": "WinApp\\Source\\Main.cpp"
+  },
+  {
+    "directory": "D:\\Users\\user\\Desktop\\vw",
+    "command": "g++ -c VW\\Source\\Main.cpp -o /dev/null",
+    "file": "VW\\Source\\Main.cpp"
+  }
+]
