@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Core/Logger.h"
 
 #include <glad/glad.h>
 
@@ -6,6 +7,9 @@ namespace VW
 {
     void Renderer::Init()
     {
+        VW_LOG_ADD_CATEGORY("vwrn", "Renderer");
+        VW_LOG(Info, "vwrn", "Initializing...");
+
         gladLoadGL();
     }
 

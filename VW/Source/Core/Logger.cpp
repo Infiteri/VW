@@ -105,6 +105,7 @@ namespace VW
         }
         else
         {
+            // todo: generalize and make more extensable, add datetimes or times
             std::string format = s_State.Settings.Format;
 
             auto prefixPos = format.find("PREFIX");
