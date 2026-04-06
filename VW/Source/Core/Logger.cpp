@@ -34,6 +34,11 @@ namespace VW
     {
     }
 
+    Logger::Settings &Logger::GetSettings()
+    {
+        return s_State.Settings;
+    }
+
     static void Output(LogColor color, const char *msg)
     {
         struct RGB
@@ -92,9 +97,36 @@ namespace VW
         va_end(args);
 
         char finalMsg[LOG_FINAL_SIZE];
-        std::snprintf(finalMsg, LOG_FINAL_SIZE, "[%s%s%s]: %s\n", cat ? cat->Prefix.c_str() : "",
-                      cat ? " " : "", strLevel, message);
 
-        Output(LogColor::Blue, finalMsg);
+        if (!s_State.Settings.FancyFormat)
+        {
+            std::snprintf(finalMsg, LOG_FINAL_SIZE, "[%s%s%s]: %s\n",
+                          cat ? cat->Prefix.c_str() : "", cat ? " " : "", strLevel, message);
+        }
+        else
+        {
+            std::string format = s_State.Settings.Format;
+
+            auto prefixPos = format.find("PREFIX");
+            if (prefixPos != std::string::npos)
+            {
+                format.replace(prefixPos, 6, cat->Prefix);
+            }
+
+            auto levelPos = format.find("LEVEL");
+            if (levelPos != std::string::npos)
+            {
+                format.replace(levelPos, 5, strLevel);
+            }
+
+            auto msgPos = format.find("MSG");
+            if (msgPos != std::string::npos)
+            {
+                format.replace(msgPos, 3, message);
+            }
+            std::snprintf(finalMsg, format.size() + 1, "%s\n", format.c_str());
+        }
+
+        Output(s_State.ColorLevelMap[level], finalMsg);
     }
 } // namespace VW

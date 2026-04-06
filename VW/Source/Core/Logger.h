@@ -31,10 +31,17 @@ namespace VW
     class VW_API Logger
     {
     public:
+        struct Settings
+        {
+            bool FancyFormat = false;
+            std::string Format = "[PREFIX LEVEL]: MSG";
+        };
+
         struct State
         {
             std::unordered_map<std::string, LogCategory> Categories;
             std::unordered_map<LogLevel, LogColor> ColorLevelMap;
+            struct Settings Settings;
         };
 
     public:
@@ -43,6 +50,8 @@ namespace VW
 
         static void Init();
         static void Shutdown();
+
+        static Settings &GetSettings();
 
         static void AddCategory(const LogCategory &category);
 

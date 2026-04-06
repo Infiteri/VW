@@ -14,6 +14,12 @@ namespace VW
 
         void Init() override
         {
+            Logger::GetSettings().FancyFormat = true;
+            Logger::GetSettings().Format = "[PREFIX]: MSG";
+
+            VW_LOG_ADD_CATEGORY("vwdp", "Dev");
+            VW_INFO("vwdp", "Initializing...");
+
             glfwInit();
             m_Handle = glfwCreateWindow(100, 100, "DevApp", nullptr, nullptr);
             glfwMakeContextCurrent(m_Handle);

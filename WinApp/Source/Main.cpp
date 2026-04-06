@@ -41,6 +41,12 @@ namespace VW
 
         void Init() override
         {
+            Logger::GetSettings().FancyFormat = true;
+            Logger::GetSettings().Format = "[PREFIX]: MSG";
+
+            VW_LOG_ADD_CATEGORY("vwwp", "Windows");
+            VW_INFO("vwwp", "Initializing...");
+
             AllocConsole();
             freopen("CONOUT$", "w", stdout);
 
