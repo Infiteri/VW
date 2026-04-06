@@ -19,6 +19,8 @@ always:
 	@mkdir -p $(OBJ)
 
 dev: always
+	@make -j12 -C VW --no-print-directory
+	@make -j12 -C DevApp --no-print-directory
 
 win: always
 	@make -j12 -C VW --no-print-directory
@@ -30,5 +32,6 @@ run:
 kill:
 	@taskkill /F /IM $(EXE).exe 2>nul || true
 
-vendor:
+vendor: always
 	@make -j12 -C VW/Vendor/glad --no-print-directory
+	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll

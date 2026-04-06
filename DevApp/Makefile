@@ -1,13 +1,13 @@
-BIN := ../Bin
-OBJ := ../Bin-Obj
-DLL ?= VW
-ASSEMBLY := VW
+BIN ?= ../Bin
+OBJ ?= ../Bin-Obj
+EXE ?= VW
+ASSEMBLY := DevApp
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-ISource -IVendor/glad/include
+INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include
 DEFINES=
-LINK_FLAGS=-shared $(OBJ)/glad/glad.o
+LINK_FLAGS= -L$(BIN) -lglfw3 -lVW
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)
 
@@ -15,7 +15,7 @@ SRC_FILES := $(call rwildcard,Source/,*.cpp)
 OBJ_FILES := $(SRC_FILES:%.cpp=$(ASSEMBLY_OBJ_DIR)/%.o)
 
 .PHONY: all
-all: $(DLL)
+all: $(EXE)
 	@echo $0
 
 $(ASSEMBLY_OBJ_DIR)/%.o: %.cpp
@@ -23,5 +23,5 @@ $(ASSEMBLY_OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@g++ -fPIC -c $< -o $@ $(COMPILE_FLAGS) $(DEFINES) $(INCLUDE_FLAGS)
 
-$(DLL): $(OBJ_FILES)
-	@g++ $(OBJ_FILES) $(LINK_FLAGS) -o $(BIN)/$(DLL).dll
+$(EXE): $(OBJ_FILES)
+	@g++ $(OBJ_FILES) $(LINK_FLAGS) -o $(BIN)/$(EXE)

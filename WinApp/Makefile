@@ -5,9 +5,9 @@ ASSEMBLY := WinApp
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-I../VW/Source -I../VW/Vendor/glad/include
+INCLUDE_FLAGS=-I../VW/Source
 DEFINES=
-LINK_FLAGS= -L$(BIN) -lVW -lopengl32 -lgdi32 -luser32 $(OBJ)/glad/glad.o
+LINK_FLAGS= -L$(BIN) -lVW -lopengl32 -lgdi32 -luser32 
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)
 

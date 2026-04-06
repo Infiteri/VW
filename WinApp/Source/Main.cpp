@@ -2,7 +2,6 @@
 #include "Core/Logger.h"
 #include "Core/Platform.h"
 #include <cstdio>
-#include <glad/glad.h>
 #include <windows.h>
 
 namespace VW
@@ -18,6 +17,28 @@ namespace VW
     class WindowsPlatform : public VW::Platform
     {
     public:
+        ~WindowsPlatform() override
+        {
+            if (g_hGLRC)
+            {
+                wglMakeCurrent(nullptr, nullptr);
+                wglDeleteContext(g_hGLRC);
+                g_hGLRC = nullptr;
+            }
+            if (g_hDC && g_hWnd)
+            {
+                ReleaseDC(g_hWnd, g_hDC);
+                g_hDC = nullptr;
+            }
+            if (g_hWnd)
+            {
+                DestroyWindow(g_hWnd);
+                g_hWnd = nullptr;
+            }
+            UnregisterClassW(L"WGL", g_hInst);
+            FreeConsole();
+        }
+
         void Init() override
         {
             AllocConsole();
@@ -90,8 +111,6 @@ namespace VW
                 return;
             }
             wglMakeCurrent(g_hDC, g_hGLRC);
-
-            gladLoadGL();
         }
 
         void Render() override
@@ -108,51 +127,16 @@ namespace VW
                 DispatchMessageW(&msg);
             }
 
-            glClearColor(1, 0, 0, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
             SwapBuffers(g_hDC);
         }
 
         void Shutdown() override
         {
-            MSG msg;
-            while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    g_Run = false;
-                    return;
-                }
-                TranslateMessage(&msg);
-                DispatchMessageW(&msg);
-            }
         }
 
         bool ShouldShutdown() override
         {
             return !g_Run;
-        }
-
-        ~WindowsPlatform() override
-        {
-            if (g_hGLRC)
-            {
-                wglMakeCurrent(nullptr, nullptr);
-                wglDeleteContext(g_hGLRC);
-                g_hGLRC = nullptr;
-            }
-            if (g_hDC && g_hWnd)
-            {
-                ReleaseDC(g_hWnd, g_hDC);
-                g_hDC = nullptr;
-            }
-            if (g_hWnd)
-            {
-                DestroyWindow(g_hWnd);
-                g_hWnd = nullptr;
-            }
-            UnregisterClassW(L"WGL", g_hInst);
-            FreeConsole();
         }
 
     private:
