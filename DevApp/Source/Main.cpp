@@ -3,6 +3,7 @@
 #include "Core/Platform.h"
 
 #include <glfw/glfw3.h>
+#include <windows.h>
 
 namespace VW
 {
@@ -50,5 +51,18 @@ namespace VW
 
 VW::Platform *VW::InitPlatform()
 {
+    // allows nice logger colors in the GetConsoleMode
+    // removed from Logger.cpp to keep VW platform independent
+    // NOTE: some code as in WinApp main
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE)
+    {
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode))
+        {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
+        }
+    }
     return new VW::DevAppPlatform();
 }

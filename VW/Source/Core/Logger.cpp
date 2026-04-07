@@ -16,18 +16,10 @@ namespace VW
 
     void Logger::Init()
     {
-#ifdef _WIN32
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (hOut != INVALID_HANDLE_VALUE)
-        {
-            DWORD dwMode = 0;
-            if (GetConsoleMode(hOut, &dwMode))
-            {
-                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                SetConsoleMode(hOut, dwMode);
-            }
-        }
-#endif
+        s_State.ColorLevelMap[LogLevel::Debug] = LogColor::White;
+        s_State.ColorLevelMap[LogLevel::Info] = LogColor::Green;
+        s_State.ColorLevelMap[LogLevel::Warn] = LogColor::Yellow;
+        s_State.ColorLevelMap[LogLevel::Error] = LogColor::Red;
     }
 
     void Logger::Shutdown()
@@ -60,7 +52,7 @@ namespace VW
             r = {255, 255, 0};
             break;
         case LogColor::Red:
-            r = {255, 0, 0};
+            r = {255, 10, 0};
             break;
         case LogColor::White:
             r = {255, 255, 255};
@@ -125,7 +117,8 @@ namespace VW
             {
                 format.replace(msgPos, 3, message);
             }
-            std::snprintf(finalMsg, format.size() + 1, "%s\n", format.c_str());
+
+            std::snprintf(finalMsg, sizeof(finalMsg), "%s\n", format.c_str());
         }
 
         Output(s_State.ColorLevelMap[level], finalMsg);

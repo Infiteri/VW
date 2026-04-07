@@ -1,7 +1,6 @@
 #include "Framebuffer.h"
 #include "Base.h"
 #include "Core/Logger.h"
-#include <GL/gl.h>
 #include <glad/glad.h>
 
 namespace VW
@@ -250,6 +249,11 @@ namespace VW
             glDeleteFramebuffers(1, &m_ID);
             m_ID = 0;
         }
+    }
+
+    bool Framebuffer::IsComplete() const
+    {
+        return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     }
 
     void Framebuffer::Bind() const

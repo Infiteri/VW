@@ -3,7 +3,7 @@ OBJ=Bin-Obj
 DLL=VW
 EXE=VW
 
-.PHONY: help always dev win run kill vendor
+.PHONY: help always dev win run kill vendor assets
 
 help:
 	@echo "VW build: "
@@ -13,21 +13,26 @@ help:
 	@echo "				run - Run the executable"
 	@echo "				kill - Kill the running executable"
 	@echo "				vendor - Builds vendor files"
+	@echo "				assets - Copies the assets needed by VW"
 
-always:
+always: 
 	@mkdir -p $(BIN)
 	@mkdir -p $(OBJ)
 
-dev: always
+assets: always
+	@echo Assetsing...
+	@cp Shader.glsl $(BIN)/Shader.glsl
+
+dev: always assets
 	@make -j12 -C VW --no-print-directory
 	@make -j12 -C DevApp --no-print-directory
 
-win: always
+win: always assets
 	@make -j12 -C VW --no-print-directory
 	@make -j12 -C WinApp --no-print-directory
 
 run:
-	@start $(BIN)\$(EXE).exe
+	@cd $(BIN) && start $(EXE).exe && cd ..
 
 kill:
 	@taskkill /F /IM $(EXE).exe 2>nul || true

@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Core/Logger.h"
+#include "Shader/Shader.h"
 
 #include <glad/glad.h>
 
@@ -11,6 +12,8 @@ namespace VW
         VW_LOG(Info, "vwrn", "Initializing...");
 
         gladLoadGL();
+
+        Shader shader("Shader.glsl");
     }
 
     void Renderer::Shutdown()

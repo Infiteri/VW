@@ -219,6 +219,19 @@ namespace VW
 
 VW::Platform *VW::InitPlatform()
 {
+    // allows nice logger colors in the GetConsoleMode
+    // removed from Logger.cpp to keep VW platform independent
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE)
+    {
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode))
+        {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
+        }
+    }
+
     VW::Logger::Log(VW::LogLevel::Info, "", "%s %i", "hahaha", 12);
     return new VW::WindowsPlatform();
 }
