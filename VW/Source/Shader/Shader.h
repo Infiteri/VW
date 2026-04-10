@@ -18,6 +18,11 @@ namespace VW
 
         void Use();
 
+        inline u32 GetID() const
+        {
+            return m_ID;
+        };
+
     private:
         u32 m_ID;
 

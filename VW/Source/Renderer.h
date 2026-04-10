@@ -7,8 +7,14 @@ namespace VW
     class VW_API Renderer
     {
     public:
+        struct Viewport
+        {
+            f32 Width, Height;
+        };
+
         struct State
         {
+            struct Viewport Viewport;
         };
 
     public:
@@ -17,6 +23,8 @@ namespace VW
 
         static void Init();
         static void Shutdown();
+
+        static void Viewport(f32 w, f32 h);
 
         static void BeginFrame();
         static void Render();

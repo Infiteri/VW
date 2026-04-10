@@ -1,12 +1,18 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
+#include "Renderer.h"
 
 #include <glfw/glfw3.h>
 #include <windows.h>
 
 namespace VW
 {
+    static void OnResize(GLFWwindow *window, int w, int h)
+    {
+        Renderer::Viewport(w, h);
+    }
+
     class DevAppPlatform : public Platform
     {
     public:
@@ -25,6 +31,8 @@ namespace VW
             m_Handle = glfwCreateWindow(100, 100, "DevApp", nullptr, nullptr);
             glfwMakeContextCurrent(m_Handle);
             glfwMaximizeWindow(m_Handle);
+
+            glfwSetWindowSizeCallback(m_Handle, OnResize);
         }
 
         bool ShouldShutdown() override

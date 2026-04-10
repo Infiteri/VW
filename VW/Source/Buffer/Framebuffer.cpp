@@ -293,4 +293,17 @@ namespace VW
         _BuildAttachments();
     }
 
+    u32 Framebuffer::GetColorAttachmentID(u32 index) const
+    {
+        if (index < 0 || index >= m_ColorTextures.size())
+            return 0;
+
+        return m_ColorTextures[index];
+    }
+
+    u32 Framebuffer::GetDepthAttachmentID() const
+    {
+        return m_DepthTexture;
+    }
+
 } // namespace VW

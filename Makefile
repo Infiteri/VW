@@ -22,6 +22,7 @@ always:
 assets: always
 	@echo Assetsing...
 	@cp Shader.glsl $(BIN)/Shader.glsl
+	@cp Screen.glsl $(BIN)/Screen.glsl
 
 dev: always assets
 	@make -j12 -C VW --no-print-directory
