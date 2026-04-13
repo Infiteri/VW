@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include "GPUScreen.h"
 
 namespace VW
 {
@@ -15,6 +16,7 @@ namespace VW
         struct State
         {
             struct Viewport Viewport;
+            GPUScreen Screen;
         };
 
     public:
