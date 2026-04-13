@@ -1,4 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "Math/Matrix.h"
 #include "Math/Vector.h"
 #include "doctest/doctest.h"
 
@@ -1309,4 +1310,452 @@ TEST_CASE("Vector4 IdentityVector Static")
     CHECK(v.y == doctest::Approx(0.0f));
     CHECK(v.z == doctest::Approx(0.0f));
     CHECK(v.w == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 Default Constructor is Identity")
+{
+    Matrix4 m;
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[1] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(0.0f));
+    CHECK(m.data[3] == doctest::Approx(0.0f));
+    CHECK(m.data[4] == doctest::Approx(0.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[6] == doctest::Approx(0.0f));
+    CHECK(m.data[7] == doctest::Approx(0.0f));
+    CHECK(m.data[8] == doctest::Approx(0.0f));
+    CHECK(m.data[9] == doctest::Approx(0.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[11] == doctest::Approx(0.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+    CHECK(m.data[14] == doctest::Approx(0.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 Copy Constructor")
+{
+    float rawData[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    Matrix4 a(rawData);
+    Matrix4 b(a);
+    for (int i = 0; i < 16; i++)
+        CHECK(b.data[i] == doctest::Approx(rawData[i]));
+}
+
+TEST_CASE("Matrix4 Float Pointer Constructor")
+{
+    float rawData[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    Matrix4 m(rawData);
+    for (int i = 0; i < 16; i++)
+        CHECK(m.data[i] == doctest::Approx(rawData[i]));
+}
+
+TEST_CASE("Matrix4 Perspective")
+{
+    Matrix4 m = Matrix4::Perspective(90.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+    float f = 1.0f / tanf(90.0f * 0.5f);
+    float aspect = 16.0f / 9.0f;
+    float nearPlane = 0.1f;
+    float farPlane = 100.0f;
+
+    CHECK(m.data[0] == doctest::Approx(f / aspect));
+    CHECK(m.data[5] == doctest::Approx(f));
+    CHECK(m.data[10] == doctest::Approx((farPlane + nearPlane) / (nearPlane - farPlane)));
+    CHECK(m.data[11] == doctest::Approx(-1.0f));
+    CHECK(m.data[14] == doctest::Approx((2.0f * farPlane * nearPlane) / (nearPlane - farPlane)));
+    CHECK(m.data[15] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(0.0f));
+    CHECK(m.data[3] == doctest::Approx(0.0f));
+    CHECK(m.data[8] == doctest::Approx(0.0f));
+    CHECK(m.data[9] == doctest::Approx(0.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 Ortho")
+{
+    Matrix4 m = Matrix4::Ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
+    float lr = 1.0f / (800.0f - 0.0f);
+    float bt = 1.0f / (600.0f - 0.0f);
+    float nf = 1.0f / (-1.0f - 1.0f);
+
+    CHECK(m.data[0] == doctest::Approx(2.0f * lr));
+    CHECK(m.data[5] == doctest::Approx(2.0f * bt));
+    CHECK(m.data[10] == doctest::Approx(2.0f * nf));
+    CHECK(m.data[12] == doctest::Approx(-(800.0f + 0.0f) * lr));
+    CHECK(m.data[13] == doctest::Approx(-(600.0f + 0.0f) * bt));
+    CHECK(m.data[14] == doctest::Approx((1.0f + (-1.0f)) * nf));
+    // Off-diagonal should be identity
+    CHECK(m.data[1] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(0.0f));
+    CHECK(m.data[3] == doctest::Approx(0.0f));
+    CHECK(m.data[4] == doctest::Approx(0.0f));
+    CHECK(m.data[6] == doctest::Approx(0.0f));
+    CHECK(m.data[7] == doctest::Approx(0.0f));
+    CHECK(m.data[8] == doctest::Approx(0.0f));
+    CHECK(m.data[9] == doctest::Approx(0.0f));
+    CHECK(m.data[11] == doctest::Approx(0.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 Multiply Identity")
+{
+    Matrix4 a;
+    Matrix4 b;
+    Matrix4 result = Matrix4::Multiply(a, b);
+    for (int i = 0; i < 16; i++)
+    {
+        if (i == 0 || i == 5 || i == 10 || i == 15)
+            CHECK(result.data[i] == doctest::Approx(1.0f));
+        else
+            CHECK(result.data[i] == doctest::Approx(0.0f));
+    }
+}
+
+TEST_CASE("Matrix4 Multiply")
+{
+    // Column-major layout: data[row + col*4]
+    float adata[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    float bdata[16] = {2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 1, 2, 3, 1};
+    Matrix4 a(adata);
+    Matrix4 b(bdata);
+
+    Matrix4 result = a * b;
+
+    // Standard column-major multiply: m[row,col] = sum_k(a[row,k] * b[k,col])
+    CHECK(result.data[0] == doctest::Approx(1*2 + 5*0 + 9*0 + 13*0));   // 2
+    CHECK(result.data[1] == doctest::Approx(2*2 + 6*0 + 10*0 + 14*0));  // 4
+    CHECK(result.data[2] == doctest::Approx(3*2 + 7*0 + 11*0 + 15*0));  // 6
+    CHECK(result.data[3] == doctest::Approx(4*2 + 8*0 + 12*0 + 16*0));  // 8
+    CHECK(result.data[4] == doctest::Approx(1*0 + 5*2 + 9*0 + 13*0));   // 10
+    CHECK(result.data[5] == doctest::Approx(2*0 + 6*2 + 10*0 + 14*0));  // 12
+    CHECK(result.data[6] == doctest::Approx(3*0 + 7*2 + 11*0 + 15*0));  // 14
+    CHECK(result.data[7] == doctest::Approx(4*0 + 8*2 + 12*0 + 16*0));  // 16
+    CHECK(result.data[8] == doctest::Approx(1*0 + 5*0 + 9*2 + 13*0));   // 18
+    CHECK(result.data[9] == doctest::Approx(2*0 + 6*0 + 10*2 + 14*0));  // 20
+    CHECK(result.data[10] == doctest::Approx(3*0 + 7*0 + 11*2 + 15*0)); // 22
+    CHECK(result.data[11] == doctest::Approx(4*0 + 8*0 + 12*2 + 16*0)); // 24
+    CHECK(result.data[12] == doctest::Approx(1*1 + 5*2 + 9*3 + 13*1));  // 51
+    CHECK(result.data[13] == doctest::Approx(2*1 + 6*2 + 10*3 + 14*1)); // 58
+    CHECK(result.data[14] == doctest::Approx(3*1 + 7*2 + 11*3 + 15*1)); // 65
+    CHECK(result.data[15] == doctest::Approx(4*1 + 8*2 + 12*3 + 16*1)); // 72
+}
+
+TEST_CASE("Matrix4 Multiply Associativity")
+{
+    float d1[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1};
+    float d2[16] = {2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1};
+    float d3[16] = {1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    Matrix4 a(d1), b(d2), c(d3);
+
+    Matrix4 left = (a * b) * c;
+    Matrix4 right = a * (b * c);
+
+    for (int i = 0; i < 16; i++)
+        CHECK(left.data[i] == doctest::Approx(right.data[i]));
+}
+
+TEST_CASE("Matrix4 Invert Identity")
+{
+    Matrix4 identity;
+    Matrix4 result = Matrix4::Invert(identity);
+    for (int i = 0; i < 16; i++)
+    {
+        if (i == 0 || i == 5 || i == 10 || i == 15)
+            CHECK(result.data[i] == doctest::Approx(1.0f));
+        else
+            CHECK(result.data[i] == doctest::Approx(0.0f));
+    }
+}
+
+TEST_CASE("Matrix4 Invert Translation")
+{
+    Matrix4 t = Matrix4::Translate(Vector3(1.0f, 2.0f, 3.0f));
+    Matrix4 inv = Matrix4::Invert(t);
+
+    CHECK(inv.data[12] == doctest::Approx(-1.0f));
+    CHECK(inv.data[13] == doctest::Approx(-2.0f));
+    CHECK(inv.data[14] == doctest::Approx(-3.0f));
+    CHECK(inv.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 Invert Scale")
+{
+    Matrix4 s = Matrix4::Scale(Vector3(2.0f, 3.0f, 4.0f));
+    Matrix4 inv = Matrix4::Invert(s);
+
+    CHECK(inv.data[0] == doctest::Approx(0.5f));
+    CHECK(inv.data[5] == doctest::Approx(1.0f / 3.0f));
+    CHECK(inv.data[10] == doctest::Approx(0.25f));
+}
+
+TEST_CASE("Matrix4 Invert Then Multiply is Identity")
+{
+    float rawData[16] = {1, 0, 0, 2, 0, 3, 0, 4, 0, 0, 5, 6, 0, 0, 0, 1};
+    Matrix4 m(rawData);
+    Matrix4 inv = Matrix4::Invert(m);
+    Matrix4 result = Matrix4::Multiply(m, inv);
+
+    for (int i = 0; i < 16; i++)
+    {
+        if (i == 0 || i == 5 || i == 10 || i == 15)
+            CHECK(result.data[i] == doctest::Approx(1.0f).epsilon(0.001));
+        else
+            CHECK(result.data[i] == doctest::Approx(0.0f).epsilon(0.001));
+    }
+}
+
+TEST_CASE("Matrix4 Translate")
+{
+    Matrix4 m = Matrix4::Translate(Vector3(1.0f, 2.0f, 3.0f));
+
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    CHECK(m.data[12] == doctest::Approx(1.0f));
+    CHECK(m.data[13] == doctest::Approx(2.0f));
+    CHECK(m.data[14] == doctest::Approx(3.0f));
+    // All others zero
+    CHECK(m.data[1] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(0.0f));
+    CHECK(m.data[3] == doctest::Approx(0.0f));
+    CHECK(m.data[4] == doctest::Approx(0.0f));
+    CHECK(m.data[6] == doctest::Approx(0.0f));
+    CHECK(m.data[7] == doctest::Approx(0.0f));
+    CHECK(m.data[8] == doctest::Approx(0.0f));
+    CHECK(m.data[9] == doctest::Approx(0.0f));
+    CHECK(m.data[11] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 RotateX")
+{
+    float angle = 3.14159265f / 2.0f; // 90 degrees
+    Matrix4 m = Matrix4::RotateX(angle);
+
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(0.0f));
+    CHECK(m.data[6] == doctest::Approx(1.0f));
+    CHECK(m.data[9] == doctest::Approx(-1.0f));
+    CHECK(m.data[10] == doctest::Approx(0.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+    CHECK(m.data[14] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 RotateY")
+{
+    float angle = 3.14159265f / 2.0f; // 90 degrees
+    Matrix4 m = Matrix4::RotateY(angle);
+
+    CHECK(m.data[0] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(1.0f));
+    CHECK(m.data[8] == doctest::Approx(-1.0f));
+    CHECK(m.data[10] == doctest::Approx(0.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+    CHECK(m.data[14] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 RotateZ")
+{
+    float angle = 3.14159265f / 2.0f; // 90 degrees
+    Matrix4 m = Matrix4::RotateZ(angle);
+
+    CHECK(m.data[0] == doctest::Approx(0.0f));
+    CHECK(m.data[1] == doctest::Approx(1.0f));
+    CHECK(m.data[4] == doctest::Approx(-1.0f));
+    CHECK(m.data[5] == doctest::Approx(0.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+    CHECK(m.data[14] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 RotateX Zero Angle is Identity")
+{
+    Matrix4 m = Matrix4::RotateX(0.0f);
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 RotateY Zero Angle is Identity")
+{
+    Matrix4 m = Matrix4::RotateY(0.0f);
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 RotateZ Zero Angle is Identity")
+{
+    Matrix4 m = Matrix4::RotateZ(0.0f);
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 RotateZYX Zero Vector is Identity")
+{
+    Matrix4 m = Matrix4::RotateZYX(Vector3(0.0f, 0.0f, 0.0f));
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 RotateXYZ Zero Vector is Identity")
+{
+    Matrix4 m = Matrix4::RotateXYZ(Vector3(0.0f, 0.0f, 0.0f));
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Matrix4 Scale")
+{
+    Matrix4 m = Matrix4::Scale(Vector3(2.0f, 3.0f, 4.0f));
+
+    CHECK(m.data[0] == doctest::Approx(2.0f));
+    CHECK(m.data[5] == doctest::Approx(3.0f));
+    CHECK(m.data[10] == doctest::Approx(4.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    // All off-diagonal zero
+    CHECK(m.data[1] == doctest::Approx(0.0f));
+    CHECK(m.data[2] == doctest::Approx(0.0f));
+    CHECK(m.data[3] == doctest::Approx(0.0f));
+    CHECK(m.data[4] == doctest::Approx(0.0f));
+    CHECK(m.data[6] == doctest::Approx(0.0f));
+    CHECK(m.data[7] == doctest::Approx(0.0f));
+    CHECK(m.data[8] == doctest::Approx(0.0f));
+    CHECK(m.data[9] == doctest::Approx(0.0f));
+    CHECK(m.data[11] == doctest::Approx(0.0f));
+    CHECK(m.data[12] == doctest::Approx(0.0f));
+    CHECK(m.data[13] == doctest::Approx(0.0f));
+    CHECK(m.data[14] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 Scale Uniform")
+{
+    Matrix4 m = Matrix4::Scale(Vector3(5.0f, 5.0f, 5.0f));
+    CHECK(m.data[0] == doctest::Approx(5.0f));
+    CHECK(m.data[5] == doctest::Approx(5.0f));
+    CHECK(m.data[10] == doctest::Approx(5.0f));
+}
+
+TEST_CASE("Matrix4 Forward")
+{
+    Matrix4 m = Matrix4::RotateY(3.14159265f / 4.0f); // 45 degrees
+    Vector3 fwd = Matrix4::Forward(m);
+
+    CHECK(fwd.x == doctest::Approx(-m.data[8]));
+    CHECK(fwd.y == doctest::Approx(-m.data[9]));
+    CHECK(fwd.z == doctest::Approx(-m.data[10]));
+}
+
+TEST_CASE("Matrix4 Forward Identity Matrix")
+{
+    Matrix4 m;
+    Vector3 fwd = Matrix4::Forward(m);
+    CHECK(fwd.x == doctest::Approx(0.0f));
+    CHECK(fwd.y == doctest::Approx(0.0f));
+    CHECK(fwd.z == doctest::Approx(-1.0f));
+}
+
+TEST_CASE("Matrix4 Right")
+{
+    Matrix4 m = Matrix4::RotateY(3.14159265f / 4.0f);
+    Vector3 right = Matrix4::Right(m);
+
+    CHECK(right.x == doctest::Approx(m.data[0]));
+    CHECK(right.y == doctest::Approx(m.data[1]));
+    CHECK(right.z == doctest::Approx(m.data[2]));
+}
+
+TEST_CASE("Matrix4 Right Identity Matrix")
+{
+    Matrix4 m;
+    Vector3 right = Matrix4::Right(m);
+    CHECK(right.x == doctest::Approx(1.0f));
+    CHECK(right.y == doctest::Approx(0.0f));
+    CHECK(right.z == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Matrix4 Transpose Identity")
+{
+    Matrix4 m;
+    Matrix4 result = Matrix4::Transpose(m);
+    for (int i = 0; i < 16; i++)
+    {
+        if (i == 0 || i == 5 || i == 10 || i == 15)
+            CHECK(result.data[i] == doctest::Approx(1.0f));
+        else
+            CHECK(result.data[i] == doctest::Approx(0.0f));
+    }
+}
+
+TEST_CASE("Matrix4 Transpose")
+{
+    float rawData[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    Matrix4 m(rawData);
+    Matrix4 result = Matrix4::Transpose(m);
+
+    CHECK(result.data[0] == doctest::Approx(1.0f));
+    CHECK(result.data[1] == doctest::Approx(5.0f));
+    CHECK(result.data[2] == doctest::Approx(9.0f));
+    CHECK(result.data[3] == doctest::Approx(13.0f));
+    CHECK(result.data[4] == doctest::Approx(2.0f));
+    CHECK(result.data[5] == doctest::Approx(6.0f));
+    CHECK(result.data[6] == doctest::Approx(10.0f));
+    CHECK(result.data[7] == doctest::Approx(14.0f));
+    CHECK(result.data[8] == doctest::Approx(3.0f));
+    CHECK(result.data[9] == doctest::Approx(7.0f));
+    CHECK(result.data[10] == doctest::Approx(11.0f));
+    CHECK(result.data[11] == doctest::Approx(15.0f));
+    CHECK(result.data[12] == doctest::Approx(4.0f));
+    CHECK(result.data[13] == doctest::Approx(8.0f));
+    CHECK(result.data[14] == doctest::Approx(12.0f));
+    CHECK(result.data[15] == doctest::Approx(16.0f));
+}
+
+TEST_CASE("Matrix4 Transpose Twice Returns Original")
+{
+    float rawData[16] = {1, 0, 0, 5, 0, 2, 0, 6, 0, 0, 3, 7, 0, 0, 0, 1};
+    Matrix4 m(rawData);
+    Matrix4 result = Matrix4::Transpose(Matrix4::Transpose(m));
+
+    for (int i = 0; i < 16; i++)
+        CHECK(result.data[i] == doctest::Approx(rawData[i]));
+}
+
+TEST_CASE("Matrix4 Composition Translation Then Rotation")
+{
+    Matrix4 t = Matrix4::Translate(Vector3(1.0f, 0.0f, 0.0f));
+    Matrix4 r = Matrix4::RotateY(3.14159265f); // 180 degrees
+    Matrix4 result = r * t;
+
+    // After translation then rotation, position should be flipped
+    CHECK(result.data[12] == doctest::Approx(-1.0f));
+}
+
+TEST_CASE("Matrix4 Operator Multiply Equivalence")
+{
+    float d1[16] = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 1, 2, 3, 1};
+    float d2[16] = {2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    Matrix4 a(d1), b(d2);
+
+    Matrix4 viaOp = a * b;
+    Matrix4 viaFn = Matrix4::Multiply(a, b);
+
+    for (int i = 0; i < 16; i++)
+        CHECK(viaOp.data[i] == doctest::Approx(viaFn.data[i]));
 }
