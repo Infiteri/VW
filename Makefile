@@ -14,6 +14,8 @@ help:
 	@echo "				kill - Kill the running executable"
 	@echo "				vendor - Builds vendor files"
 	@echo "				assets - Copies the assets needed by VW"
+	@echo "				test - Builds the test executable"
+	@echo "				run_tests - Builds and runs the tests"
 
 always: 
 	@mkdir -p $(BIN)
@@ -41,3 +43,9 @@ kill:
 vendor: always
 	@make -j12 -C VW/Vendor/glad --no-print-directory
 	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll
+
+test:
+	@make -j12 -C Tests --no-print-directory
+
+run_tests:
+	@$(BIN)/Tests.exe --success

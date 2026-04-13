@@ -82,7 +82,7 @@ namespace VW
         m_SS->Use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_FB->GetColorAttachmentID(0));
-        glUniform1i(glGetUniformLocation(m_SS->GetID(), "uSceneColor"), 0);
+        m_SS->Int(0, "uSceneColor");
         m_VAO->Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }

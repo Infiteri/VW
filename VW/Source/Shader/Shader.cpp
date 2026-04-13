@@ -142,4 +142,20 @@ namespace VW
     {
         glUseProgram(m_ID);
     }
+
+    void Shader::Int(int i, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        glUniform1i(loc, i);
+    }
+
+    u32 Shader::_GetUniform(const char *name)
+    {
+        Use();
+        if (m_Locations.find(name) != m_Locations.end())
+            return m_Locations[name];
+
+        m_Locations[name] = glGetUniformLocation(m_ID, name);
+        return m_Locations[name];
+    }
 } // namespace VW
