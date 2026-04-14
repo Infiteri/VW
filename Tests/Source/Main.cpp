@@ -1,5 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "Math/Matrix.h"
+#include "Math/Quaternion.h"
 #include "Math/Vector.h"
 #include "doctest/doctest.h"
 
@@ -1423,22 +1424,22 @@ TEST_CASE("Matrix4 Multiply")
     Matrix4 result = a * b;
 
     // Standard column-major multiply: m[row,col] = sum_k(a[row,k] * b[k,col])
-    CHECK(result.data[0] == doctest::Approx(1*2 + 5*0 + 9*0 + 13*0));   // 2
-    CHECK(result.data[1] == doctest::Approx(2*2 + 6*0 + 10*0 + 14*0));  // 4
-    CHECK(result.data[2] == doctest::Approx(3*2 + 7*0 + 11*0 + 15*0));  // 6
-    CHECK(result.data[3] == doctest::Approx(4*2 + 8*0 + 12*0 + 16*0));  // 8
-    CHECK(result.data[4] == doctest::Approx(1*0 + 5*2 + 9*0 + 13*0));   // 10
-    CHECK(result.data[5] == doctest::Approx(2*0 + 6*2 + 10*0 + 14*0));  // 12
-    CHECK(result.data[6] == doctest::Approx(3*0 + 7*2 + 11*0 + 15*0));  // 14
-    CHECK(result.data[7] == doctest::Approx(4*0 + 8*2 + 12*0 + 16*0));  // 16
-    CHECK(result.data[8] == doctest::Approx(1*0 + 5*0 + 9*2 + 13*0));   // 18
-    CHECK(result.data[9] == doctest::Approx(2*0 + 6*0 + 10*2 + 14*0));  // 20
-    CHECK(result.data[10] == doctest::Approx(3*0 + 7*0 + 11*2 + 15*0)); // 22
-    CHECK(result.data[11] == doctest::Approx(4*0 + 8*0 + 12*2 + 16*0)); // 24
-    CHECK(result.data[12] == doctest::Approx(1*1 + 5*2 + 9*3 + 13*1));  // 51
-    CHECK(result.data[13] == doctest::Approx(2*1 + 6*2 + 10*3 + 14*1)); // 58
-    CHECK(result.data[14] == doctest::Approx(3*1 + 7*2 + 11*3 + 15*1)); // 65
-    CHECK(result.data[15] == doctest::Approx(4*1 + 8*2 + 12*3 + 16*1)); // 72
+    CHECK(result.data[0] == doctest::Approx(1 * 2 + 5 * 0 + 9 * 0 + 13 * 0));   // 2
+    CHECK(result.data[1] == doctest::Approx(2 * 2 + 6 * 0 + 10 * 0 + 14 * 0));  // 4
+    CHECK(result.data[2] == doctest::Approx(3 * 2 + 7 * 0 + 11 * 0 + 15 * 0));  // 6
+    CHECK(result.data[3] == doctest::Approx(4 * 2 + 8 * 0 + 12 * 0 + 16 * 0));  // 8
+    CHECK(result.data[4] == doctest::Approx(1 * 0 + 5 * 2 + 9 * 0 + 13 * 0));   // 10
+    CHECK(result.data[5] == doctest::Approx(2 * 0 + 6 * 2 + 10 * 0 + 14 * 0));  // 12
+    CHECK(result.data[6] == doctest::Approx(3 * 0 + 7 * 2 + 11 * 0 + 15 * 0));  // 14
+    CHECK(result.data[7] == doctest::Approx(4 * 0 + 8 * 2 + 12 * 0 + 16 * 0));  // 16
+    CHECK(result.data[8] == doctest::Approx(1 * 0 + 5 * 0 + 9 * 2 + 13 * 0));   // 18
+    CHECK(result.data[9] == doctest::Approx(2 * 0 + 6 * 0 + 10 * 2 + 14 * 0));  // 20
+    CHECK(result.data[10] == doctest::Approx(3 * 0 + 7 * 0 + 11 * 2 + 15 * 0)); // 22
+    CHECK(result.data[11] == doctest::Approx(4 * 0 + 8 * 0 + 12 * 2 + 16 * 0)); // 24
+    CHECK(result.data[12] == doctest::Approx(1 * 1 + 5 * 2 + 9 * 3 + 13 * 1));  // 51
+    CHECK(result.data[13] == doctest::Approx(2 * 1 + 6 * 2 + 10 * 3 + 14 * 1)); // 58
+    CHECK(result.data[14] == doctest::Approx(3 * 1 + 7 * 2 + 11 * 3 + 15 * 1)); // 65
+    CHECK(result.data[15] == doctest::Approx(4 * 1 + 8 * 2 + 12 * 3 + 16 * 1)); // 72
 }
 
 TEST_CASE("Matrix4 Multiply Associativity")
@@ -1758,4 +1759,432 @@ TEST_CASE("Matrix4 Operator Multiply Equivalence")
 
     for (int i = 0; i < 16; i++)
         CHECK(viaOp.data[i] == doctest::Approx(viaFn.data[i]));
+}
+
+// ============================================================================
+// Quaternion Tests
+// ============================================================================
+
+TEST_CASE("Quaternion Default Constructor is Identity")
+{
+    Quaternion q;
+    CHECK(q.x == doctest::Approx(0.0f));
+    CHECK(q.y == doctest::Approx(0.0f));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Quaternion Parameterized Constructor")
+{
+    Quaternion q(1.0f, 2.0f, 3.0f, 4.0f);
+    CHECK(q.x == doctest::Approx(1.0f));
+    CHECK(q.y == doctest::Approx(2.0f));
+    CHECK(q.z == doctest::Approx(3.0f));
+    CHECK(q.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Copy Constructor")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b(a);
+    CHECK(b.x == doctest::Approx(1.0f));
+    CHECK(b.y == doctest::Approx(2.0f));
+    CHECK(b.z == doctest::Approx(3.0f));
+    CHECK(b.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Axis-Angle Constructor")
+{
+    // 180 degrees around X axis
+    Quaternion q(Vector3(1.0f, 0.0f, 0.0f), 3.14159265f);
+    float half = 3.14159265f / 2.0f;
+    CHECK(q.x == doctest::Approx(std::sin(half)));
+    CHECK(q.y == doctest::Approx(0.0f));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(std::cos(half)));
+}
+
+TEST_CASE("Quaternion Axis-Angle 90 degrees around Y")
+{
+    float angle = 3.14159265f / 2.0f;
+    Quaternion q(Vector3(0.0f, 1.0f, 0.0f), angle);
+    float half = angle / 2.0f;
+    float s = std::sin(half);
+    float c = std::cos(half);
+    CHECK(q.x == doctest::Approx(0.0f));
+    CHECK(q.y == doctest::Approx(s));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(c));
+}
+
+TEST_CASE("Quaternion Set Components")
+{
+    Quaternion q;
+    q.Set(1.0f, 2.0f, 3.0f, 4.0f);
+    CHECK(q.x == doctest::Approx(1.0f));
+    CHECK(q.y == doctest::Approx(2.0f));
+    CHECK(q.z == doctest::Approx(3.0f));
+    CHECK(q.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Set From Other")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b;
+    b.Set(a);
+    CHECK(b.x == doctest::Approx(1.0f));
+    CHECK(b.y == doctest::Approx(2.0f));
+    CHECK(b.z == doctest::Approx(3.0f));
+    CHECK(b.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Multiplication Operator")
+{
+    Quaternion a(0.0f, 0.0f, 0.0f, 1.0f); // identity
+    Quaternion b(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion result = a * b;
+    // identity * q = q
+    CHECK(result.x == doctest::Approx(1.0f));
+    CHECK(result.y == doctest::Approx(2.0f));
+    CHECK(result.z == doctest::Approx(3.0f));
+    CHECK(result.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Multiplication Non-Identity")
+{
+    // q1 = rotation 90° around X, q2 = rotation 90° around Y
+    float a = 3.14159265f / 2.0f;
+    float s = std::sin(a / 2.0f); // ~0.7071
+    float c = std::cos(a / 2.0f); // ~0.7071
+    Quaternion qx(s, 0.0f, 0.0f, c);
+    Quaternion qy(0.0f, s, 0.0f, c);
+
+    Quaternion result = qx * qy;
+
+    // w = c*c - s*0 - 0*s - 0*0 = c^2
+    CHECK(result.w == doctest::Approx(c * c));
+    // x = c*0 + s*c + 0*0 - 0*s = s*c
+    CHECK(result.x == doctest::Approx(s * c));
+    // y = c*s - s*0 + 0*c + 0*0 = s*c
+    CHECK(result.y == doctest::Approx(s * c));
+    // z = c*0 + s*s - 0*0 + 0*c = s^2
+    CHECK(result.z == doctest::Approx(s * s));
+}
+
+TEST_CASE("Quaternion Multiplication Associativity")
+{
+    Quaternion a(0.1f, 0.2f, 0.3f, 0.9f);
+    Quaternion b(0.4f, 0.5f, 0.6f, 0.7f);
+    Quaternion c(0.8f, 0.9f, 0.1f, 0.2f);
+
+    Quaternion left = (a * b) * c;
+    Quaternion right = a * (b * c);
+
+    CHECK(left.x == doctest::Approx(right.x));
+    CHECK(left.y == doctest::Approx(right.y));
+    CHECK(left.z == doctest::Approx(right.z));
+    CHECK(left.w == doctest::Approx(right.w));
+}
+
+TEST_CASE("Quaternion Multiplication Assignment Operator")
+{
+    Quaternion a(0.0f, 0.0f, 0.0f, 1.0f);
+    Quaternion b(1.0f, 2.0f, 3.0f, 4.0f);
+    a *= b;
+    CHECK(a.x == doctest::Approx(1.0f));
+    CHECK(a.y == doctest::Approx(2.0f));
+    CHECK(a.z == doctest::Approx(3.0f));
+    CHECK(a.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Scalar Multiplication Assignment")
+{
+    Quaternion q(1.0f, 2.0f, 3.0f, 4.0f);
+    q *= 2.0f;
+    CHECK(q.x == doctest::Approx(2.0f));
+    CHECK(q.y == doctest::Approx(4.0f));
+    CHECK(q.z == doctest::Approx(6.0f));
+    CHECK(q.w == doctest::Approx(8.0f));
+}
+
+TEST_CASE("Quaternion Scalar Division Assignment")
+{
+    Quaternion q(2.0f, 4.0f, 6.0f, 8.0f);
+    q /= 2.0f;
+    CHECK(q.x == doctest::Approx(1.0f));
+    CHECK(q.y == doctest::Approx(2.0f));
+    CHECK(q.z == doctest::Approx(3.0f));
+    CHECK(q.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Addition Assignment")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b(5.0f, 6.0f, 7.0f, 8.0f);
+    a += b;
+    CHECK(a.x == doctest::Approx(6.0f));
+    CHECK(a.y == doctest::Approx(8.0f));
+    CHECK(a.z == doctest::Approx(10.0f));
+    CHECK(a.w == doctest::Approx(12.0f));
+}
+
+TEST_CASE("Quaternion Subtraction Assignment")
+{
+    Quaternion a(5.0f, 6.0f, 7.0f, 8.0f);
+    Quaternion b(1.0f, 2.0f, 3.0f, 4.0f);
+    a -= b;
+    CHECK(a.x == doctest::Approx(4.0f));
+    CHECK(a.y == doctest::Approx(4.0f));
+    CHECK(a.z == doctest::Approx(4.0f));
+    CHECK(a.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Equality Operator")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion c(5.0f, 6.0f, 7.0f, 8.0f);
+    CHECK(a == b);
+    CHECK_FALSE(a == c);
+}
+
+TEST_CASE("Quaternion Inequality Operator")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion c(5.0f, 6.0f, 7.0f, 8.0f);
+    CHECK_FALSE(a != b);
+    CHECK(a != c);
+}
+
+TEST_CASE("Quaternion Length")
+{
+    Quaternion q(0.0f, 0.0f, 0.0f, 1.0f);
+    CHECK(q.Length() == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Quaternion Length Non-Unit")
+{
+    Quaternion q(3.0f, 0.0f, 0.0f, 4.0f);
+    CHECK(q.Length() == doctest::Approx(5.0f));
+}
+
+TEST_CASE("Quaternion Length Squared")
+{
+    Quaternion q(3.0f, 0.0f, 0.0f, 4.0f);
+    CHECK(q.LengthSquared() == doctest::Approx(25.0f));
+}
+
+TEST_CASE("Quaternion Normalize")
+{
+    Quaternion q(3.0f, 0.0f, 0.0f, 4.0f);
+    Quaternion result = q.Normalized();
+    CHECK(result.x == doctest::Approx(0.6f));
+    CHECK(result.y == doctest::Approx(0.0f));
+    CHECK(result.z == doctest::Approx(0.0f));
+    CHECK(result.w == doctest::Approx(0.8f));
+}
+
+TEST_CASE("Quaternion Normalize In-Place")
+{
+    Quaternion q(3.0f, 0.0f, 0.0f, 4.0f);
+    q.Normalize();
+    CHECK(q.x == doctest::Approx(0.6f));
+    CHECK(q.w == doctest::Approx(0.8f));
+}
+
+TEST_CASE("Quaternion Normalize Zero Quaternion")
+{
+    Quaternion q(0.0f, 0.0f, 0.0f, 0.0f);
+    q.Normalize();
+    CHECK(q.x == doctest::Approx(1.0f));
+    CHECK(q.y == doctest::Approx(0.0f));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Quaternion Conjugate")
+{
+    Quaternion q(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion result = q.Conjugated();
+    CHECK(result.x == doctest::Approx(-1.0f));
+    CHECK(result.y == doctest::Approx(-2.0f));
+    CHECK(result.z == doctest::Approx(-3.0f));
+    CHECK(result.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Conjugate In-Place")
+{
+    Quaternion q(1.0f, 2.0f, 3.0f, 4.0f);
+    q.Conjugate();
+    CHECK(q.x == doctest::Approx(-1.0f));
+    CHECK(q.y == doctest::Approx(-2.0f));
+    CHECK(q.z == doctest::Approx(-3.0f));
+    CHECK(q.w == doctest::Approx(4.0f));
+}
+
+TEST_CASE("Quaternion Dot Product")
+{
+    Quaternion a(1.0f, 0.0f, 0.0f, 0.0f);
+    Quaternion b(0.0f, 1.0f, 0.0f, 0.0f);
+    CHECK(a.Dot(b) == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Quaternion Dot Product Non-Zero")
+{
+    Quaternion a(1.0f, 2.0f, 3.0f, 4.0f);
+    Quaternion b(5.0f, 6.0f, 7.0f, 8.0f);
+    CHECK(a.Dot(b) == doctest::Approx(70.0f));
+}
+
+TEST_CASE("Quaternion RotateVector Identity")
+{
+    Quaternion q = Quaternion::Identity();
+    Vector3 v(1.0f, 2.0f, 3.0f);
+    Vector3 result = q.RotateVector(v);
+    CHECK(result.x == doctest::Approx(1.0f));
+    CHECK(result.y == doctest::Approx(2.0f));
+    CHECK(result.z == doctest::Approx(3.0f));
+}
+
+TEST_CASE("Quaternion RotateVector 180 around X")
+{
+    // 180 degrees around X should flip Y and Z
+    Quaternion q(Vector3(1.0f, 0.0f, 0.0f), 3.14159265f);
+    Vector3 result = q.RotateVector(Vector3(0.0f, 1.0f, 0.0f));
+    CHECK(result.x == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.y == doctest::Approx(-1.0f).epsilon(0.001));
+    CHECK(result.z == doctest::Approx(0.0f).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion RotateVector 180 around Z")
+{
+    Quaternion q(Vector3(0.0f, 0.0f, 1.0f), 3.14159265f);
+    Vector3 result = q.RotateVector(Vector3(1.0f, 0.0f, 0.0f));
+    CHECK(result.x == doctest::Approx(-1.0f).epsilon(0.001));
+    CHECK(result.y == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.z == doctest::Approx(0.0f).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion GetMatrix Identity")
+{
+    Quaternion q = Quaternion::Identity();
+    Matrix4 m = q.GetMatrix();
+
+    CHECK(m.data[0] == doctest::Approx(1.0f));
+    CHECK(m.data[5] == doctest::Approx(1.0f));
+    CHECK(m.data[10] == doctest::Approx(1.0f));
+    CHECK(m.data[15] == doctest::Approx(1.0f));
+    // All off-diagonal should be 0
+    for (int i = 0; i < 16; i++)
+    {
+        if (i != 0 && i != 5 && i != 10 && i != 15)
+            CHECK(m.data[i] == doctest::Approx(0.0f));
+    }
+}
+
+TEST_CASE("Quaternion GetMatrix 90 around Y")
+{
+    float angle = 3.14159265f / 2.0f;
+    Quaternion q(Vector3(0.0f, 1.0f, 0.0f), angle);
+    Matrix4 m = q.GetMatrix();
+
+    // Verify by rotating a vector: (1,0,0) rotated 90° around Y → (0,0,-1)
+    // The matrix rotation should match the quaternion rotation
+    Vector3 vResult = q.RotateVector(Vector3(1.0f, 0.0f, 0.0f));
+    // Extract column 0 of matrix (the X basis vector)
+    Vector3 mResult(m.data[0], m.data[1], m.data[2]);
+
+    CHECK(mResult.x == doctest::Approx(vResult.x).epsilon(0.001));
+    CHECK(mResult.y == doctest::Approx(vResult.y).epsilon(0.001));
+    CHECK(mResult.z == doctest::Approx(vResult.z).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion GetMatrix 90 around X")
+{
+    float angle = 3.14159265f / 2.0f;
+    Quaternion q(Vector3(1.0f, 0.0f, 0.0f), angle);
+    Matrix4 m = q.GetMatrix();
+
+    // Extract column 1 of matrix (the Y basis vector)
+    Vector3 mResult(m.data[4], m.data[5], m.data[6]);
+    Vector3 vResult = q.RotateVector(Vector3(0.0f, 1.0f, 0.0f));
+
+    CHECK(mResult.x == doctest::Approx(vResult.x).epsilon(0.001));
+    CHECK(mResult.y == doctest::Approx(vResult.y).epsilon(0.001));
+    CHECK(mResult.z == doctest::Approx(vResult.z).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion Static Identity")
+{
+    Quaternion q = Quaternion::Identity();
+    CHECK(q.x == doctest::Approx(0.0f));
+    CHECK(q.y == doctest::Approx(0.0f));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Quaternion FromEulerAngles Zero")
+{
+    Quaternion q = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f);
+    CHECK(q.x == doctest::Approx(0.0f));
+    CHECK(q.y == doctest::Approx(0.0f));
+    CHECK(q.z == doctest::Approx(0.0f));
+    CHECK(q.w == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Quaternion FromEulerAngles 180 Yaw")
+{
+    Quaternion q = Quaternion::FromEulerAngles(0.0f, 3.14159265f, 0.0f);
+    // 180 yaw = half angle ~90, so cos(90)=0, sin(90)=1
+    CHECK(q.w == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(q.y == doctest::Approx(1.0f).epsilon(0.001));
+    CHECK(q.x == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(q.z == doctest::Approx(0.0f).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion RotateVector 90 Y rotates X to Z")
+{
+    float angle = 3.14159265f / 2.0f;
+    Quaternion q(Vector3(0.0f, 1.0f, 0.0f), angle);
+    // Rotating (1,0,0) by 90° around Y should give (0,0,-1)
+    Vector3 result = q.RotateVector(Vector3(1.0f, 0.0f, 0.0f));
+    CHECK(result.x == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.y == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.z == doctest::Approx(-1.0f).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion Compose Two Rotations")
+{
+    // Rotate 90° around X, then 90° around Y
+    float a = 3.14159265f / 2.0f;
+    Quaternion rx = Quaternion(Vector3(1.0f, 0.0f, 0.0f), a);
+    Quaternion ry = Quaternion(Vector3(0.0f, 1.0f, 0.0f), a);
+    Quaternion combined = ry * rx;
+
+    // Apply to vector (1, 0, 0):
+    // First 90° X rotation: (1,0,0) -> (1,0,0)
+    // Then 90° Y rotation: (1,0,0) -> (0,0,-1)
+    Vector3 result = combined.RotateVector(Vector3(1.0f, 0.0f, 0.0f));
+    CHECK(result.x == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.y == doctest::Approx(0.0f).epsilon(0.001));
+    CHECK(result.z == doctest::Approx(-1.0f).epsilon(0.001));
+}
+
+TEST_CASE("Quaternion Normalize Preserves Direction")
+{
+    Quaternion q(2.0f, 2.0f, 2.0f, 2.0f);
+    Quaternion n = q.Normalized();
+    float len = n.Length();
+    CHECK(len == doctest::Approx(1.0f));
+}
+
+TEST_CASE("Quaternion Identity GetMatrix Equals Identity Matrix")
+{
+    Quaternion q = Quaternion::Identity();
+    Matrix4 qm = q.GetMatrix();
+    Matrix4 im; // identity matrix
+
+    for (int i = 0; i < 16; i++)
+        CHECK(qm.data[i] == doctest::Approx(im.data[i]));
 }

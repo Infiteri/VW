@@ -2,6 +2,7 @@
 #include "Buffer/Buffer.h"
 #include "Buffer/Framebuffer.h"
 #include "Buffer/VertexArray.h"
+#include "Camera/PerspectiveCamera.h"
 #include "Core/Logger.h"
 #include "Shader/Shader.h"
 
@@ -15,6 +16,8 @@ namespace VW
     static Buffer *s_IndexBuffer = nullptr;
     static Shader *s_Shader = nullptr;
     static u32 s_IndexCount = 0;
+
+    static PerspectiveCamera pers;
 
     struct Vertex
     {
@@ -59,6 +62,8 @@ namespace VW
         s_VAO->SetIndexBuffer(s_IndexBuffer);
 
         s_State.Screen.Init();
+
+        pers.SetPosition({0, 0, 5});
     }
 
     void Renderer::Shutdown()
@@ -97,6 +102,9 @@ namespace VW
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         s_Shader->Use();
+        s_Shader->Mat4(pers.GetProjection(), "uProj");
+        pers.SetOrientation({0.1, 0, 0, 1});
+        s_Shader->Mat4(pers.GetView(), "uView");
         s_VAO->Bind();
         glDrawElements(GL_TRIANGLES, s_IndexCount, GL_UNSIGNED_INT, nullptr);
     }

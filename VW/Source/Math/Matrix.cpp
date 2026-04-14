@@ -11,22 +11,25 @@ namespace VW
 
     Matrix4::Matrix4(float *data)
     {
-        // note: Not really safe
         for (int i = 0; i < 16; i++)
             this->data[i] = data[i];
     }
 
-    Matrix4::Matrix4(const Matrix4 &m)
+    Matrix4::Matrix4(const Matrix4 &other)
     {
         for (int i = 0; i < 16; i++)
-            data[i] = m.data[i];
+            data[i] = other.data[i];
     }
 
-    Matrix4 Matrix4::Perspective(float fov, float aspect, float near, float far)
+    Matrix4 Matrix4::operator*(const Matrix4 &other) const
     {
+        return Multiply(*this, other);
+    }
 
+    Matrix4 Matrix4::Perspective(float fov, float aspect, float nearPlane, float farPlane)
+    {
         Matrix4 m;
-        float f = 1.0f / tanf(fov * 0.5f);
+        float f = 1.0f / std::tanf(fov * 0.5f);
         m.data[0] = f / aspect;
         m.data[5] = f;
         m.data[8] = 0;
@@ -37,20 +40,20 @@ namespace VW
         m.data[3] = 0;
         m.data[6] = 0;
         m.data[7] = 0;
-        m.data[10] = (far + near) / (near - far);
+        m.data[10] = (farPlane + nearPlane) / (nearPlane - farPlane);
         m.data[11] = -1;
-        m.data[14] = (2 * far * near) / (near - far);
+        m.data[14] = (2 * farPlane * nearPlane) / (nearPlane - farPlane);
         m.data[15] = 0;
         return m;
     }
 
-    Matrix4 Matrix4::Ortho(float left, float right, float top, float bottom, float near, float far)
+    Matrix4 Matrix4::Ortho(float left, float right, float top, float bottom, float nearPlane, float farPlane)
     {
         Matrix4 m;
 
         float lr = 1.0f / (right - left);
         float bt = 1.0f / (top - bottom);
-        float nf = 1.0f / (near - far);
+        float nf = 1.0f / (nearPlane - farPlane);
 
         m.data[0] = 2.0f * lr;
         m.data[5] = 2.0f * bt;
@@ -58,7 +61,7 @@ namespace VW
 
         m.data[12] = -(right + left) * lr;
         m.data[13] = -(top + bottom) * bt;
-        m.data[14] = (far + near) * nf;
+        m.data[14] = (farPlane + nearPlane) * nf;
 
         return m;
     }
@@ -97,7 +100,7 @@ namespace VW
         m.data[11] = a.data[3] * b.data[8] + a.data[7] * b.data[9] + a.data[11] * b.data[10] +
                      a.data[15] * b.data[11];
 
-        // Column 3 (Translation Column)
+        // Column 3
         m.data[12] = a.data[0] * b.data[12] + a.data[4] * b.data[13] + a.data[8] * b.data[14] +
                      a.data[12] * b.data[15];
         m.data[13] = a.data[1] * b.data[12] + a.data[5] * b.data[13] + a.data[9] * b.data[14] +
@@ -109,6 +112,7 @@ namespace VW
 
         return m;
     }
+
     Matrix4 Matrix4::Invert(const Matrix4 &a)
     {
         Matrix4 m;
@@ -141,10 +145,9 @@ namespace VW
         float b09 = a21 * a32 - a22 * a31;
         float b10 = a21 * a33 - a23 * a31;
         float b11 = a22 * a33 - a23 * a32;
-        // Calculate the determinant
         float det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
-        det = 1.0 / det;
+        det = 1.0f / det;
 
         m.data[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
         m.data[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
@@ -181,8 +184,8 @@ namespace VW
     {
         Matrix4 m;
 
-        float c = cos(x);
-        float s = sin(x);
+        float c = std::cos(x);
+        float s = std::sin(x);
 
         m.data[5] = c;
         m.data[6] = s;
@@ -196,8 +199,8 @@ namespace VW
     {
         Matrix4 m;
 
-        float c = cos(y);
-        float s = sin(y);
+        float c = std::cos(y);
+        float s = std::sin(y);
 
         m.data[0] = c;
         m.data[2] = s;
@@ -211,8 +214,8 @@ namespace VW
     {
         Matrix4 m;
 
-        float c = cos(z);
-        float s = sin(z);
+        float c = std::cos(z);
+        float s = std::sin(z);
 
         m.data[0] = c;
         m.data[1] = s;

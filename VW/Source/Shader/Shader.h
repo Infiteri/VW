@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include "Math/Matrix.h"
 #include <string>
 #include <unordered_map>
 namespace VW
@@ -18,6 +19,7 @@ namespace VW
         bool IsLoaded() const;
 
         void Int(int i, const char *name);
+        void Mat4(const Matrix4 &n, const char *name);
 
         inline u32 GetID() const
         {
