@@ -10,6 +10,12 @@ namespace VW
         GetProjection();
     }
 
+    void PerspectiveCamera::Resize(float width, float height)
+    {
+        m_Aspect = width / height;
+        GetProjection();
+    }
+
     Matrix4 PerspectiveCamera::GetProjection()
     {
         m_Proj = Matrix4::Perspective(m_FOV * VW_DEG_TO_RAD, m_Aspect, m_Near, m_Far);

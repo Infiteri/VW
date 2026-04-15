@@ -6,7 +6,7 @@
 
 namespace VW
 {
-    class VW_API Camera
+    class Camera
     {
     public:
         Camera() = default;
@@ -26,6 +26,18 @@ namespace VW
         {
             return m_Orientation;
         }
+
+        inline Vector3 Forward() const
+        {
+            return m_Orientation.RotateVector(Vector3(0, 0, -1));
+        }
+
+        inline Vector3 Right() const
+        {
+            return m_Orientation.RotateVector(Vector3(1, 0, 0));
+        }
+
+        virtual void Resize(float width, float height) = 0;
 
     protected:
         Vector3 m_Pos;

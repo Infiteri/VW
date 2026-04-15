@@ -2,8 +2,10 @@
 #include "Buffer/Buffer.h"
 #include "Buffer/Framebuffer.h"
 #include "Buffer/VertexArray.h"
+#include "Camera/OrthographicCamera.h"
 #include "Camera/PerspectiveCamera.h"
 #include "Core/Logger.h"
+#include "Math/Math.h"
 #include "Shader/Shader.h"
 
 #include <glad/glad.h>
@@ -34,11 +36,12 @@ namespace VW
 
         s_Shader = new Shader("Shader.glsl");
 
+#define S 1
         Vertex vertices[] = {
-            {-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f},
-            {0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f},
-            {0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f},
-            {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f},
+            {-S, S, 0.0f, 1.0f, 0.0f, 0.0f},
+            {S, S, 0.0f, 0.0f, 1.0f, 0.0f},
+            {S, -S, 0.0f, 0.0f, 0.0f, 1.0f},
+            {-S, -S, 0.0f, 1.0f, 1.0f, 0.0f},
         };
 
         u32 indices[] = {0, 1, 2, 0, 2, 3};
@@ -63,7 +66,8 @@ namespace VW
 
         s_State.Screen.Init();
 
-        pers.SetPosition({0, 0, 5});
+        pers.SetPosition({0, 0, 10});
+        pers.SetOrientation(Quaternion::FromEulerAngles(0.5, 0.6, 0));
     }
 
     void Renderer::Shutdown()
@@ -90,6 +94,7 @@ namespace VW
         s_State.Viewport = {w, h};
         glViewport(0, 0, w, h);
         s_State.Screen.Resize(w, h);
+        pers.Resize(w, h);
     }
 
     void Renderer::BeginFrame()
@@ -99,11 +104,13 @@ namespace VW
 
     void Renderer::Render()
     {
+        Vector3 forward = pers.Forward() * 0.1f;
+        pers.SetPosition(pers.GetPosition() + forward);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         s_Shader->Use();
         s_Shader->Mat4(pers.GetProjection(), "uProj");
-        pers.SetOrientation({0.1, 0, 0, 1});
         s_Shader->Mat4(pers.GetView(), "uView");
         s_VAO->Bind();
         glDrawElements(GL_TRIANGLES, s_IndexCount, GL_UNSIGNED_INT, nullptr);
