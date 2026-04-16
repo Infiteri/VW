@@ -10,9 +10,9 @@ namespace VW
         if (m_Dirty)
         {
             m_Dirty = false;
-            auto rot = m_Orientation.GetMatrix();
-            auto pos = Matrix4::Translate(m_Pos);
-            m_View = Matrix4::Invert(pos * rot);
+            auto rot = Matrix4::Transpose(m_Orientation.GetMatrix());
+            auto negPos = Matrix4::Translate(-m_Pos);
+            m_View = rot * negPos;
         }
 
         return m_View;

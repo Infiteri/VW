@@ -6,7 +6,7 @@
 
 namespace VW
 {
-    class Camera
+    class VW_API Camera
     {
     public:
         Camera() = default;

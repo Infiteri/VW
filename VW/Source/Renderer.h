@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include "Camera/Camera.h"
 #include "GPUScreen.h"
 
 namespace VW
@@ -17,6 +18,7 @@ namespace VW
         {
             struct Viewport Viewport;
             GPUScreen Screen;
+            Camera *Cam;
         };
 
     public:
@@ -27,6 +29,8 @@ namespace VW
         static void Shutdown();
 
         static void Viewport(f32 w, f32 h);
+
+        static void UseCamera(Camera *cam);
 
         static void BeginFrame();
         static void Render();

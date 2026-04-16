@@ -1,11 +1,7 @@
 #include "Renderer.h"
 #include "Buffer/Buffer.h"
-#include "Buffer/Framebuffer.h"
 #include "Buffer/VertexArray.h"
-#include "Camera/OrthographicCamera.h"
-#include "Camera/PerspectiveCamera.h"
 #include "Core/Logger.h"
-#include "Math/Math.h"
 #include "Shader/Shader.h"
 
 #include <glad/glad.h>
@@ -18,8 +14,6 @@ namespace VW
     static Buffer *s_IndexBuffer = nullptr;
     static Shader *s_Shader = nullptr;
     static u32 s_IndexCount = 0;
-
-    static PerspectiveCamera pers;
 
     struct Vertex
     {
@@ -65,9 +59,6 @@ namespace VW
         s_VAO->SetIndexBuffer(s_IndexBuffer);
 
         s_State.Screen.Init();
-
-        pers.SetPosition({0, 0, 10});
-        pers.SetOrientation(Quaternion::FromEulerAngles(0.5, 0.6, 0));
     }
 
     void Renderer::Shutdown()
@@ -94,7 +85,9 @@ namespace VW
         s_State.Viewport = {w, h};
         glViewport(0, 0, w, h);
         s_State.Screen.Resize(w, h);
-        pers.Resize(w, h);
+
+        if (s_State.Cam)
+            s_State.Cam->Resize(w, h);
     }
 
     void Renderer::BeginFrame()
@@ -104,14 +97,15 @@ namespace VW
 
     void Renderer::Render()
     {
-        Vector3 forward = pers.Forward() * 0.1f;
-        pers.SetPosition(pers.GetPosition() + forward);
-
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         s_Shader->Use();
-        s_Shader->Mat4(pers.GetProjection(), "uProj");
-        s_Shader->Mat4(pers.GetView(), "uView");
+
+        if (s_State.Cam)
+        {
+            s_Shader->Mat4(s_State.Cam->GetProjection(), "uProj");
+            s_Shader->Mat4(s_State.Cam->GetView(), "uView");
+        }
         s_VAO->Bind();
         glDrawElements(GL_TRIANGLES, s_IndexCount, GL_UNSIGNED_INT, nullptr);
     }
@@ -119,5 +113,10 @@ namespace VW
     void Renderer::EndFrame()
     {
         s_State.Screen.End();
+    }
+
+    void Renderer::UseCamera(Camera *cam)
+    {
+        s_State.Cam = cam;
     }
 } // namespace VW
