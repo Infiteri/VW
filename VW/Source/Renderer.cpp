@@ -2,6 +2,7 @@
 #include "Buffer/Buffer.h"
 #include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
+#include "Mesh/Mesh.h"
 #include "Shader/Shader.h"
 
 #include <glad/glad.h>
@@ -9,17 +10,9 @@
 namespace VW
 {
     static Renderer::State s_State;
-    static VertexArray *s_VAO = nullptr;
-    static Buffer *s_VertexBuffer = nullptr;
-    static Buffer *s_IndexBuffer = nullptr;
     static Shader *s_Shader = nullptr;
     static u32 s_IndexCount = 0;
-
-    struct Vertex
-    {
-        f32 x, y, z;
-        f32 r, g, b;
-    };
+    static Mesh *mesh;
 
     void Renderer::Init()
     {
@@ -32,44 +25,28 @@ namespace VW
 
 #define S 1
         Vertex vertices[] = {
-            {-S, S, 0.0f, 1.0f, 0.0f, 0.0f},
-            {S, S, 0.0f, 0.0f, 1.0f, 0.0f},
-            {S, -S, 0.0f, 0.0f, 0.0f, 1.0f},
-            {-S, -S, 0.0f, 1.0f, 1.0f, 0.0f},
+            {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
+            {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
+            {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
+            {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
         };
 
         u32 indices[] = {0, 1, 2, 0, 2, 3};
         s_IndexCount = 6;
 
-        s_VAO = new VertexArray();
-
-        s_VertexBuffer = new Buffer(BufferType::Vertex, BufferUsage::Static);
-        s_VertexBuffer->SetData(vertices, sizeof(vertices));
-
-        s_IndexBuffer = new Buffer(BufferType::Index, BufferUsage::Static);
-        s_IndexBuffer->SetData(indices, sizeof(indices));
-
         VertexLayout layout;
         layout.Stride = sizeof(Vertex);
-
         layout.Attributes.push_back({0, 0, 3, false});
-        layout.Attributes.push_back({1, 3 * sizeof(f32), 3, false});
-
-        s_VAO->AddVertexBuffer(s_VertexBuffer, layout, VertexInputRate::Vertex);
-        s_VAO->SetIndexBuffer(s_IndexBuffer);
+        layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
 
         s_State.Screen.Init();
+
+        mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices, sizeof(indices) / 4, layout);
     }
 
     void Renderer::Shutdown()
     {
-        delete s_VAO;
-        delete s_VertexBuffer;
-        delete s_IndexBuffer;
         delete s_Shader;
-        s_VAO = nullptr;
-        s_VertexBuffer = nullptr;
-        s_IndexBuffer = nullptr;
         s_Shader = nullptr;
         s_IndexCount = 0;
     }
@@ -106,7 +83,8 @@ namespace VW
             s_Shader->Mat4(s_State.Cam->GetProjection(), "uProj");
             s_Shader->Mat4(s_State.Cam->GetView(), "uView");
         }
-        s_VAO->Bind();
+
+        mesh->Bind();
         glDrawElements(GL_TRIANGLES, s_IndexCount, GL_UNSIGNED_INT, nullptr);
     }
 
