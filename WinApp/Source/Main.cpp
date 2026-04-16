@@ -1,3 +1,4 @@
+#include "Camera/PerspectiveCamera.h"
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
@@ -13,6 +14,9 @@ namespace VW
     static int g_W = 0;
     static int g_H = 0;
     static HINSTANCE g_hInst = nullptr;
+
+    static PerspectiveCamera cam;
+    static Mesh *mesh;
 
     class WindowsPlatform : public VW::Platform
     {
@@ -117,6 +121,8 @@ namespace VW
                 return;
             }
             wglMakeCurrent(g_hDC, g_hGLRC);
+            cam.SetPosition({0, 0, 5});
+            Renderer::UseCamera(&cam);
         }
 
         void Render() override
@@ -134,6 +140,33 @@ namespace VW
             }
 
             SwapBuffers(g_hDC);
+            if (!mesh)
+            {
+#define S 1
+                Vertex vertices[] = {
+                    {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
+                    {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
+                    {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
+                };
+
+                u32 indices[] = {0, 1, 2, 0, 2, 3};
+
+                VertexLayout layout;
+                layout.Stride = sizeof(Vertex);
+                layout.Attributes.push_back({0, 0, 3, false});
+                layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
+
+                mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices,
+                                sizeof(indices) / sizeof(u32), layout);
+            }
+            else
+            {
+                Renderer::Submit({.Mesh = mesh});
+                Renderer::Submit({.Mesh = mesh,
+                                  .Transform = Matrix4::Translate({10, 0, 0}),
+                                  .Material = {.Color = {0, 125, 255, 255}}});
+            }
         }
 
         void Shutdown() override
