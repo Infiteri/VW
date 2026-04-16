@@ -2,25 +2,32 @@
 #version 330 core
 
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aColor;
+layout(location = 1) in vec2 aUV;
+
+layout(location = 4) in vec4 iRow0;
+layout(location = 5) in vec4 iRow1;
+layout(location = 6) in vec4 iRow2;
+layout(location = 7) in vec4 iRow3;
+layout(location = 8) in vec4 iColor;
 
 uniform mat4 uProj;
 uniform mat4 uView;
 
-out vec2 vColor;
+out vec4 vColor;
 
 void main() {
-    gl_Position = uProj * uView * vec4(aPosition, 1.0);
-    vColor = aColor;
+    mat4 model = mat4(iRow0, iRow1, iRow2, iRow3);
+    gl_Position = uProj * uView * model * vec4(aPosition, 1.0);
+    vColor = iColor;
 }
 
 // FRAGMENT
 #version 330 core
 
-in vec2 vColor;
+in vec4 vColor;
 
 out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(vColor, 1, 1.0);
+    FragColor = vColor;
 }

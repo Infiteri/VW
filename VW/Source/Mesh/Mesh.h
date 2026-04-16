@@ -14,7 +14,7 @@ namespace VW
         Vector2 UV;
     };
 
-    class Mesh
+    class VW_API Mesh
     {
     public:
         Mesh(const Vertex *vertices, u32 vertexSize, u32 *indices, u32 indexCount,
@@ -42,6 +42,8 @@ namespace VW
         {
             return m_BoundRadius;
         };
+
+        void AddInstanceBuffer(const Buffer *buffer, const VertexLayout &layout);
 
     private:
         std::unique_ptr<VertexArray> m_VAO;

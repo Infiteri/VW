@@ -50,4 +50,9 @@ namespace VW
         m_VAO->Bind();
     }
 
+    void Mesh::AddInstanceBuffer(const Buffer *buffer, const VertexLayout &layout)
+    {
+        m_VAO->AddVertexBuffer(buffer, layout, VertexInputRate::Instance);
+    }
+
 }; // namespace VW

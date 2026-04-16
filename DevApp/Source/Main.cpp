@@ -3,7 +3,9 @@
 #include "Core/Logger.h"
 #include "Core/Platform.h"
 #include "Math/Math.h"
+#include "Math/Matrix.h"
 #include "Math/Quaternion.h"
+#include "Mesh/Mesh.h"
 #include "Renderer.h"
 
 #include <algorithm>
@@ -20,6 +22,7 @@ namespace VW
     static float s_Sensitivity = 0.001f;
     static float s_Pitch = 0.0f;
     static float s_Yaw = 0.0f;
+    static Mesh *mesh;
 
     static void CameraMovement(GLFWwindow *window)
     {
@@ -177,6 +180,34 @@ namespace VW
             CameraMovement(m_Handle);
             glfwSwapBuffers(m_Handle);
             glfwPollEvents();
+
+            if (!mesh)
+            {
+#define S 1
+                Vertex vertices[] = {
+                    {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
+                    {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
+                    {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
+                };
+
+                u32 indices[] = {0, 1, 2, 0, 2, 3};
+
+                VertexLayout layout;
+                layout.Stride = sizeof(Vertex);
+                layout.Attributes.push_back({0, 0, 3, false});
+                layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
+
+                mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices,
+                                sizeof(indices) / sizeof(u32), layout);
+            }
+            else
+            {
+                Renderer::Submit({.Mesh = mesh});
+                Renderer::Submit({.Mesh = mesh,
+                                  .Transform = Matrix4::Translate({10, 0, 0}),
+                                  .Material = {.Color = {0, 125, 255, 255}}});
+            }
         }
 
     private:

@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "BatchRenderer.h"
 #include "Buffer/Buffer.h"
 #include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
@@ -11,8 +12,6 @@ namespace VW
 {
     static Renderer::State s_State;
     static Shader *s_Shader = nullptr;
-    static u32 s_IndexCount = 0;
-    static Mesh *mesh;
 
     void Renderer::Init()
     {
@@ -23,32 +22,14 @@ namespace VW
 
         s_Shader = new Shader("Shader.glsl");
 
-#define S 1
-        Vertex vertices[] = {
-            {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
-            {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
-            {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
-            {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
-        };
-
-        u32 indices[] = {0, 1, 2, 0, 2, 3};
-        s_IndexCount = 6;
-
-        VertexLayout layout;
-        layout.Stride = sizeof(Vertex);
-        layout.Attributes.push_back({0, 0, 3, false});
-        layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
-
         s_State.Screen.Init();
-
-        mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices, sizeof(indices) / 4, layout);
+        s_State.Batch = new BatchRenderer(1000);
     }
 
     void Renderer::Shutdown()
     {
         delete s_Shader;
         s_Shader = nullptr;
-        s_IndexCount = 0;
     }
 
     // TODO: figure out viewport on 'true' platforms (non dev apps)
@@ -84,8 +65,19 @@ namespace VW
             s_Shader->Mat4(s_State.Cam->GetView(), "uView");
         }
 
-        mesh->Bind();
-        glDrawElements(GL_TRIANGLES, s_IndexCount, GL_UNSIGNED_INT, nullptr);
+        s_State.Batch->Begin();
+        for (const auto &item : s_State.RenderQueue)
+        {
+            MaterialGPU m;
+            m.Color = item.Material.Color;
+            s_State.Batch->Submit(item.Mesh, item.Transform, m);
+        }
+        s_State.Batch->End();
+    }
+
+    void Renderer::Submit(const RenderItem &item)
+    {
+        s_State.RenderQueue.push_back(item);
     }
 
     void Renderer::EndFrame()
