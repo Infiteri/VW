@@ -101,7 +101,7 @@ namespace VW
             std::string format = s_State.Settings.Format;
 
             auto prefixPos = format.find("PREFIX");
-            if (prefixPos != std::string::npos)
+            if (prefixPos != std::string::npos && cat)
             {
                 format.replace(prefixPos, 6, cat->Prefix);
             }

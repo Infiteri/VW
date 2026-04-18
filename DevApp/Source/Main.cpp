@@ -22,7 +22,8 @@ namespace VW
     static float s_Sensitivity = 0.001f;
     static float s_Pitch = 0.0f;
     static float s_Yaw = 0.0f;
-    static Mesh *mesh;
+    static Mesh *cubeMesh;
+    static std::vector<RenderItem> renderItems;
 
     static void CameraMovement(GLFWwindow *window)
     {
@@ -181,32 +182,57 @@ namespace VW
             glfwSwapBuffers(m_Handle);
             glfwPollEvents();
 
-            if (!mesh)
+            if (cubeMesh == nullptr)
             {
-#define S 1
+#define S 0.5f
                 Vertex vertices[] = {
-                    {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
-                    {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
-                    {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
+                    {Vector3{-S, -S, -S}, Vector2{0.0f, 0.0f}}, // 0
+                    {Vector3{S, -S, -S}, Vector2{1.0f, 0.0f}},  // 1
+                    {Vector3{S, S, -S}, Vector2{1.0f, 1.0f}},   // 2
+                    {Vector3{-S, S, -S}, Vector2{0.0f, 1.0f}},  // 3
+                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},  // 4
+                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},   // 5
+                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},    // 6
+                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},   // 7
                 };
 
-                u32 indices[] = {0, 1, 2, 0, 2, 3};
+                u32 indices[] = {
+                    0, 1, 2, 0, 2, 3, // Front
+                    4, 6, 5, 4, 7, 6, // Back
+                    0, 3, 7, 0, 7, 4, // Left
+                    1, 5, 6, 1, 6, 2, // Right
+                    3, 2, 6, 3, 6, 7, // Top
+                    0, 4, 5, 0, 5, 1, // Bottom
+                };
 
                 VertexLayout layout;
                 layout.Stride = sizeof(Vertex);
                 layout.Attributes.push_back({0, 0, 3, false});
                 layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
 
-                mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices,
-                                sizeof(indices) / sizeof(u32), layout);
+                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 8, indices, 36, layout);
+
+                const float SPACING = 2.0f;
+                const i32 CUBE_COUNT = 1500;
+
+                for (i32 i = 0; i < CUBE_COUNT; i++)
+                {
+                    i32 x = i % 100 - 50;
+                    i32 y = (i / 100) % 100;
+                    i32 z = i / 10000;
+
+                    RenderItem item;
+                    item.Mesh = cubeMesh;
+                    item.Transform = Matrix4::Translate(
+                        {(float)x * SPACING, (float)y * SPACING, (float)z * SPACING});
+                    item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
+                    renderItems.push_back(item);
+                }
             }
-            else
+
+            for (const auto &item : renderItems)
             {
-                Renderer::Submit({.Mesh = mesh});
-                Renderer::Submit({.Mesh = mesh,
-                                  .Transform = Matrix4::Translate({10, 0, 0}),
-                                  .Material = {.Color = {0, 125, 255, 255}}});
+                Renderer::Submit(item);
             }
         }
 

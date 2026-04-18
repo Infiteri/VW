@@ -5,7 +5,7 @@ ASSEMBLY := DevApp
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include
+INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include -IVendor/miniaudio
 DEFINES=
 LINK_FLAGS= -L$(BIN) -lglfw3 -lVW
 

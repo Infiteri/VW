@@ -35,9 +35,10 @@ namespace VW
         m_CurrentMesh = mesh;
         InstanceData data;
         data.Transform = transform;
-        data.Material.Color = material.Color;
+        data.Material.Color = material.Color.Normalized();
         m_InstanceStorage.push_back(data);
     }
+
     void BatchRenderer::Flush()
     {
         if (m_InstanceStorage.empty() || !m_CurrentMesh)

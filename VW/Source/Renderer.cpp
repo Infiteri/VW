@@ -23,7 +23,7 @@ namespace VW
         s_Shader = new Shader("Shader.glsl");
 
         s_State.Screen.Init();
-        s_State.Batch = new BatchRenderer(1000);
+        s_State.Batch = new BatchRenderer(5000);
     }
 
     void Renderer::Shutdown()
@@ -51,6 +51,7 @@ namespace VW
     void Renderer::BeginFrame()
     {
         s_State.Screen.Begin();
+        s_State.RenderQueue.clear();
     }
 
     void Renderer::Render()
@@ -64,6 +65,13 @@ namespace VW
             s_Shader->Mat4(s_State.Cam->GetProjection(), "uProj");
             s_Shader->Mat4(s_State.Cam->GetView(), "uView");
         }
+    }
+
+    void Renderer::Submit(const RenderItem &item)
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
 
         s_State.Batch->Begin();
         for (const auto &item : s_State.RenderQueue)
@@ -73,10 +81,8 @@ namespace VW
             s_State.Batch->Submit(item.Mesh, item.Transform, m);
         }
         s_State.Batch->End();
-    }
+        glDisable(GL_CULL_FACE);
 
-    void Renderer::Submit(const RenderItem &item)
-    {
         s_State.RenderQueue.push_back(item);
     }
 

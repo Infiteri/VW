@@ -20,10 +20,9 @@ int main(int argc, const char **argv)
 
     while (!platform->ShouldShutdown())
     {
-        platform->Render(); /// todo: rename from Render to something more meaniningful
-
         VW::Renderer::BeginFrame();
         VW::Renderer::Render();
+        platform->Render(); /// todo: rename from Render to something more meaniningful
         VW::Renderer::EndFrame();
     }
 
