@@ -83,6 +83,15 @@ namespace VW
     void Renderer::EndFrame()
     {
 
+        if (s_State.Debug.RenderWireframe)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glFrontFace(GL_CCW);
+
         s_State.Batch->Begin();
         for (const auto &item : s_State.RenderQueue)
         {
@@ -91,6 +100,10 @@ namespace VW
             s_State.Batch->Submit(item.Mesh, item.Transform, m);
         }
         s_State.Batch->End();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        glDisable(GL_CULL_FACE);
+
         s_State.Screen.End();
     }
 
@@ -104,7 +117,7 @@ namespace VW
         return s_State.Stats;
     }
 
-    const RendererDebugSettings &Renderer::GetDebugSettings()
+    RendererDebugSettings &Renderer::GetDebugSettings()
     {
         return s_State.Debug;
     }

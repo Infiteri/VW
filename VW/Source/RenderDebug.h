@@ -12,5 +12,6 @@ namespace VW
 
     struct RendererDebugSettings
     {
+        bool RenderWireframe = false;
     };
 } // namespace VW

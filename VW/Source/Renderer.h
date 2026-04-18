@@ -70,7 +70,7 @@ namespace VW
         static void Submit(const RenderItem &item);
 
         static const RendererStats &GetStats();
-        static const RendererDebugSettings &GetDebugSettings();
+        static RendererDebugSettings &GetDebugSettings();
 
         static void BeginFrame();
         static void Render();

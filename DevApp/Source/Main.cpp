@@ -256,6 +256,7 @@ namespace VW
             ImGui::Begin("Stats");
             ImGui::Text("%i %i", Renderer::GetStats().DrawCalls,
                         Renderer::GetStats().ItemsSubmited);
+            ImGui::Checkbox("Writeframe", &Renderer::GetDebugSettings().RenderWireframe);
             ImGui::End();
 
             ImGui::Render();
