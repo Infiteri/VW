@@ -1,7 +1,7 @@
-BIN=Bin
-OBJ=Bin-Obj
-DLL=VW
-EXE=VW
+export BIN=$(abspath Bin)
+export OBJ=$(abspath Bin-Obj)
+export DLL=VW
+export EXE=VW
 
 .PHONY: help always dev win run kill vendor assets
 
@@ -42,6 +42,7 @@ kill:
 
 vendor: always
 	@make -j12 -C VW/Vendor/glad --no-print-directory
+	@make -j12 -C DevApp/Vendor/imgui --no-print-directory
 	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll
 
 test:

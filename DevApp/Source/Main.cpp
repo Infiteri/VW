@@ -9,7 +9,11 @@
 #include "Renderer.h"
 
 #include <algorithm>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_opengl3_loader.h>
 #include <glfw/glfw3.h>
+#include <imgui.h>
 #include <windows.h>
 
 namespace VW
@@ -228,12 +232,34 @@ namespace VW
                     item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
                     renderItems.push_back(item);
                 }
+
+                IMGUI_CHECKVERSION();
+                ImGui::CreateContext();
+
+                ImGui::StyleColorsDark();
+                ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
+                ImGui_ImplOpenGL3_Init("#version 330");
             }
 
             for (const auto &item : renderItems)
             {
                 Renderer::Submit(item);
             }
+        }
+
+        void RenderImGui() override
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Stats");
+            ImGui::Text("%i %i", Renderer::GetStats().DrawCalls,
+                        Renderer::GetStats().ItemsSubmited);
+            ImGui::End();
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
     private:

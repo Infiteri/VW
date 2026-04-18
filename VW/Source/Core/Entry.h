@@ -24,6 +24,8 @@ int main(int argc, const char **argv)
         VW::Renderer::Render();
         platform->Render(); /// todo: rename from Render to something more meaniningful
         VW::Renderer::EndFrame();
+
+        platform->RenderImGui();
     }
 
     platform->Shutdown();

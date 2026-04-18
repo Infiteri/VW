@@ -6,6 +6,7 @@
 #include "GPUScreen.h"
 #include "Math/Matrix.h"
 #include "Mesh/Mesh.h"
+#include "RenderDebug.h"
 #include <vector>
 
 namespace VW
@@ -50,6 +51,9 @@ namespace VW
 
             std::vector<RenderItem> RenderQueue;
             class BatchRenderer *Batch;
+
+            RendererStats Stats;
+            RendererDebugSettings Debug;
         };
 
     public:
@@ -65,8 +69,16 @@ namespace VW
 
         static void Submit(const RenderItem &item);
 
+        static const RendererStats &GetStats();
+        static const RendererDebugSettings &GetDebugSettings();
+
         static void BeginFrame();
         static void Render();
         static void EndFrame();
+
+    private:
+        friend class BatchRenderer;
+        static State &_GetState();
     };
+
 } // namespace VW

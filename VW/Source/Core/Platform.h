@@ -18,6 +18,8 @@ namespace VW
         {
             return true;
         };
+
+        virtual void RenderImGui() {};
     };
 
     // every platform implementation (i.e. windows or developer) will implement this function

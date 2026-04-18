@@ -1,5 +1,6 @@
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
+#include "Renderer.h"
 #include <glad/glad.h>
 namespace VW
 {
@@ -41,6 +42,8 @@ namespace VW
         data.Transform = transform;
         data.Material.Color = material.Color.Normalized();
         m_InstanceStorage.push_back(data);
+
+        Renderer::_GetState().Stats.ItemsSubmited++;
     }
 
     void BatchRenderer::Flush()
@@ -59,6 +62,7 @@ namespace VW
         m_CurrentMesh->Bind();
         glDrawElementsInstanced(GL_TRIANGLES, m_CurrentMesh->GetIndexCount(), GL_UNSIGNED_INT,
                                 nullptr, (GLsizei)m_InstanceStorage.size());
+        Renderer::_GetState().Stats.DrawCalls++;
         m_InstanceStorage.clear();
     }
     void BatchRenderer::End()

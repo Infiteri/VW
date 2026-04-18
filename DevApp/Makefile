@@ -5,9 +5,9 @@ ASSEMBLY := DevApp
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include -IVendor/miniaudio
+INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include -IVendor/miniaudio -IVendor/imgui
 DEFINES=
-LINK_FLAGS= -L$(BIN) -lglfw3 -lVW
+LINK_FLAGS= -L$(BIN) -lglfw3 -lVW -limgui
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)
 

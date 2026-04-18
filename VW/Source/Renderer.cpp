@@ -4,6 +4,7 @@
 #include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
 #include "Mesh/Mesh.h"
+#include "RenderDebug.h"
 #include "Shader/Shader.h"
 
 #include <glad/glad.h>
@@ -53,6 +54,9 @@ namespace VW
 
     void Renderer::BeginFrame()
     {
+        // reset Stats
+        s_State.Stats = RendererStats();
+
         s_State.Screen.Begin();
         s_State.RenderQueue.clear();
     }
@@ -94,4 +98,20 @@ namespace VW
     {
         s_State.Cam = cam;
     }
+
+    const RendererStats &Renderer::GetStats()
+    {
+        return s_State.Stats;
+    }
+
+    const RendererDebugSettings &Renderer::GetDebugSettings()
+    {
+        return s_State.Debug;
+    }
+
+    Renderer::State &Renderer::_GetState()
+    {
+        return s_State;
+    }
+
 } // namespace VW
