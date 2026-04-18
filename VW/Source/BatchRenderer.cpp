@@ -5,9 +5,13 @@ namespace VW
 {
     BatchRenderer::BatchRenderer(u64 maxInstances) : m_MaxInstances(maxInstances)
     {
-        m_InstanceStorage.reserve(m_MaxInstances);
+        m_InstanceStorage.reserve(maxInstances);
+
         m_InstanceBuffer = new Buffer(BufferType::Vertex, BufferUsage::Dynamic);
-        m_InstanceBuffer->SetData(nullptr, sizeof(InstanceData) * m_MaxInstances);
+        InstanceData *temp = new InstanceData[maxInstances];
+        m_InstanceBuffer->SetData(temp, sizeof(InstanceData) * maxInstances);
+        delete[] temp;
+
         m_InstanceLayout.Stride = sizeof(InstanceData);
         m_InstanceLayout.Attributes = {
             {4, 0, 4, false},  // Transform Row0 (mat4 col 0)

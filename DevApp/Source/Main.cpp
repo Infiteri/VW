@@ -18,7 +18,7 @@ namespace VW
     static bool s_MouseLocked = false;
     static double s_LastMouseX = 0, s_LastMouseY = 0;
     static float s_RotationSpeed = 0.05f;
-    static float s_MoveSpeed = 0.1f;
+    static float s_MoveSpeed = 0.5f;
     static float s_Sensitivity = 0.001f;
     static float s_Pitch = 0.0f;
     static float s_Yaw = 0.0f;
@@ -213,7 +213,7 @@ namespace VW
                 cubeMesh = new Mesh(vertices, sizeof(Vertex) * 8, indices, 36, layout);
 
                 const float SPACING = 2.0f;
-                const i32 CUBE_COUNT = 1500;
+                const i32 CUBE_COUNT = 2000;
 
                 for (i32 i = 0; i < CUBE_COUNT; i++)
                 {

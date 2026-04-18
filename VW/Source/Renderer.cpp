@@ -20,10 +20,13 @@ namespace VW
 
         gladLoadGL();
 
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
         s_Shader = new Shader("Shader.glsl");
 
         s_State.Screen.Init();
-        s_State.Batch = new BatchRenderer(5000);
+        s_State.Batch = new BatchRenderer(1000);
     }
 
     void Renderer::Shutdown()
@@ -57,7 +60,7 @@ namespace VW
     void Renderer::Render()
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         s_Shader->Use();
 
         if (s_State.Cam)
@@ -69,9 +72,12 @@ namespace VW
 
     void Renderer::Submit(const RenderItem &item)
     {
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
+
+        s_State.RenderQueue.push_back(item);
+    }
+
+    void Renderer::EndFrame()
+    {
 
         s_State.Batch->Begin();
         for (const auto &item : s_State.RenderQueue)
@@ -81,13 +87,6 @@ namespace VW
             s_State.Batch->Submit(item.Mesh, item.Transform, m);
         }
         s_State.Batch->End();
-        glDisable(GL_CULL_FACE);
-
-        s_State.RenderQueue.push_back(item);
-    }
-
-    void Renderer::EndFrame()
-    {
         s_State.Screen.End();
     }
 
