@@ -1,11 +1,9 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
-#include "Buffer/Buffer.h"
-#include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
-#include "Mesh/Mesh.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
+#include "Texture/Texture2D.h"
 
 #include <glad/glad.h>
 
@@ -13,6 +11,8 @@ namespace VW
 {
     static Renderer::State s_State;
     static Shader *s_Shader = nullptr;
+
+    static Texture2D *tex;
 
     void Renderer::Init()
     {
@@ -28,6 +28,9 @@ namespace VW
 
         s_State.Screen.Init();
         s_State.Batch = new BatchRenderer(1000);
+
+        tex = new Texture2D();
+        tex->Load();
     }
 
     void Renderer::Shutdown()
@@ -89,10 +92,13 @@ namespace VW
         }
 
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
+        glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
 
         s_State.Batch->Begin();
+        glActiveTexture(GL_TEXTURE0);
+        tex->Bind();
+        s_Shader->Int(0, "uTex");
         for (const auto &item : s_State.RenderQueue)
         {
             MaterialGPU m;

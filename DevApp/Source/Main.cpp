@@ -201,12 +201,12 @@ namespace VW
                 };
 
                 u32 indices[] = {
-                    0, 1, 2, 0, 2, 3, // Front
-                    4, 6, 5, 4, 7, 6, // Back
-                    0, 3, 7, 0, 7, 4, // Left
-                    1, 5, 6, 1, 6, 2, // Right
-                    3, 2, 6, 3, 6, 7, // Top
-                    0, 4, 5, 0, 5, 1, // Bottom
+                    0, 2, 1, 0, 3, 2, // Front
+                    4, 5, 6, 4, 6, 7, // Back
+                    0, 4, 7, 0, 7, 3, // Left
+                    1, 2, 6, 1, 6, 5, // Right
+                    3, 7, 6, 3, 6, 2, // Top
+                    0, 1, 5, 0, 5, 4, // Bottom
                 };
 
                 VertexLayout layout;

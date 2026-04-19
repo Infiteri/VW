@@ -14,20 +14,26 @@ uniform mat4 uProj;
 uniform mat4 uView;
 
 out vec4 vColor;
+out vec2 vUV;
 
 void main() {
     mat4 model = mat4(iRow0, iRow1, iRow2, iRow3);
     gl_Position = uProj * uView * model * vec4(aPosition, 1.0);
     vColor = iColor;
+    vUV = aUV;
 }
 
 // FRAGMENT
 #version 330 core
 
 in vec4 vColor;
+in vec2 vUV;
 
 out vec4 FragColor;
 
+uniform sampler2D uTex;
+
 void main() {
     FragColor = vColor;
+    FragColor = texture2D(uTex, vUV);
 }
