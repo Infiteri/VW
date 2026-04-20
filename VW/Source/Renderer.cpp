@@ -30,7 +30,7 @@ namespace VW
         s_State.Batch = new BatchRenderer(1000);
 
         tex = new Texture2D();
-        tex->Load();
+        tex->Load("1-akane.jpg");
     }
 
     void Renderer::Shutdown()

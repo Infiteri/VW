@@ -190,23 +190,50 @@ namespace VW
             {
 #define S 0.5f
                 Vertex vertices[] = {
-                    {Vector3{-S, -S, -S}, Vector2{0.0f, 0.0f}}, // 0
-                    {Vector3{S, -S, -S}, Vector2{1.0f, 0.0f}},  // 1
-                    {Vector3{S, S, -S}, Vector2{1.0f, 1.0f}},   // 2
-                    {Vector3{-S, S, -S}, Vector2{0.0f, 1.0f}},  // 3
-                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},  // 4
-                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},   // 5
-                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},    // 6
-                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},   // 7
+                    // Front (z = -S)
+                    {Vector3{-S, -S, -S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{S, -S, -S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, S, -S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{-S, S, -S}, Vector2{0.0f, 1.0f}},
+
+                    // Back (z = +S)
+                    {Vector3{S, -S, S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{-S, -S, S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{-S, S, S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{S, S, S}, Vector2{0.0f, 1.0f}},
+
+                    // Left (x = -S)
+                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{-S, -S, -S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{-S, S, -S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
+
+                    // Right (x = +S)
+                    {Vector3{S, -S, -S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{S, S, -S}, Vector2{0.0f, 1.0f}},
+
+                    // Top (y = +S)
+                    {Vector3{-S, S, -S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{S, S, -S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
+
+                    // Bottom (y = -S)
+                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
+                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
+                    {Vector3{S, -S, -S}, Vector2{1.0f, 1.0f}},
+                    {Vector3{-S, -S, -S}, Vector2{0.0f, 1.0f}},
                 };
 
                 u32 indices[] = {
-                    0, 2, 1, 0, 3, 2, // Front
-                    4, 5, 6, 4, 6, 7, // Back
-                    0, 4, 7, 0, 7, 3, // Left
-                    1, 2, 6, 1, 6, 5, // Right
-                    3, 7, 6, 3, 6, 2, // Top
-                    0, 1, 5, 0, 5, 4, // Bottom
+                    0,  2,  1,  0,  3,  2,  // Front
+                    4,  6,  5,  4,  7,  6,  // Back
+                    8,  10, 9,  8,  11, 10, // Left
+                    12, 14, 13, 12, 15, 14, // Right
+                    16, 18, 17, 16, 19, 18, // Top
+                    20, 22, 21, 20, 23, 22, // Bottom
                 };
 
                 VertexLayout layout;
@@ -214,7 +241,7 @@ namespace VW
                 layout.Attributes.push_back({0, 0, 3, false});
                 layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
 
-                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 8, indices, 36, layout);
+                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 24, indices, 36, layout);
 
                 const float SPACING = 2.0f;
                 const i32 CUBE_COUNT = 2000;

@@ -1,6 +1,9 @@
 #include "Texture2D.h"
 #include <glad/glad.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 namespace VW
 {
     Texture2D::Texture2D()
@@ -40,7 +43,7 @@ namespace VW
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        u8 whitePixel[4] = {0, 255, 255, 255};
+        u8 whitePixel[4] = {255, 255, 255, 255};
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
 
         Unbind();
@@ -58,6 +61,55 @@ namespace VW
 
     void Texture2D::Load(const std::string &path)
     {
+        // TODO: add error logs
+        if (m_ID != 0)
+            Destroy();
+
+        glGenTextures(1, &m_ID);
+        Bind();
+
+        u8 *data = stbi_load(path.c_str(), &m_Width, &m_Height, &m_Channels, 0);
+        if (!data)
+        {
+            Unbind();
+            return;
+        }
+
+        GLenum format = GL_RGBA;
+        GLenum internalFormat = GL_RGBA8;
+
+        switch (m_Channels)
+        {
+        case 1:
+            format = GL_RED;
+            internalFormat = GL_R8;
+            break;
+        case 2:
+            format = GL_RG;
+            internalFormat = GL_RG8;
+            break;
+        case 3:
+            format = GL_RGB;
+            internalFormat = GL_RGB8;
+            break;
+        case 4:
+            format = GL_RGBA;
+            internalFormat = GL_RGBA8;
+            break;
+
+        default:
+            return;
+        }
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_Width, m_Height, 0, format,
+                     GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        Unbind();
     }
 
     Texture2D::Texture2D(Texture2D &&other) noexcept : Texture()
