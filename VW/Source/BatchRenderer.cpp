@@ -20,6 +20,7 @@ namespace VW
             {6, 32, 4, false}, // Transform Row2
             {7, 48, 4, false}, // Transform Row3
             {8, 64, 4, false}, // Color
+            {9, 80, 1, true},  // Color
         };
     }
     BatchRenderer::~BatchRenderer()
@@ -31,7 +32,7 @@ namespace VW
         m_CurrentMesh = nullptr;
         m_InstanceStorage.clear();
     }
-    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const MaterialGPU &material)
+    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const Material &material)
     {
         if ((m_CurrentMesh && mesh != m_CurrentMesh) || m_InstanceStorage.size() >= m_MaxInstances)
         {
@@ -41,6 +42,7 @@ namespace VW
         InstanceData data;
         data.Transform = transform;
         data.Material.Color = material.Color.Normalized();
+        data.Material.AlbedoHandle = material.AlbedoHandle;
         m_InstanceStorage.push_back(data);
 
         Renderer::_GetState().Stats.ItemsSubmited++;

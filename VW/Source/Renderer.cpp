@@ -13,6 +13,7 @@ namespace VW
     static Shader *s_Shader = nullptr;
 
     static Texture2D *tex;
+    static u32 handle;
 
     void Renderer::Init()
     {
@@ -31,6 +32,9 @@ namespace VW
 
         tex = new Texture2D();
         tex->Load("1-akane.jpg");
+
+        handle = glGetTextureHandleARB(tex->GetID());
+        glMakeTextureHandleResidentARB(handle);
     }
 
     void Renderer::Shutdown()
@@ -77,9 +81,9 @@ namespace VW
         }
     }
 
-    void Renderer::Submit(const RenderItem &item)
+    void Renderer::Submit(RenderItem &item)
     {
-
+        item.Material.AlbedoHandle = handle;
         s_State.RenderQueue.push_back(item);
     }
 
@@ -96,14 +100,9 @@ namespace VW
         glFrontFace(GL_CCW);
 
         s_State.Batch->Begin();
-        glActiveTexture(GL_TEXTURE0);
-        tex->Bind();
-        s_Shader->Int(0, "uTex");
         for (const auto &item : s_State.RenderQueue)
         {
-            MaterialGPU m;
-            m.Color = item.Material.Color;
-            s_State.Batch->Submit(item.Mesh, item.Transform, m);
+            s_State.Batch->Submit(item.Mesh, item.Transform, item.Material);
         }
         s_State.Batch->End();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

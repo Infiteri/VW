@@ -231,7 +231,7 @@ namespace VW
                     0,  2,  1,  0,  3,  2,  // Front
                     4,  6,  5,  4,  7,  6,  // Back
                     8,  10, 9,  8,  11, 10, // Left
-                    12, 14, 13, 12, 15, 14, // Right
+                    12, 14, 13, 12, 15, 14, // Righe
                     16, 18, 17, 16, 19, 18, // Top
                     20, 22, 21, 20, 23, 22, // Bottom
                 };
@@ -241,7 +241,7 @@ namespace VW
                 layout.Attributes.push_back({0, 0, 3, false});
                 layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
 
-                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 24, indices, 36, layout);
+                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 25, indices, 36, layout);
 
                 const float SPACING = 2.0f;
                 const i32 CUBE_COUNT = 2000;
@@ -268,7 +268,7 @@ namespace VW
                 ImGui_ImplOpenGL3_Init("#version 330");
             }
 
-            for (const auto &item : renderItems)
+            for (auto &item : renderItems)
             {
                 Renderer::Submit(item);
             }

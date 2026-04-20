@@ -15,11 +15,13 @@ namespace VW
     struct Material
     {
         Color Color;
+        u64 AlbedoHandle;
     };
 
     struct MaterialGPU
     {
         Color Color;
+        u64 AlbedoHandle = 0;
     };
 
     struct RenderItem
@@ -67,7 +69,7 @@ namespace VW
 
         static void UseCamera(Camera *cam);
 
-        static void Submit(const RenderItem &item);
+        static void Submit(RenderItem &item);
 
         static const RendererStats &GetStats();
         static RendererDebugSettings &GetDebugSettings();
