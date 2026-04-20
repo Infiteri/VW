@@ -42,7 +42,7 @@ namespace VW
         InstanceData data;
         data.Transform = transform;
         data.Material.Color = material.Color.Normalized();
-        data.Material.AlbedoHandle = material.AlbedoHandle;
+        data.Material.AlbedoHandle = material.AlbedoID;
         m_InstanceStorage.push_back(data);
 
         Renderer::_GetState().Stats.ItemsSubmited++;

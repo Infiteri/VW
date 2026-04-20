@@ -15,7 +15,7 @@ namespace VW
     struct Material
     {
         Color Color;
-        u64 AlbedoHandle;
+        u64 AlbedoID;
     };
 
     struct MaterialGPU

@@ -4,6 +4,7 @@
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
 #include "Texture/Texture2D.h"
+#include "Texture/TextureSystem.h"
 
 #include <glad/glad.h>
 
@@ -35,6 +36,9 @@ namespace VW
 
         handle = glGetTextureHandleARB(tex->GetID());
         glMakeTextureHandleResidentARB(handle);
+
+        TextureSystem::Init();
+        TextureSystem::CreateTexture("1-akane.jpg");
     }
 
     void Renderer::Shutdown()
@@ -83,7 +87,7 @@ namespace VW
 
     void Renderer::Submit(RenderItem &item)
     {
-        item.Material.AlbedoHandle = handle;
+        item.Material.AlbedoID = TextureSystem::GetHandle(TextureSystem::GetDefaultTexture());
         s_State.RenderQueue.push_back(item);
     }
 
