@@ -6,6 +6,25 @@
 
 namespace VW
 {
+    struct Frustum
+    {
+        struct Plane
+        {
+            Vector3 Normal;
+            float D;
+
+            float Distance(const Vector3 &p) const
+            {
+                return Vector3::Dot(Normal, p) + D;
+            }
+        };
+
+        Plane Planes[6];
+
+        bool IsSphereInside(const Vector3 &center, float radius) const;
+        void Extract(const Matrix4 &m);
+    };
+
     class VW_API Camera
     {
     public:

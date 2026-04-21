@@ -30,7 +30,7 @@ namespace VW
     {
     }
 
-    u64 TextureSystem::GetHandle(int index)
+    u64 TextureSystem::GetTextureHandle(int index)
     {
         if (index < 0 || (size_t)index >= s_State.Textures.size())
             return 0;
@@ -38,11 +38,11 @@ namespace VW
         return s_State.Textures[index].Handle;
     }
 
-    u64 TextureSystem::GetHandle(const std::string &path)
+    u64 TextureSystem::GetTextureHandle(const std::string &path)
     {
         if (s_State.NameToIndex.count(path) == 0)
             return 0;
-        return GetHandle(s_State.NameToIndex[path]);
+        return GetTextureHandle(s_State.NameToIndex[path]);
     }
 
     u64 TextureSystem::CreateTexture(const std::string &path)
@@ -82,7 +82,15 @@ namespace VW
 
         return index;
     }
-    u64 TextureSystem::GetDefaultTexture()
+
+    u64 TextureSystem::GetTextureID(const std::string &path)
+    {
+        if (s_State.NameToIndex.count(path))
+            return s_State.NameToIndex[path];
+        return CreateTexture(path);
+    }
+
+    u64 TextureSystem::GetDefaultTextureID()
     {
         return s_State.NameToIndex["__DEFAULT_WHITE__"];
     }

@@ -7,6 +7,7 @@
 #include "Math/Quaternion.h"
 #include "Mesh/Mesh.h"
 #include "Renderer.h"
+#include "Texture/TextureSystem.h"
 
 #include <algorithm>
 #include <backends/imgui_impl_glfw.h>
@@ -28,6 +29,10 @@ namespace VW
     static float s_Yaw = 0.0f;
     static Mesh *cubeMesh;
     static std::vector<RenderItem> renderItems;
+
+    static i32 s_GridSize = 1;
+    static float s_Spacing = 1.5f;
+    static bool s_RebuildGrid = true;
 
     static void CameraMovement(GLFWwindow *window)
     {
@@ -144,6 +149,35 @@ namespace VW
         Renderer::Viewport(w, h);
     }
 
+    static void BuildGrid()
+    {
+        renderItems.clear();
+
+        i32 count = s_GridSize * s_GridSize * s_GridSize;
+        i32 idx = 0;
+
+        for (i32 z = 0; z < s_GridSize; z++)
+        {
+            for (i32 y = 0; y < s_GridSize; y++)
+            {
+                for (i32 x = 0; x < s_GridSize; x++)
+                {
+                    RenderItem item;
+                    item.Material.AlbedoID =
+                        x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
+                    item.Mesh = cubeMesh;
+                    item.Transform = Matrix4::Translate(
+                        {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
+                    item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
+                    renderItems.push_back(item);
+                    idx++;
+                }
+            }
+        }
+
+        s_RebuildGrid = false;
+    }
+
     class DevAppPlatform : public Platform
     {
     public:
@@ -241,7 +275,7 @@ namespace VW
                 layout.Attributes.push_back({0, 0, 3, false});
                 layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
 
-                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 25, indices, 36, layout);
+                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 24, indices, 36, layout);
 
                 const float SPACING = 2.0f;
                 const i32 CUBE_COUNT = 2000;
@@ -257,6 +291,7 @@ namespace VW
                     item.Transform = Matrix4::Translate(
                         {(float)x * SPACING, (float)y * SPACING, (float)z * SPACING});
                     item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
+                    item.Material.AlbedoID = TextureSystem::GetTextureID("1-akane.jpg");
                     renderItems.push_back(item);
                 }
 
@@ -266,6 +301,11 @@ namespace VW
                 ImGui::StyleColorsDark();
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 330");
+            }
+
+            if (s_RebuildGrid && cubeMesh != nullptr)
+            {
+                BuildGrid();
             }
 
             for (auto &item : renderItems)
@@ -281,9 +321,17 @@ namespace VW
             ImGui::NewFrame();
 
             ImGui::Begin("Stats");
-            ImGui::Text("%i %i", Renderer::GetStats().DrawCalls,
-                        Renderer::GetStats().ItemsSubmited);
-            ImGui::Checkbox("Writeframe", &Renderer::GetDebugSettings().RenderWireframe);
+            ImGui::Text("%i draw calls", Renderer::GetStats().DrawCalls);
+            ImGui::Text("%i rendered cubes", (i32)Renderer::GetStats().ItemsSubmited);
+            ImGui::Checkbox("Wireframe", &Renderer::GetDebugSettings().RenderWireframe);
+            ImGui::Separator();
+            ImGui::Text("Grid Settings");
+            ImGui::DragInt("Grid Size", &s_GridSize, 1.0f, 1, 1000);
+            ImGui::DragFloat("Spacing", &s_Spacing, 0.1f, 0.0f, 100.0f);
+            if (ImGui::Button("Rebuild"))
+            {
+                s_RebuildGrid = true;
+            }
             ImGui::End();
 
             ImGui::Render();

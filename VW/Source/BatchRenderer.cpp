@@ -1,6 +1,7 @@
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
 #include "Renderer.h"
+#include "Texture/TextureSystem.h"
 #include <glad/glad.h>
 namespace VW
 {
@@ -20,18 +21,21 @@ namespace VW
             {6, 32, 4, false}, // Transform Row2
             {7, 48, 4, false}, // Transform Row3
             {8, 64, 4, false}, // Color
-            {9, 80, 1, true},  // Color
+            {9, 80, 1, true},  // Albedo
         };
     }
+
     BatchRenderer::~BatchRenderer()
     {
         delete m_InstanceBuffer;
     }
+
     void BatchRenderer::Begin()
     {
         m_CurrentMesh = nullptr;
         m_InstanceStorage.clear();
     }
+
     void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const Material &material)
     {
         if ((m_CurrentMesh && mesh != m_CurrentMesh) || m_InstanceStorage.size() >= m_MaxInstances)
@@ -42,7 +46,10 @@ namespace VW
         InstanceData data;
         data.Transform = transform;
         data.Material.Color = material.Color.Normalized();
-        data.Material.AlbedoHandle = material.AlbedoID;
+        data.Material.AlbedoHandle =
+            material.AlbedoID != 0
+                ? TextureSystem::GetTextureHandle(material.AlbedoID)
+                : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
         m_InstanceStorage.push_back(data);
 
         Renderer::_GetState().Stats.ItemsSubmited++;

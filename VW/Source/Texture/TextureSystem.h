@@ -32,10 +32,11 @@ namespace VW
         static void Init();
         static void Shutdown();
 
-        static u64 GetHandle(int index);
-        static u64 GetHandle(const std::string &path);
+        static u64 GetTextureHandle(int index);
+        static u64 GetTextureHandle(const std::string &path);
+        static u64 GetTextureID(const std::string &path);
         static u64 CreateTexture(const std::string &path);
 
-        static u64 GetDefaultTexture();
+        static u64 GetDefaultTextureID();
     };
 } // namespace VW

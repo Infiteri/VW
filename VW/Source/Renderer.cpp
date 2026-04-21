@@ -13,9 +13,6 @@ namespace VW
     static Renderer::State s_State;
     static Shader *s_Shader = nullptr;
 
-    static Texture2D *tex;
-    static u32 handle;
-
     void Renderer::Init()
     {
         VW_LOG_ADD_CATEGORY("vwrn", "Renderer");
@@ -31,14 +28,7 @@ namespace VW
         s_State.Screen.Init();
         s_State.Batch = new BatchRenderer(1000);
 
-        tex = new Texture2D();
-        tex->Load("1-akane.jpg");
-
-        handle = glGetTextureHandleARB(tex->GetID());
-        glMakeTextureHandleResidentARB(handle);
-
         TextureSystem::Init();
-        TextureSystem::CreateTexture("1-akane.jpg");
     }
 
     void Renderer::Shutdown()
@@ -70,6 +60,12 @@ namespace VW
 
         s_State.Screen.Begin();
         s_State.RenderQueue.clear();
+
+        if (s_State.Cam)
+        {
+            Matrix4 vp = Matrix4::Multiply(s_State.Cam->GetProjection(), s_State.Cam->GetView());
+            s_State.Frustum.Extract(vp);
+        }
     }
 
     void Renderer::Render()
@@ -85,9 +81,8 @@ namespace VW
         }
     }
 
-    void Renderer::Submit(RenderItem &item)
+    void Renderer::Submit(const RenderItem &item)
     {
-        item.Material.AlbedoID = TextureSystem::GetHandle(TextureSystem::GetDefaultTexture());
         s_State.RenderQueue.push_back(item);
     }
 
@@ -106,7 +101,15 @@ namespace VW
         s_State.Batch->Begin();
         for (const auto &item : s_State.RenderQueue)
         {
-            s_State.Batch->Submit(item.Mesh, item.Transform, item.Material);
+
+            Vector3 pos = {item.Transform.data[12], item.Transform.data[13],
+                           item.Transform.data[14]};
+            Vector3 worldCenter = pos + item.Mesh->GetBoundsCenter();
+            float worldRadius = item.Mesh->GetBoundsRadius();
+            if (s_State.Frustum.IsSphereInside(worldCenter, worldRadius))
+            {
+                s_State.Batch->Submit(item.Mesh, item.Transform, item.Material);
+            }
         }
         s_State.Batch->End();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

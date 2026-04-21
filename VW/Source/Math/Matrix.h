@@ -8,7 +8,11 @@ namespace VW
     class VW_API Matrix4
     {
     public:
-        float data[16];
+        union
+        {
+            float data[16];
+            float m[4][4];
+        };
 
         Matrix4();
         Matrix4(float *data);
