@@ -26,6 +26,7 @@ assets: always
 	@cp Shader.glsl $(BIN)/Shader.glsl
 	@cp Screen.glsl $(BIN)/Screen.glsl
 	@cp 1-akane.jpg $(BIN)/1-akane.jpg
+	@cp a.obj $(BIN)/a.obj
 
 dev: always assets
 	@make -j12 -C VW --no-print-directory
@@ -42,9 +43,9 @@ kill:
 	@taskkill /F /IM $(EXE).exe 2>nul || true
 
 vendor: always
+	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll
 	@make -j12 -C VW/Vendor/glad --no-print-directory
 	@make -j12 -C DevApp/Vendor/imgui --no-print-directory
-	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll
 
 test:
 	@make -j12 -C Tests --no-print-directory

@@ -59,21 +59,27 @@ namespace VW
     {
         if (m_InstanceStorage.empty() || !m_CurrentMesh)
             return;
+
+        m_CurrentMesh->Bind();
+
         m_InstanceBuffer->Bind();
         glBufferSubData(GL_ARRAY_BUFFER, 0, m_InstanceStorage.size() * sizeof(InstanceData),
                         m_InstanceStorage.data());
+
         if (m_LinkedMeshes.find(m_CurrentMesh) == m_LinkedMeshes.end())
         {
             m_CurrentMesh->GetVAO()->AddVertexBuffer(m_InstanceBuffer, m_InstanceLayout,
                                                      VertexInputRate::Instance);
             m_LinkedMeshes.insert(m_CurrentMesh);
         }
-        m_CurrentMesh->Bind();
+
         glDrawElementsInstanced(GL_TRIANGLES, m_CurrentMesh->GetIndexCount(), GL_UNSIGNED_INT,
                                 nullptr, (GLsizei)m_InstanceStorage.size());
+
         Renderer::_GetState().Stats.DrawCalls++;
         m_InstanceStorage.clear();
     }
+
     void BatchRenderer::End()
     {
         Flush();

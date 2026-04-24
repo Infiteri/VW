@@ -5,7 +5,7 @@ ASSEMBLY := VW
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-ISource -IVendor/glad/include -IVendor/stb
+INCLUDE_FLAGS=-ISource -IVendor/glad/include -IVendor/stb -IVendor/fast_obj
 DEFINES=
 LINK_FLAGS=-shared $(OBJ)/glad/glad.o
 

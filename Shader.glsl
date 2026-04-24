@@ -1,6 +1,7 @@
 // VERTEX
 #version 400 core
 #extension GL_ARB_gpu_shader_int64 : enable
+#extension GL_ARB_bindless_texture : require
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aUV;

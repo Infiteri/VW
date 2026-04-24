@@ -217,9 +217,6 @@ namespace VW
         void Render() override
         {
             CameraMovement(m_Handle);
-            glfwSwapBuffers(m_Handle);
-            glfwPollEvents();
-
             if (cubeMesh == nullptr)
             {
 #define S 0.5f
@@ -336,6 +333,9 @@ namespace VW
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwSwapBuffers(m_Handle);
+            glfwPollEvents();
         }
 
     private:
