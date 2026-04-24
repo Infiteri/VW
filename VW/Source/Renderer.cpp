@@ -1,21 +1,16 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
+#include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
-#include "Texture/Texture2D.h"
 #include "Texture/TextureSystem.h"
-
-#define FAST_OBJ_IMPLEMENTATION
-#include "fast_obj.h"
 #include <glad/glad.h>
-#include <unordered_map>
 
 namespace VW
 {
     static Renderer::State s_State;
     static Shader *s_Shader = nullptr;
-    static Mesh *mesh = nullptr;
 
     void Renderer::Init()
     {
@@ -33,65 +28,7 @@ namespace VW
         s_State.Batch = new BatchRenderer(1000);
 
         TextureSystem::Init();
-
-        // 1. Parse
-        // In Renderer::Init(), replace the mesh loading section:
-
-        fastObjMesh *fmesh = fast_obj_read("a.obj");
-
-        std::vector<Vertex> vertices;
-        std::vector<u32> indices;
-        vertices.reserve(fmesh->face_count * 3);
-        indices.reserve(fmesh->face_count * 3);
-
-        std::unordered_map<u64, u32> uniqueVertices;
-
-        u32 index_offset = 0;
-        for (u32 i = 0; i < fmesh->face_count; i++)
-        {
-            u32 fv = fmesh->face_vertices[i];
-            for (u32 j = 1; j < fv - 1; j++)
-            {
-                for (int k = 0; k < 3; k++)
-                {
-                    u32 vi = (k == 0) ? 0 : (k == 1) ? j : j + 1;
-                    fastObjIndex idx = fmesh->indices[index_offset + vi];
-                    u64 key = (u64)idx.p | ((u64)idx.t << 21);
-                    auto it = uniqueVertices.find(key);
-                    if (it != uniqueVertices.end())
-                    {
-                        indices.push_back(it->second);
-                    }
-                    else
-                    {
-                        Vertex vert = {};
-                        vert.Position = {fmesh->positions[idx.p * 3 + 0],
-                                         fmesh->positions[idx.p * 3 + 1],
-                                         fmesh->positions[idx.p * 3 + 2]};
-                        if (idx.t < fmesh->texcoord_count)
-                            vert.UV = {fmesh->texcoords[idx.t * 2 + 0],
-                                       1.0f - fmesh->texcoords[idx.t * 2 + 1]};
-                        u32 newIndex = vertices.size();
-                        vertices.push_back(vert);
-                        uniqueVertices[key] = newIndex;
-                        indices.push_back(newIndex);
-                    }
-                }
-            }
-            index_offset += fv;
-        }
-
-        fast_obj_destroy(fmesh);
-
-        VertexLayout layout;
-        layout.Stride = sizeof(Vertex);
-        layout.Attributes = {
-            {0, offsetof(Vertex, Position), 3, false},
-            {1, offsetof(Vertex, UV), 2, false},
-        };
-
-        mesh = new Mesh(vertices.data(), vertices.size() * sizeof(Vertex), indices.data(),
-                        indices.size(), layout);
+        MeshSystem::Init();
     }
 
     void Renderer::Shutdown()
@@ -128,15 +65,6 @@ namespace VW
         {
             Matrix4 vp = Matrix4::Multiply(s_State.Cam->GetProjection(), s_State.Cam->GetView());
             s_State.Frustum.Extract(vp);
-        }
-
-        if (mesh)
-        {
-            Submit({.Mesh = mesh,
-                    .Transform = Matrix4::Translate({-5, 0, 0})
-
-                        ,
-                    .Material = {.Color = {255, 0, 0, 255}, .AlbedoID = 0}});
         }
     }
 

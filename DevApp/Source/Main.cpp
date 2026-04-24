@@ -6,6 +6,7 @@
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
 #include "Mesh/Mesh.h"
+#include "Mesh/MeshSystem.h"
 #include "Renderer.h"
 #include "Texture/TextureSystem.h"
 
@@ -27,7 +28,7 @@ namespace VW
     static float s_Sensitivity = 0.001f;
     static float s_Pitch = 0.0f;
     static float s_Yaw = 0.0f;
-    static Mesh *cubeMesh;
+    static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
     static i32 s_GridSize = 1;
@@ -165,7 +166,7 @@ namespace VW
                     RenderItem item;
                     item.Material.AlbedoID =
                         x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
-                    item.Mesh = cubeMesh;
+                    item.Mesh = MeshSystem::GetMesh("model").get();
                     item.Transform = Matrix4::Translate(
                         {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
                     item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
@@ -217,90 +218,20 @@ namespace VW
         void Render() override
         {
             CameraMovement(m_Handle);
-            if (cubeMesh == nullptr)
+            if (firstFrame)
             {
-#define S 0.5f
-                Vertex vertices[] = {
-                    // Front (z = -S)
-                    {Vector3{-S, -S, -S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{S, -S, -S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, S, -S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{-S, S, -S}, Vector2{0.0f, 1.0f}},
-
-                    // Back (z = +S)
-                    {Vector3{S, -S, S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{-S, -S, S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{-S, S, S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{S, S, S}, Vector2{0.0f, 1.0f}},
-
-                    // Left (x = -S)
-                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{-S, -S, -S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{-S, S, -S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
-
-                    // Right (x = +S)
-                    {Vector3{S, -S, -S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{S, S, -S}, Vector2{0.0f, 1.0f}},
-
-                    // Top (y = +S)
-                    {Vector3{-S, S, -S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{S, S, -S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
-
-                    // Bottom (y = -S)
-                    {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
-                    {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, -S, -S}, Vector2{1.0f, 1.0f}},
-                    {Vector3{-S, -S, -S}, Vector2{0.0f, 1.0f}},
-                };
-
-                u32 indices[] = {
-                    0,  2,  1,  0,  3,  2,  // Front
-                    4,  6,  5,  4,  7,  6,  // Back
-                    8,  10, 9,  8,  11, 10, // Left
-                    12, 14, 13, 12, 15, 14, // Righe
-                    16, 18, 17, 16, 19, 18, // Top
-                    20, 22, 21, 20, 23, 22, // Bottom
-                };
-
-                VertexLayout layout;
-                layout.Stride = sizeof(Vertex);
-                layout.Attributes.push_back({0, 0, 3, false});
-                layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
-
-                cubeMesh = new Mesh(vertices, sizeof(Vertex) * 24, indices, 36, layout);
-
-                const float SPACING = 2.0f;
-                const i32 CUBE_COUNT = 2000;
-
-                for (i32 i = 0; i < CUBE_COUNT; i++)
-                {
-                    i32 x = i % 100 - 50;
-                    i32 y = (i / 100) % 100;
-                    i32 z = i / 10000;
-
-                    RenderItem item;
-                    item.Mesh = cubeMesh;
-                    item.Transform = Matrix4::Translate(
-                        {(float)x * SPACING, (float)y * SPACING, (float)z * SPACING});
-                    item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
-                    item.Material.AlbedoID = TextureSystem::GetTextureID("1-akane.jpg");
-                    renderItems.push_back(item);
-                }
-
+                firstFrame = false;
                 IMGUI_CHECKVERSION();
                 ImGui::CreateContext();
 
                 ImGui::StyleColorsDark();
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 330");
+
+                MeshSystem::LoadModel("model", "a.obj");
             }
 
-            if (s_RebuildGrid && cubeMesh != nullptr)
+            if (s_RebuildGrid)
             {
                 BuildGrid();
             }
