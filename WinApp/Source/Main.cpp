@@ -2,7 +2,9 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
-#include <cstdio>
+#include "Mesh/MeshSystem.h"
+#include "Renderer.h"
+#include "Texture/TextureSystem.h"
 #include <windows.h>
 
 namespace VW
@@ -16,7 +18,24 @@ namespace VW
     static HINSTANCE g_hInst = nullptr;
 
     static PerspectiveCamera cam;
-    static Mesh *mesh;
+    static std::vector<RenderItem> renderItems;
+    static bool firstFrame = true;
+
+    static void BuildScene()
+    {
+        renderItems.clear();
+
+        // two meshes, different textures/colors to test batching + sorting
+        for (i32 x = 0; x < 5; x++)
+        {
+            RenderItem item;
+            item.Mesh = MeshSystem::GetMesh("model").get();
+            item.Transform = Matrix4::Translate({(float)x * 2.5f, 0.0f, 0.0f});
+            item.Material.AlbedoID = x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
+            item.Material.Color = x % 2 == 0 ? Color(255, 125, 0, 255) : Color(0, 125, 255, 255);
+            renderItems.push_back(item);
+        }
+    }
 
     class WindowsPlatform : public VW::Platform
     {
@@ -47,7 +66,6 @@ namespace VW
         {
             Logger::GetSettings().FancyFormat = true;
             Logger::GetSettings().Format = "[PREFIX]: MSG";
-
             VW_LOG_ADD_CATEGORY("vwwp", "Windows");
             VW_INFO("vwwp", "Initializing...");
 
@@ -56,15 +74,11 @@ namespace VW
 
             g_W = GetSystemMetrics(SM_CXSCREEN);
             g_H = GetSystemMetrics(SM_CYSCREEN);
-
             g_hInst = GetModuleHandleA(nullptr);
 
             HWND parent = FindWallpaperLayer();
             if (!parent)
-            {
                 return;
-            }
-
             ShowWindow(parent, SW_SHOW);
 
             WNDCLASSEXW wc{};
@@ -74,20 +88,14 @@ namespace VW
             wc.hInstance = g_hInst;
             wc.lpszClassName = L"WGL";
             wc.hbrBackground = nullptr;
-
             if (!RegisterClassExW(&wc))
-            {
                 return;
-            }
 
             g_hWnd = CreateWindowExW(WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW, L"WGL", L"WALLPAPER",
                                      WS_CHILD | WS_VISIBLE, 0, 0, g_W, g_H, parent, nullptr,
                                      g_hInst, nullptr);
-
             if (!g_hWnd)
-            {
                 return;
-            }
 
             ShowWindow(g_hWnd, SW_SHOW);
             UpdateWindow(g_hWnd);
@@ -95,9 +103,7 @@ namespace VW
 
             g_hDC = GetDC(g_hWnd);
             if (!g_hDC)
-            {
                 return;
-            }
 
             PIXELFORMATDESCRIPTOR pfd{};
             pfd.nSize = sizeof pfd;
@@ -110,17 +116,14 @@ namespace VW
 
             int pf = ChoosePixelFormat(g_hDC, &pfd);
             if (!pf)
-            {
                 return;
-            }
             SetPixelFormat(g_hDC, pf, &pfd);
 
             g_hGLRC = wglCreateContext(g_hDC);
             if (!g_hGLRC)
-            {
                 return;
-            }
             wglMakeCurrent(g_hDC, g_hGLRC);
+
             cam.SetPosition({0, 0, 5});
             Renderer::UseCamera(&cam);
         }
@@ -139,34 +142,17 @@ namespace VW
                 DispatchMessageW(&msg);
             }
 
+            if (firstFrame)
+            {
+                firstFrame = false;
+                MeshSystem::LoadModel("model", "a.obj");
+                BuildScene();
+            }
+
+            for (auto &item : renderItems)
+                Renderer::Submit(item);
+
             SwapBuffers(g_hDC);
-            if (!mesh)
-            {
-#define S 1
-                Vertex vertices[] = {
-                    {Vector3{-S, S, 0.0f}, Vector2{1.0f, 0.0f}},
-                    {Vector3{S, S, 0.0f}, Vector2{0.0f, 1.0f}},
-                    {Vector3{S, -S, 0.0f}, Vector2{0.0f, 0.0f}},
-                    {Vector3{-S, -S, 0.0f}, Vector2{1.0f, 1.0f}},
-                };
-
-                u32 indices[] = {0, 1, 2, 0, 2, 3};
-
-                VertexLayout layout;
-                layout.Stride = sizeof(Vertex);
-                layout.Attributes.push_back({0, 0, 3, false});
-                layout.Attributes.push_back({1, 3 * sizeof(f32), 2, false});
-
-                mesh = new Mesh(vertices, sizeof(Vertex) * 4, indices,
-                                sizeof(indices) / sizeof(u32), layout);
-            }
-            else
-            {
-                Renderer::Submit({.Mesh = mesh});
-                Renderer::Submit({.Mesh = mesh,
-                                  .Transform = Matrix4::Translate({10, 0, 0}),
-                                  .Material = {.Color = {0, 125, 255, 255}}});
-            }
         }
 
         void Shutdown() override
@@ -184,7 +170,6 @@ namespace VW
             HWND progman = FindWindowA("ProgMan", nullptr);
             if (!progman)
                 return nullptr;
-
             SendMessageTimeoutA(progman, 0x052C, 0, 0, SMTO_NORMAL, 1000, nullptr);
 
             struct State
@@ -202,23 +187,19 @@ namespace VW
                         return TRUE;
                     if (strcmp(cls, "WorkerW") != 0)
                         return TRUE;
-
                     State *s = (State *)lp;
                     HWND dv = FindWindowExA(top, nullptr, "SHELLDLL_DefView", nullptr);
-
                     if (dv)
                     {
                         s->phase = 1;
                         return TRUE;
                     }
-
                     if (s->phase == 1)
                     {
                         s->result = top;
                         s->phase = 2;
                         return FALSE;
                     }
-
                     return TRUE;
                 },
                 (LPARAM)&state);
@@ -230,11 +211,9 @@ namespace VW
         {
             if (msg == WM_SIZE && g_hDC && g_hGLRC)
             {
-                int w = LOWORD(lParam);
-                int h = HIWORD(lParam);
+                int w = LOWORD(lParam), h = HIWORD(lParam);
                 if (w && h)
-                {
-                }
+                    Renderer::Viewport(w, h);
                 return 0;
             }
             if (msg == WM_CLOSE)
@@ -247,13 +226,10 @@ namespace VW
             return DefWindowProcW(hWnd, msg, wParam, lParam);
         }
     };
-
 } // namespace VW
 
 VW::Platform *VW::InitPlatform()
 {
-    // allows nice logger colors in the GetConsoleMode
-    // removed from Logger.cpp to keep VW platform independent
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut != INVALID_HANDLE_VALUE)
     {
@@ -264,7 +240,5 @@ VW::Platform *VW::InitPlatform()
             SetConsoleMode(hOut, dwMode);
         }
     }
-
-    VW::Logger::Log(VW::LogLevel::Info, "", "%s %i", "hahaha", 12);
     return new VW::WindowsPlatform();
 }
