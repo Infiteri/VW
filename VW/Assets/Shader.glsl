@@ -32,13 +32,37 @@ void main() {
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : enable
 
+#define RENDER_MODE_FULL 0
+#define RENDER_MODE_UV 1
+
+uniform int uRenderMode;
+
 in vec4 vColor;
 in vec2 vUV;
 flat in uvec2 fAlbedo;
 
 out vec4 FragColor;
 
-void main() {
+vec4 FullColor() {
+    vec4 o;
     sampler2D s = sampler2D(packUint2x32(fAlbedo));
-    FragColor = texture(s, vUV);
+    o = texture(s, vUV);
+    return o;
+}
+
+vec4 UVColor() {
+    return vec4(vUV, 0, 1);
+}
+
+void main() {
+    switch(uRenderMode) {
+        case RENDER_MODE_FULL:
+        default:
+            FragColor = FullColor();
+        break;
+
+        case RENDER_MODE_UV:
+            FragColor = UVColor();
+        break;
+    }
 }

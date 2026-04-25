@@ -31,8 +31,8 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 1;
-    static float s_Spacing = 1.5f;
+    static i32 s_GridSize = 3;
+    static float s_Spacing = 5.5f;
     static bool s_RebuildGrid = true;
 
     static void CameraMovement(GLFWwindow *window)
@@ -259,6 +259,21 @@ namespace VW
             if (ImGui::Button("Rebuild"))
             {
                 s_RebuildGrid = true;
+            }
+
+            // dropdown
+            {
+
+                auto &debug = Renderer::GetDebugSettings();
+
+                const char *modes[] = {"Full", "UV"};
+
+                int current = static_cast<int>(debug.RenderMode);
+
+                if (ImGui::Combo("Render Mode", &current, modes, IM_ARRAYSIZE(modes)))
+                {
+                    debug.RenderMode = static_cast<RenderDebugMode>(current);
+                }
             }
             ImGui::End();
 

@@ -73,6 +73,7 @@ namespace VW
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         s_Shader->Use();
+        s_Shader->Int((int)s_State.Debug.RenderMode, "uRenderMode");
 
         if (s_State.Cam)
         {

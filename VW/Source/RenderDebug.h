@@ -10,8 +10,15 @@ namespace VW
         int ItemsSubmited = 0;
     };
 
+    enum class RenderDebugMode
+    {
+        Full,
+        UV
+    };
+
     struct RendererDebugSettings
     {
         bool RenderWireframe = false;
+        RenderDebugMode RenderMode = RenderDebugMode::Full;
     };
 } // namespace VW
