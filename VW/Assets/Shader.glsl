@@ -15,6 +15,7 @@ layout(location = 8)  in vec4 iRow2;
 layout(location = 9)  in vec4 iRow3;
 layout(location = 10) in vec4 iColor;
 layout(location = 11) in uvec2 iAlbedo;
+layout(location = 12) in uvec2 iNormal;
 
 uniform mat4 uProj;
 uniform mat4 uView;
@@ -24,7 +25,9 @@ out vec2 vUV;
 out vec3 vNormal;
 out vec3 vTangent;
 out vec3 vBitangent;
+
 flat out uvec2 fAlbedo;
+flat out uvec2 fNormal;
 
 void main() {
     mat4 model = mat4(iRow0, iRow1, iRow2, iRow3);
@@ -37,6 +40,7 @@ void main() {
     vBitangent = aBitangent;
     
     fAlbedo = iAlbedo;
+    fNormal = iNormal;
 }
 
 // FRAGMENT
@@ -57,7 +61,9 @@ in vec4 vColor;
 in vec3 vNormal;
 in vec3 vTangent;
 in vec3 vBitangent;
+
 flat in uvec2 fAlbedo;
+flat in uvec2 fNormal;
 
 out vec4 FragColor;
 
@@ -68,7 +74,7 @@ void main()
         default:
         case RENDER_MODE_FULL:
         {
-            sampler2D s = sampler2D(packUint2x32(fAlbedo));
+            sampler2D s = sampler2D(packUint2x32(fNormal));
             FragColor = texture(s, vUV) * vColor;
             break;
         }

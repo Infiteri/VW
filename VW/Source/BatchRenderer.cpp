@@ -22,6 +22,7 @@ namespace VW
             {9, 48, 4, false},  // Row3
             {10, 64, 4, false}, // Color
             {11, 80, 1, true},  // Albedo
+            {12, 88, 1, true},  // Normal
         };
     }
 
@@ -50,6 +51,12 @@ namespace VW
             material.AlbedoID != 0
                 ? TextureSystem::GetTextureHandle(material.AlbedoID)
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
+
+        data.Material.NormalHandle =
+            material.NormalID != 0
+                ? TextureSystem::GetTextureHandle(material.NormalID)
+                : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
+
         m_InstanceStorage.push_back(data);
 
         Renderer::_GetState().Stats.ItemsSubmited++;

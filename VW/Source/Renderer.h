@@ -16,12 +16,14 @@ namespace VW
     {
         Color Color;
         u64 AlbedoID = 0;
+        u64 NormalID = 0;
     };
 
     struct MaterialGPU
     {
         Color Color;
         u64 AlbedoHandle = 0;
+        u64 NormalHandle = 0;
     };
 
     struct RenderItem

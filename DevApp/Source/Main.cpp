@@ -166,6 +166,10 @@ namespace VW
                     RenderItem item;
                     item.Material.AlbedoID =
                         x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
+
+                    item.Material.NormalID =
+                        x % 2 == 0 ? 0 : TextureSystem::GetTextureID("normal.png");
+
                     item.Mesh = MeshSystem::GetMesh("model").get();
                     item.Transform = Matrix4::Translate(
                         {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
