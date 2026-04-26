@@ -16,12 +16,12 @@ namespace VW
 
         m_InstanceLayout.Stride = sizeof(InstanceData);
         m_InstanceLayout.Attributes = {
-            {4, 0, 4, false},  // Transform Row0 (mat4 col 0)
-            {5, 16, 4, false}, // Transform Row1
-            {6, 32, 4, false}, // Transform Row2
-            {7, 48, 4, false}, // Transform Row3
-            {8, 64, 4, false}, // Color
-            {9, 80, 1, true},  // Albedo
+            {6, 0, 4, false},   // Row0
+            {7, 16, 4, false},  // Row1
+            {8, 32, 4, false},  // Row2
+            {9, 48, 4, false},  // Row3
+            {10, 64, 4, false}, // Color
+            {11, 80, 1, true},  // Albedo
         };
     }
 

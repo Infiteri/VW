@@ -13,7 +13,10 @@ namespace VW
     enum class RenderDebugMode
     {
         Full,
-        UV
+        UV,
+        Normal,
+        Tangent,
+        Bitangent
     };
 
     struct RendererDebugSettings

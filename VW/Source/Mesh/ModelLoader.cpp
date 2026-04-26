@@ -1,8 +1,6 @@
 #include "ModelLoader.h"
-
-#include "fast_obj.h"
-
 #include "Core/Logger.h"
+#include "fast_obj.h"
 #include <cstring>
 #include <vector>
 
@@ -11,7 +9,6 @@ namespace VW
     struct VertexKey
     {
         u32 p, n, t;
-
         bool operator==(const VertexKey &other) const
         {
             return p == other.p && n == other.n && t == other.t;
@@ -29,7 +26,6 @@ namespace VW
     std::shared_ptr<Mesh> ModelLoader::LoadObj(const std::string &path)
     {
         fastObjMesh *mesh = fast_obj_read(path.c_str());
-
         if (!mesh)
         {
             VW_ERROR("vwrn", "Failed to load model: %s", path.c_str());
@@ -38,7 +34,6 @@ namespace VW
 
         std::vector<Vertex> vertices;
         std::vector<u32> indices;
-
         vertices.reserve(mesh->face_count * 3);
         indices.reserve(mesh->face_count * 3);
 
@@ -49,10 +44,8 @@ namespace VW
         for (u32 i = 0; i < mesh->face_count; i++)
         {
             u32 face_vertices = mesh->face_vertices[i];
-
             if (face_vertices < 3)
             {
-                VW_WARN("vwrn", "Skipping face with %u vertices at face %u", face_vertices, i);
                 index_offset += face_vertices;
                 continue;
             }
@@ -63,7 +56,6 @@ namespace VW
                 {
                     u32 vertexIndex = (k == 0) ? 0 : (k == 1) ? j : j + 1;
                     fastObjIndex idx = mesh->indices[index_offset + vertexIndex];
-
                     VertexKey key = {idx.p, idx.n, idx.t};
 
                     auto it = uniqueVertices.find(key);
@@ -82,42 +74,30 @@ namespace VW
                             vertex.Position.z = mesh->positions[idx.p * 3 + 2];
                         }
 
-                        // if (idx.n < mesh->normal_count)
-                        // {
-                        //     vertex.Normal.x = mesh->normals[idx.n * 3 + 0];
-                        //     vertex.Normal.y = mesh->normals[idx.n * 3 + 1];
-                        //     vertex.Normal.z = mesh->normals[idx.n * 3 + 2];
-                        // }
-                        //
                         if (idx.t < mesh->texcoord_count)
                         {
                             vertex.UV.x = mesh->texcoords[idx.t * 2 + 0];
                             vertex.UV.y = 1.0f - mesh->texcoords[idx.t * 2 + 1];
                         }
 
-                        // vertex.Tangent = Vector3(0, 0, 0);
+                        if (idx.n < mesh->normal_count)
+                        {
+                            vertex.Normal.x = mesh->normals[idx.n * 3 + 0];
+                            vertex.Normal.y = mesh->normals[idx.n * 3 + 1];
+                            vertex.Normal.z = mesh->normals[idx.n * 3 + 2];
+                        }
 
-                        u32 newIndex = vertices.size();
+                        u32 newIndex = (u32)vertices.size();
                         vertices.push_back(vertex);
                         uniqueVertices[key] = newIndex;
                         indices.push_back(newIndex);
                     }
                 }
             }
-
             index_offset += face_vertices;
         }
 
-        for (size_t i = 0; i < indices.size(); i++)
-        {
-            if (indices[i] >= vertices.size())
-            {
-                VW_ERROR("vwrn", "Invalid index %zu: %u (vertices: %zu) - CLAMPING", i, indices[i],
-                         vertices.size());
-                indices[i] = 0;
-            }
-        }
-
+        // tangent + bitangent
         for (size_t i = 0; i + 2 < indices.size(); i += 3)
         {
             Vertex &v0 = vertices[indices[i]];
@@ -126,45 +106,51 @@ namespace VW
 
             Vector3 deltaPos1 = v1.Position - v0.Position;
             Vector3 deltaPos2 = v2.Position - v0.Position;
-
             Vector2 deltaUV1 = v1.UV - v0.UV;
             Vector2 deltaUV2 = v2.UV - v0.UV;
 
             float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y + 0.00001f);
             Vector3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+            Vector3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
-            // v0.Tangent = v0.Tangent + tangent;
-            // v1.Tangent = v1.Tangent + tangent;
-            // v2.Tangent = v2.Tangent + tangent;
+            v0.Tangent += tangent;
+            v1.Tangent += tangent;
+            v2.Tangent += tangent;
+            v0.Bitangent += bitangent;
+            v1.Bitangent += bitangent;
+            v2.Bitangent += bitangent;
         }
 
-        // for (auto &vertex : vertices)
-        // {
-        //     if (vertex.Tangent.LengthSquared() > 0.0f)
-        //     {
-        //         vertex.Tangent = vertex.Tangent.Normalized();
-        //     }
-        // }
+        for (auto &v : vertices)
+        {
+            if (v.Tangent.LengthSquared() > 0.0f)
+                v.Tangent = v.Tangent.Normalized();
+            if (v.Bitangent.LengthSquared() > 0.0f)
+                v.Bitangent = v.Bitangent.Normalized();
+        }
+
+        // clamp bad indices
+        for (size_t i = 0; i < indices.size(); i++)
+            if (indices[i] >= vertices.size())
+                indices[i] = 0;
 
         VertexLayout layout;
         layout.Stride = sizeof(Vertex);
         layout.Attributes = {
-            {0, offsetof(Vertex, Position), 3, false},
-            {1, offsetof(Vertex, UV), 2, false},
-            // {2, offsetof(Vertex, Normal), 3, false},
-            // {3, offsetof(Vertex, Tangent), 3, false},
+            {0, offsetof(Vertex, Position), 3, false},  {1, offsetof(Vertex, UV), 2, false},
+            {2, offsetof(Vertex, Normal), 3, false},    {3, offsetof(Vertex, Tangent), 3, false},
+            {4, offsetof(Vertex, Bitangent), 3, false},
         };
 
         fast_obj_destroy(mesh);
 
         if (vertices.empty() || indices.empty())
         {
-            VW_ERROR("vwrn", "Model has no vertices or indices");
+            VW_ERROR("vwrn", "Model empty");
             return nullptr;
         }
 
         return std::make_shared<Mesh>(vertices.data(), vertices.size() * sizeof(Vertex),
                                       indices.data(), indices.size(), layout);
     }
-
 } // namespace VW

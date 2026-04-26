@@ -32,7 +32,7 @@ namespace VW
     static std::vector<RenderItem> renderItems;
 
     static i32 s_GridSize = 3;
-    static float s_Spacing = 5.5f;
+    static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
     static void CameraMovement(GLFWwindow *window)
@@ -266,7 +266,7 @@ namespace VW
 
                 auto &debug = Renderer::GetDebugSettings();
 
-                const char *modes[] = {"Full", "UV"};
+                const char *modes[] = {"Full", "UV", "Normal", "Tangent", "Bitangent"};
 
                 int current = static_cast<int>(debug.RenderMode);
 

@@ -12,6 +12,9 @@ namespace VW
     {
         Vector3 Position;
         Vector2 UV;
+        Vector3 Normal;
+        Vector3 Tangent;
+        Vector3 Bitangent;
     };
 
     class VW_API Mesh
