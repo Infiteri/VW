@@ -1,16 +1,19 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
+#include "Light/AmbientLight.h"
+#include "Light/LightSystem.h"
 #include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
 #include "Texture/TextureSystem.h"
 #include <glad/glad.h>
+#include <memory>
 
 namespace VW
 {
     static Renderer::State s_State;
-    static Shader *s_Shader = nullptr;
+    static Shader *s_Shader = nullptr; // TODO: MOVE
 
     void Renderer::Init()
     {
@@ -27,8 +30,14 @@ namespace VW
         s_State.Screen.Init();
         s_State.Batch = new BatchRenderer(1000);
 
+        LightSystem::Init();
         TextureSystem::Init();
         MeshSystem::Init();
+
+        auto a = std::make_shared<AmbientLight>();
+        a->SetColor({0, 255, 255, 255});
+        a->SetIntensity(1);
+        LightSystem::AddLight(a);
     }
 
     void Renderer::Shutdown()
@@ -80,6 +89,10 @@ namespace VW
             s_Shader->Mat4(s_State.Cam->GetProjection(), "uProj");
             s_Shader->Mat4(s_State.Cam->GetView(), "uView");
         }
+
+        LightSystem::UpdateGPUData();
+        LightSystem::Bind(3);
+        s_Shader->Int(LightSystem::GetLightCount(), "uLightCount");
     }
 
     void Renderer::Submit(const RenderItem &item)

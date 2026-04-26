@@ -31,7 +31,7 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 3;
+    static i32 s_GridSize = 1;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
@@ -165,15 +165,14 @@ namespace VW
                 {
                     RenderItem item;
                     item.Material.AlbedoID =
-                        x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
+                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
 
                     item.Material.NormalID =
-                        x % 2 == 0 ? 0 : TextureSystem::GetTextureID("normal.png");
+                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("normal.png");
 
-                    item.Mesh = MeshSystem::GetMesh("model").get();
+                    item.Mesh = MeshSystem::GetMesh(MeshType::Cube).get();
                     item.Transform = Matrix4::Translate(
                         {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
-                    item.Material.Color = Color(255.0f, 125.0f, 0.0f, 255.0f);
                     renderItems.push_back(item);
                     idx++;
                 }

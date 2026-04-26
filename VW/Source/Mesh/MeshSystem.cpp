@@ -9,36 +9,59 @@ namespace VW
     {
 #define S 0.5f
         Vertex vertices[] = {
-            // Front (z = -S)
-            {Vector3{-S, -S, -S}, Vector2{0.0f, 0.0f}},
-            {Vector3{S, -S, -S}, Vector2{1.0f, 0.0f}},
-            {Vector3{S, S, -S}, Vector2{1.0f, 1.0f}},
-            {Vector3{-S, S, -S}, Vector2{0.0f, 1.0f}},
-            // Back (z = +S)
-            {Vector3{S, -S, S}, Vector2{0.0f, 0.0f}},
-            {Vector3{-S, -S, S}, Vector2{1.0f, 0.0f}},
-            {Vector3{-S, S, S}, Vector2{1.0f, 1.0f}},
-            {Vector3{S, S, S}, Vector2{0.0f, 1.0f}},
-            // Left (x = -S)
-            {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
-            {Vector3{-S, -S, -S}, Vector2{1.0f, 0.0f}},
-            {Vector3{-S, S, -S}, Vector2{1.0f, 1.0f}},
-            {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
-            // Right (x = +S)
-            {Vector3{S, -S, -S}, Vector2{0.0f, 0.0f}},
-            {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
-            {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
-            {Vector3{S, S, -S}, Vector2{0.0f, 1.0f}},
-            // Top (y = +S)
-            {Vector3{-S, S, -S}, Vector2{0.0f, 0.0f}},
-            {Vector3{S, S, -S}, Vector2{1.0f, 0.0f}},
-            {Vector3{S, S, S}, Vector2{1.0f, 1.0f}},
-            {Vector3{-S, S, S}, Vector2{0.0f, 1.0f}},
-            // Bottom (y = -S)
-            {Vector3{-S, -S, S}, Vector2{0.0f, 0.0f}},
-            {Vector3{S, -S, S}, Vector2{1.0f, 0.0f}},
-            {Vector3{S, -S, -S}, Vector2{1.0f, 1.0f}},
-            {Vector3{-S, -S, -S}, Vector2{0.0f, 1.0f}},
+            // Front (z = -S)  Normal(0,0,-1)
+            {Vector3{-S, -S, -S}, Vector2{0, 0}, Vector3{0, 0, -1}, Vector3{1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{S, -S, -S}, Vector2{1, 0}, Vector3{0, 0, -1}, Vector3{1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{S, S, -S}, Vector2{1, 1}, Vector3{0, 0, -1}, Vector3{1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, S, -S}, Vector2{0, 1}, Vector3{0, 0, -1}, Vector3{1, 0, 0},
+             Vector3{0, -1, 0}},
+            // Back (z = +S)  Normal(0,0,1)
+            {Vector3{S, -S, S}, Vector2{0, 0}, Vector3{0, 0, 1}, Vector3{-1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, -S, S}, Vector2{1, 0}, Vector3{0, 0, 1}, Vector3{-1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, S, S}, Vector2{1, 1}, Vector3{0, 0, 1}, Vector3{-1, 0, 0},
+             Vector3{0, -1, 0}},
+            {Vector3{S, S, S}, Vector2{0, 1}, Vector3{0, 0, 1}, Vector3{-1, 0, 0},
+             Vector3{0, -1, 0}},
+            // Left (x = -S)  Normal(-1,0,0)
+            {Vector3{-S, -S, S}, Vector2{0, 0}, Vector3{-1, 0, 0}, Vector3{0, 0, -1},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, -S, -S}, Vector2{1, 0}, Vector3{-1, 0, 0}, Vector3{0, 0, -1},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, S, -S}, Vector2{1, 1}, Vector3{-1, 0, 0}, Vector3{0, 0, -1},
+             Vector3{0, -1, 0}},
+            {Vector3{-S, S, S}, Vector2{0, 1}, Vector3{-1, 0, 0}, Vector3{0, 0, -1},
+             Vector3{0, -1, 0}},
+            // Right (x = +S)  Normal(1,0,0)
+            {Vector3{S, -S, -S}, Vector2{0, 0}, Vector3{1, 0, 0}, Vector3{0, 0, 1},
+             Vector3{0, -1, 0}},
+            {Vector3{S, -S, S}, Vector2{1, 0}, Vector3{1, 0, 0}, Vector3{0, 0, 1},
+             Vector3{0, -1, 0}},
+            {Vector3{S, S, S}, Vector2{1, 1}, Vector3{1, 0, 0}, Vector3{0, 0, 1},
+             Vector3{0, -1, 0}},
+            {Vector3{S, S, -S}, Vector2{0, 1}, Vector3{1, 0, 0}, Vector3{0, 0, 1},
+             Vector3{0, -1, 0}},
+            // Top (y = +S)  Normal(0,1,0)
+            {Vector3{-S, S, -S}, Vector2{0, 0}, Vector3{0, 1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, 1}},
+            {Vector3{S, S, -S}, Vector2{1, 0}, Vector3{0, 1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, 1}},
+            {Vector3{S, S, S}, Vector2{1, 1}, Vector3{0, 1, 0}, Vector3{1, 0, 0}, Vector3{0, 0, 1}},
+            {Vector3{-S, S, S}, Vector2{0, 1}, Vector3{0, 1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, 1}},
+            // Bottom (y = -S)  Normal(0,-1,0)
+            {Vector3{-S, -S, S}, Vector2{0, 0}, Vector3{0, -1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, -1}},
+            {Vector3{S, -S, S}, Vector2{1, 0}, Vector3{0, -1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, -1}},
+            {Vector3{S, -S, -S}, Vector2{1, 1}, Vector3{0, -1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, -1}},
+            {Vector3{-S, -S, -S}, Vector2{0, 1}, Vector3{0, -1, 0}, Vector3{1, 0, 0},
+             Vector3{0, 0, -1}},
         };
 
         u32 indices[] = {
@@ -49,8 +72,9 @@ namespace VW
         VertexLayout layout;
         layout.Stride = sizeof(Vertex);
         layout.Attributes = {
-            {0, offsetof(Vertex, Position), 3, false},
-            {1, offsetof(Vertex, UV), 2, false},
+            {0, offsetof(Vertex, Position), 3, false},  {1, offsetof(Vertex, UV), 2, false},
+            {2, offsetof(Vertex, Normal), 3, false},    {3, offsetof(Vertex, Tangent), 3, false},
+            {4, offsetof(Vertex, Bitangent), 3, false},
         };
 
         s_State.BuiltinMeshes[MeshType::Cube] =
