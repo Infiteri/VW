@@ -2,6 +2,7 @@
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
 #include "Light/AmbientLight.h"
+#include "Light/DirectionalLight.h"
 #include "Light/LightSystem.h"
 #include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
@@ -33,11 +34,6 @@ namespace VW
         LightSystem::Init();
         TextureSystem::Init();
         MeshSystem::Init();
-
-        auto a = std::make_shared<AmbientLight>();
-        a->SetColor({0, 255, 255, 255});
-        a->SetIntensity(1);
-        LightSystem::AddLight(a);
     }
 
     void Renderer::Shutdown()

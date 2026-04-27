@@ -1,5 +1,7 @@
 #include "LightSystem.h"
 #include "Core/Logger.h"
+#include "Light/DirectionalLight.h"
+#include "Light/SpotLight.h"
 #include "Math/Math.h"
 #include <cmath>
 #include <glad/glad.h>
@@ -59,39 +61,38 @@ namespace VW
             case LightType::Ambient:
                 gpuLight.Data.x = 0.0f;
                 break;
-                // case LightType::Directional:
-                // {
-                //     auto dirLight = std::static_pointer_cast<DirectionalLight>(light);
-                //     Vector3 dir = dirLight->GetDirection();
-                //     gpuLight.Data.x = 1.0f;
-                //     gpuLight.Direction = Vector4(dir.x, dir.y, dir.z, 0.0f);
-                //     break;
-                // }
-                //
-                // case LightType::Spot:
-                // {
-                //     auto spotLight = std::static_pointer_cast<SpotLight>(light);
-                //     Vector3 pos = spotLight->GetPosition();
-                //     Vector3 dir = spotLight->GetDirection();
-                //     float range = spotLight->GetRange();
-                //     float innerAngle = spotLight->GetInnerConeAngle();
-                //     float outerAngle = spotLight->GetOuterConeAngle();
-                //
-                //     gpuLight.Data.x = 3.0f; // type 3
-                //
-                //     gpuLight.Position = Vector4(pos.x, pos.y, pos.z, range);
-                //
-                //     float outerCos = cosf(outerAngle * CE_DEG_TO_RAD);
-                //     gpuLight.Direction = Vector4(dir.x, dir.y, dir.z, outerCos);
-                //
-                //     float innerCos = cosf(innerAngle * CE_DEG_TO_RAD);
-                //     gpuLight.Data.y = innerCos;
-                //
-                //     gpuLight.Attenuation = Vector4(1.0f, 4.5f / range, 75.0f / (range * range),
-                //     0.0f);
-                //
-                //     break;
-                // }
+            case LightType::Directional:
+            {
+                auto dirLight = std::static_pointer_cast<DirectionalLight>(light);
+                Vector3 dir = dirLight->GetDirection();
+                gpuLight.Data.x = 1.0f;
+                gpuLight.Direction = Vector4(dir.x, dir.y, dir.z, 0.0f);
+                break;
+            }
+
+            case LightType::Spot:
+            {
+                auto spotLight = std::static_pointer_cast<SpotLight>(light);
+                Vector3 pos = spotLight->GetPosition();
+                Vector3 dir = spotLight->GetDirection();
+                float range = spotLight->GetRange();
+                float innerAngle = spotLight->GetInnerConeAngle();
+                float outerAngle = spotLight->GetOuterConeAngle();
+
+                gpuLight.Data.x = 3.0f; // type 3
+
+                gpuLight.Position = Vector4(pos.x, pos.y, pos.z, range);
+
+                float outerCos = cosf(outerAngle * VW_DEG_TO_RAD);
+                gpuLight.Direction = Vector4(dir.x, dir.y, dir.z, outerCos);
+
+                float innerCos = cosf(innerAngle * VW_DEG_TO_RAD);
+                gpuLight.Data.y = innerCos;
+
+                gpuLight.Attenuation = Vector4(1.0f, 4.5f / range, 75.0f / (range * range), 0.0f);
+
+                break;
+            }
 
             default:
                 continue;
