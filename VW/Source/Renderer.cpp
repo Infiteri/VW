@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
+#include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
 #include "Light/AmbientLight.h"
 #include "Light/DirectionalLight.h"
@@ -7,6 +8,7 @@
 #include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
+#include "Texture/CubemapTexture.h"
 #include "Texture/TextureSystem.h"
 #include <glad/glad.h>
 #include <memory>
@@ -15,6 +17,29 @@ namespace VW
 {
     static Renderer::State s_State;
     static Shader *s_Shader = nullptr; // TODO: MOVE
+    static Shader *cubemap;
+    static VertexArray *VA;
+    static CubemapTexture *texture;
+
+    static float cubeVertices[] = {
+        -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,
+
+        -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f,
+        -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f,
+
+        1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,
+        1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,
+
+        -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,
+
+        -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+        -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  -1.0f,
+    };
 
     void Renderer::Init()
     {
@@ -34,6 +59,31 @@ namespace VW
         LightSystem::Init();
         TextureSystem::Init();
         MeshSystem::Init();
+
+        cubemap = new Shader("Cubemap.glsl");
+
+        texture = new CubemapTexture();
+        CubemapTexture::Configuration config;
+        config.Left = "posz.jpg";
+        config.Right = "posz.jpg";
+        config.Top = "posz.jpg";
+        config.Bottom = "posz.jpg";
+        config.Front = "posz.jpg";
+        config.Back = "posz.jpg";
+        texture->Load(config);
+
+        VA = new VertexArray();
+        auto vb = new Buffer(BufferType::Vertex, BufferUsage::Static); // todo: holy this sucks
+
+        vb->SetData(cubeVertices, sizeof(cubeVertices));
+        VA->AddVertexBuffer(vb,
+                            {
+                                .Attributes = {{0, 0, 3, false}},
+                                .Stride = 3 * sizeof(float),
+                            },
+                            VertexInputRate::Vertex);
+        VA->Bind();
+        VA->Unbind();
     }
 
     void Renderer::Shutdown()
@@ -71,12 +121,38 @@ namespace VW
             Matrix4 vp = Matrix4::Multiply(s_State.Cam->GetProjection(), s_State.Cam->GetView());
             s_State.Frustum.Extract(vp);
         }
+
+        glClearColor(1, 0, 0, 1); // debug color
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_CULL_FACE);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(false);
+
+        auto c = s_State.Cam;
+        cubemap->Use();
+        cubemap->Mat4(c->GetProjection(), "uProj");
+
+        Matrix4 view = c->GetView();
+        view.data[12] = view.data[13] = view.data[14] = 0;
+        cubemap->Mat4(view, "uView");
+
+        texture->Use();
+        cubemap->Int(0, "uSkybox");
+
+        cubemap->Use();
+        texture->Use();
+        cubemap->Int(0, "uSkybox");
+
+        VA->Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        VA->Unbind();
+        glDepthMask(true);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
     }
 
     void Renderer::Render()
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         s_Shader->Use();
         s_Shader->Int((int)s_State.Debug.RenderMode, "uRenderMode");
 

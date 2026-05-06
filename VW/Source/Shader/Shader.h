@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "Math/Matrix.h"
+#include "Math/Vector.h"
 #include <string>
 #include <unordered_map>
 namespace VW
@@ -20,6 +21,7 @@ namespace VW
 
         void Int(int i, const char *name);
         void Mat4(const Matrix4 &n, const char *name);
+        void Vec3(const Vector3 &vec, const char *name);
 
         inline u32 GetID() const
         {

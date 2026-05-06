@@ -155,6 +155,12 @@ namespace VW
         glUniformMatrix4fv(loc, 1, false, n.data);
     }
 
+    void Shader::Vec3(const Vector3 &vec, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        glUniform3f(loc, vec.x, vec.y, vec.z);
+    }
+
     u32 Shader::_GetUniform(const char *name)
     {
         Use();
