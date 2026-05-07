@@ -1,3 +1,4 @@
+#include "Camera/CameraSystem.h"
 #include "Camera/PerspectiveCamera.h"
 #include "Core/Entry.h"
 #include "Core/Logger.h"
@@ -19,11 +20,12 @@
 #include <backends/imgui_impl_opengl3_loader.h>
 #include <glfw/glfw3.h>
 #include <imgui.h>
+#include <memory>
 #include <windows.h>
 
 namespace VW
 {
-    static PerspectiveCamera cam;
+    static PerspectiveCamera *cam;
     static bool s_MouseLocked = false;
     static double s_LastMouseX = 0, s_LastMouseY = 0;
     static float s_RotationSpeed = 0.05f;
@@ -97,24 +99,24 @@ namespace VW
         }
 
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            cam.SetOrientation(cam.GetOrientation() *
-                               Quaternion(Vector3(0, 1, 0), -s_RotationSpeed));
+            cam->SetOrientation(cam->GetOrientation() *
+                                Quaternion(Vector3(0, 1, 0), -s_RotationSpeed));
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            cam.SetOrientation(cam.GetOrientation() *
-                               Quaternion(Vector3(0, 1, 0), s_RotationSpeed));
+            cam->SetOrientation(cam->GetOrientation() *
+                                Quaternion(Vector3(0, 1, 0), s_RotationSpeed));
 
         if (rotate)
-            cam.SetOrientation(Quaternion(Vector3(0, 1, 0), s_Yaw) *
-                               Quaternion(Vector3(1, 0, 0), s_Pitch));
+            cam->SetOrientation(Quaternion(Vector3(0, 1, 0), s_Yaw) *
+                                Quaternion(Vector3(1, 0, 0), s_Pitch));
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam.SetPosition(cam.GetPosition() + cam.Forward() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() + cam->Forward() * s_MoveSpeed);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam.SetPosition(cam.GetPosition() - cam.Forward() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() - cam->Forward() * s_MoveSpeed);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam.SetPosition(cam.GetPosition() - cam.Right() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() - cam->Right() * s_MoveSpeed);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam.SetPosition(cam.GetPosition() + cam.Right() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() + cam->Right() * s_MoveSpeed);
     }
 
     static void OnMouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -190,6 +192,10 @@ namespace VW
 
         void Init() override
         {
+            CameraSystem::AddCamera("main", std::make_shared<PerspectiveCamera>(120));
+            CameraSystem::ActivateCamera("main");
+            cam = (PerspectiveCamera *)CameraSystem::GetCamera("main");
+
             Logger::GetSettings().FancyFormat = true;
             Logger::GetSettings().Format = "[PREFIX]: MSG";
             VW_LOG_ADD_CATEGORY("vwdp", "Dev");
@@ -201,8 +207,7 @@ namespace VW
             glfwMaximizeWindow(m_Handle);
             glfwSetWindowSizeCallback(m_Handle, OnResize);
             glfwSetMouseButtonCallback(m_Handle, OnMouseButton);
-            cam.SetPosition({0, 0, 5});
-            Renderer::UseCamera(&cam);
+            cam->SetPosition({0, 0, 5});
         }
 
         bool ShouldShutdown() override
@@ -249,7 +254,7 @@ namespace VW
             ImGui::Begin("Stats");
             ImGui::Text("%i draw calls", Renderer::GetStats().DrawCalls);
             ImGui::Text("%i items submitted", (i32)Renderer::GetStats().ItemsSubmited);
-            ImGui::Checkbox("Wireframe", &Renderer::GetDebugSettings().RenderWireframe);
+            //   ImGui::Checkbox("Wireframe", &Renderer::GetDebugSettings().RenderWireframe);
 
             ImGui::Separator();
             ImGui::Text("Grid");

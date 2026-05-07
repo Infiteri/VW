@@ -53,7 +53,6 @@ namespace VW
             struct Frustum Frustum;
 
             GPUScreen Screen;
-            Camera *Cam;
 
             std::vector<RenderItem> RenderQueue;
             class BatchRenderer *Batch;
@@ -70,9 +69,6 @@ namespace VW
         static void Shutdown();
 
         static void Viewport(f32 w, f32 h);
-
-        static void UseCamera(Camera *cam);
-        static Camera *GetActiveCamera();
 
         static void Submit(const RenderItem &item);
 

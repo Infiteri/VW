@@ -1,5 +1,6 @@
 #include "Sky.h"
 #include "Camera/Camera.h"
+#include "Camera/CameraSystem.h"
 #include "Core/Logger.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
@@ -78,8 +79,7 @@ namespace VW
 
         case SkyMode::Skybox:
         {
-            // TODO: CAMERASYSTEM + SHADERSYSTEM
-            auto camera = Renderer::GetActiveCamera();
+            auto camera = CameraSystem::GetActiveCamera();
             if (!m_SkyboxData.Shader)
             {
                 m_SkyboxData.Shader = ShaderSystem::GetEngineShader("Cubemap.glsl");

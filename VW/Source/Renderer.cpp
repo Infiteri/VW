@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
+#include "Camera/CameraSystem.h"
 #include "Core/Logger.h"
 #include "Light/LightSystem.h"
 #include "Mesh/MeshSystem.h"
@@ -65,21 +66,23 @@ namespace VW
         glViewport(0, 0, w, h);
         s_State.Screen.Resize(w, h);
 
-        if (s_State.Cam)
-            s_State.Cam->Resize(w, h);
+        auto camera = CameraSystem::GetActiveCamera();
+        if (camera)
+            camera->Resize(w, h);
     }
 
     void Renderer::BeginFrame()
     {
         // reset Stats
+        auto camera = CameraSystem::GetActiveCamera();
         s_State.Stats = RendererStats();
 
         s_State.Screen.Begin();
         s_State.RenderQueue.clear();
 
-        if (s_State.Cam)
+        if (camera)
         {
-            Matrix4 vp = Matrix4::Multiply(s_State.Cam->GetProjection(), s_State.Cam->GetView());
+            Matrix4 vp = Matrix4::Multiply(camera->GetProjection(), camera->GetView());
             s_State.Frustum.Extract(vp);
         }
 
@@ -88,13 +91,14 @@ namespace VW
 
     void Renderer::Render()
     {
+        auto camera = CameraSystem::GetActiveCamera();
         s_Shader->Use();
         s_Shader->Int((int)s_State.Debug.RenderMode, "uRenderMode");
 
-        if (s_State.Cam)
+        if (camera)
         {
-            s_Shader->Mat4(s_State.Cam->GetProjection(), "uProj");
-            s_Shader->Mat4(s_State.Cam->GetView(), "uView");
+            s_Shader->Mat4(camera->GetProjection(), "uProj");
+            s_Shader->Mat4(camera->GetView(), "uView");
         }
 
         LightSystem::UpdateGPUData();
@@ -109,7 +113,6 @@ namespace VW
 
     void Renderer::EndFrame()
     {
-
         if (s_State.Debug.RenderWireframe)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -140,11 +143,6 @@ namespace VW
         s_State.Screen.End();
     }
 
-    void Renderer::UseCamera(Camera *cam)
-    {
-        s_State.Cam = cam;
-    }
-
     const RendererStats &Renderer::GetStats()
     {
         return s_State.Stats;
@@ -159,10 +157,4 @@ namespace VW
     {
         return s_State;
     }
-
-    Camera *Renderer::GetActiveCamera()
-    {
-        return s_State.Cam;
-    }
-
 } // namespace VW
