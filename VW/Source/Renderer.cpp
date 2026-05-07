@@ -1,18 +1,15 @@
 #include "Renderer.h"
 #include "BatchRenderer.h"
-#include "Buffer/VertexArray.h"
 #include "Core/Logger.h"
-#include "Light/AmbientLight.h"
-#include "Light/DirectionalLight.h"
 #include "Light/LightSystem.h"
 #include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
+#include "Shader/ShaderSystem.h"
 #include "Sky/Sky.h"
 #include "Texture/CubemapTexture.h"
 #include "Texture/TextureSystem.h"
 #include <glad/glad.h>
-#include <memory>
 
 namespace VW
 {
@@ -30,14 +27,15 @@ namespace VW
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
 
-        s_Shader = new Shader("Shader.glsl");
-
         s_State.Screen.Init();
         s_State.Batch = new BatchRenderer(1000);
 
         LightSystem::Init();
         TextureSystem::Init();
         MeshSystem::Init();
+        ShaderSystem::Init();
+
+        s_Shader = ShaderSystem::GetEngineShader("Shader.glsl");
 
         CubemapTexture::Configuration config;
         config.Left = "posz.jpg";

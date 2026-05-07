@@ -1,4 +1,5 @@
 #include "GPUScreen.h"
+#include "Shader/ShaderSystem.h"
 #include <glad/glad.h>
 
 namespace VW
@@ -14,7 +15,7 @@ namespace VW
 
     void GPUScreen::Init()
     {
-        m_SS = std::make_unique<Shader>("Screen.glsl");
+        m_SS = ShaderSystem::GetEngineShader("Screen.glsl");
 
         // screen buffer setup
         FramebufferDesc desc;

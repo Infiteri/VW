@@ -23,7 +23,7 @@ namespace VW
         std::unique_ptr<Framebuffer> m_FB;
         std::unique_ptr<VertexArray> m_VAO;
         std::unique_ptr<Buffer> m_VBO, m_EBO;
-        std::unique_ptr<Shader> m_SS; // TODO: from ShaderSystem when in place
+        Shader *m_SS;
         u32 m_IndexCount = 0;
     };
 } // namespace VW

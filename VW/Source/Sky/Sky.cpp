@@ -2,6 +2,7 @@
 #include "Camera/Camera.h"
 #include "Core/Logger.h"
 #include "Renderer.h"
+#include "Shader/ShaderSystem.h"
 #include <glad/glad.h>
 
 namespace VW
@@ -81,7 +82,7 @@ namespace VW
             auto camera = Renderer::GetActiveCamera();
             if (!m_SkyboxData.Shader)
             {
-                m_SkyboxData.Shader = new Shader("Cubemap.glsl");
+                m_SkyboxData.Shader = ShaderSystem::GetEngineShader("Cubemap.glsl");
             }
             if (!camera)
                 return;
