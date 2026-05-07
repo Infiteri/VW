@@ -8,7 +8,6 @@ namespace VW
         : m_Data(nullptr), m_Width(0), m_Height(0), m_Channels(0), m_Path(name)
     {
         int w, h, c;
-        stbi_set_flip_vertically_on_load(true);
         m_Data = stbi_load(name.c_str(), &w, &h, &c, 0);
         if (!m_Data)
         {

@@ -72,6 +72,7 @@ namespace VW
         static void Viewport(f32 w, f32 h);
 
         static void UseCamera(Camera *cam);
+        static Camera *GetActiveCamera();
 
         static void Submit(const RenderItem &item);
 
