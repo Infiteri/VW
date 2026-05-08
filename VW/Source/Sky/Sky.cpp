@@ -46,6 +46,7 @@ namespace VW
         Matrix4 view = c->GetView();
         view.data[12] = view.data[13] = view.data[14] = 0;
         s->Mat4(view, "uView");
+        s->Vec3(c->GetPosition(), "uCamPos");
     }
 
     void Sky::Render()
@@ -102,6 +103,11 @@ namespace VW
                 return;
 
             shader->Use();
+
+            // TODO: maybe make a function so that other shaders may get core uniforms uploaded
+            shader->Float(Renderer::GetDeltaTime(), "uDeltaTime");
+            shader->Float(Renderer::GetTime(), "uTime");
+
             _UploadCameraToShader(camera, shader);
             m_ShaderData.Uniforms.Apply(shader);
 

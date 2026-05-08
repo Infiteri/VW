@@ -10,6 +10,7 @@
 #include "Sky/Sky.h"
 #include "Texture/CubemapTexture.h"
 #include "Texture/TextureSystem.h"
+#include <chrono>
 #include <glad/glad.h>
 
 namespace VW
@@ -74,6 +75,20 @@ namespace VW
 
     void Renderer::BeginFrame()
     {
+        // TODO: move to some timing class
+        {
+            auto now = std::chrono::high_resolution_clock::now();
+            static auto lastFrame = now;
+            static float totalTime = 0.0f;
+
+            float deltaTime = std::chrono::duration<float>(now - lastFrame).count();
+            totalTime += deltaTime;
+            lastFrame = now;
+
+            s_State.Time = totalTime;
+            s_State.DeltaTime = deltaTime;
+        }
+
         // reset Stats
         auto camera = CameraSystem::GetActiveCamera();
         s_State.Stats = RendererStats();
@@ -157,5 +172,15 @@ namespace VW
     Renderer::State &Renderer::_GetState()
     {
         return s_State;
+    }
+
+    float Renderer::GetDeltaTime()
+    {
+        return s_State.DeltaTime;
+    }
+
+    float Renderer::GetTime()
+    {
+        return s_State.Time;
     }
 } // namespace VW

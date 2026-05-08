@@ -59,6 +59,8 @@ namespace VW
 
             RendererStats Stats;
             RendererDebugSettings Debug;
+
+            float Time, DeltaTime;
         };
 
     public:
@@ -78,6 +80,10 @@ namespace VW
         static void BeginFrame();
         static void Render();
         static void EndFrame();
+
+        // TODO: move to separate file
+        static float GetDeltaTime();
+        static float GetTime();
 
     private:
         friend class BatchRenderer;
