@@ -45,7 +45,8 @@ namespace VW
         config.Bottom = "posz.jpg";
         config.Front = "posz.jpg";
         config.Back = "posz.jpg";
-        sky.SetSkyboxMode(config);
+        sky.SetShaderMode("Sky.glsl");
+        sky.GetShaderUniforms().AddUniform("uColor", Color({0, 125, 255, 255}));
     }
 
     void Renderer::Shutdown()

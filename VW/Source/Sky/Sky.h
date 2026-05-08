@@ -4,15 +4,18 @@
 #include "Buffer/VertexArray.h"
 #include "Color.h"
 #include "Shader/Shader.h"
+#include "Shader/ShaderUniforms.h"
 #include "Texture/CubemapTexture.h"
 #include <memory>
+#include <string>
 
 namespace VW
 {
     enum class SkyMode
     {
         Color,
-        Skybox
+        Skybox,
+        Shader
     };
 
     class VW_API Sky
@@ -25,6 +28,17 @@ namespace VW
 
         void SetColorMode(const Color &color);
         void SetSkyboxMode(const CubemapTexture::Configuration &config);
+        void SetShaderMode(const std::string &path);
+
+        inline SkyMode GetMode() const
+        {
+            return m_Mode;
+        };
+
+        inline ShaderUniforms &GetShaderUniforms()
+        {
+            return m_ShaderData.Uniforms;
+        };
 
     private:
         SkyMode m_Mode;
@@ -38,8 +52,13 @@ namespace VW
         struct
         {
             CubemapTexture Texture;
-            Shader *Shader;
         } m_SkyboxData;
+
+        struct
+        {
+            Shader *Shader;
+            ShaderUniforms Uniforms;
+        } m_ShaderData;
 
     private:
         void _EnsureVA();

@@ -149,16 +149,41 @@ namespace VW
         glUniform1i(loc, i);
     }
 
+    void Shader::Float(float i, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        glUniform1f(loc, i);
+    }
+
     void Shader::Mat4(const Matrix4 &n, const char *name)
     {
         u32 loc = _GetUniform(name);
         glUniformMatrix4fv(loc, 1, false, n.data);
     }
 
+    void Shader::Vec2(const Vector2 &vec, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        glUniform2f(loc, vec.x, vec.y);
+    }
+
     void Shader::Vec3(const Vector3 &vec, const char *name)
     {
         u32 loc = _GetUniform(name);
         glUniform3f(loc, vec.x, vec.y, vec.z);
+    }
+
+    void Shader::Vec4(const Vector4 &vec, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        glUniform4f(loc, vec.x, vec.y, vec.z, vec.w);
+    }
+
+    void Shader::Color(const class Color &color, const char *name)
+    {
+        u32 loc = _GetUniform(name);
+        class Color vec = color.Normalized();
+        glUniform4f(loc, vec.r, vec.g, vec.b, vec.a);
     }
 
     u32 Shader::_GetUniform(const char *name)

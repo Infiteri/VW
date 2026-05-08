@@ -80,17 +80,30 @@ namespace VW
         case SkyMode::Skybox:
         {
             auto camera = CameraSystem::GetActiveCamera();
-            if (!m_SkyboxData.Shader)
-            {
-                m_SkyboxData.Shader = ShaderSystem::GetEngineShader("Cubemap.glsl");
-            }
-            if (!camera)
+            auto shader = ShaderSystem::GetEngineShader("Cubemap.glsl");
+            if (!camera || !shader)
                 return;
 
-            m_SkyboxData.Shader->Use();
-            _UploadCameraToShader(camera, m_SkyboxData.Shader);
+            shader->Use();
+            _UploadCameraToShader(camera, shader);
             m_SkyboxData.Texture.Use();
-            m_SkyboxData.Shader->Int(0, "uSkybox");
+            shader->Int(0, "uSkybox");
+
+            VA->Bind();
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        break;
+
+        case SkyMode::Shader:
+        {
+            auto shader = m_ShaderData.Shader;
+            auto camera = CameraSystem::GetActiveCamera();
+            if (!shader || !camera)
+                return;
+
+            shader->Use();
+            _UploadCameraToShader(camera, shader);
+            m_ShaderData.Uniforms.Apply(shader);
 
             VA->Bind();
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -130,6 +143,13 @@ namespace VW
 
         m_SkyboxData.Texture.Destroy();
         m_SkyboxData.Texture.Load(config);
+    }
+
+    void Sky::SetShaderMode(const std::string &path)
+    {
+        m_Mode = SkyMode::Shader;
+
+        m_ShaderData.Shader = ShaderSystem::GetShader(path);
     }
 
 } // namespace VW

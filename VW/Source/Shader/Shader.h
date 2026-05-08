@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Base.h"
+#include "Color.h"
 #include "Math/Matrix.h"
 #include "Math/Vector.h"
 #include <string>
 #include <unordered_map>
+
 namespace VW
 {
     class Shader
@@ -20,8 +22,12 @@ namespace VW
         bool IsLoaded() const;
 
         void Int(int i, const char *name);
+        void Float(float i, const char *name);
         void Mat4(const Matrix4 &n, const char *name);
+        void Vec2(const Vector2 &vec, const char *name);
         void Vec3(const Vector3 &vec, const char *name);
+        void Vec4(const Vector4 &vec, const char *name);
+        void Color(const Color &color, const char *name);
 
         inline u32 GetID() const
         {
