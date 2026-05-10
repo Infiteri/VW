@@ -1,14 +1,14 @@
 #include "BatchRenderer.h"
 #include "Core/Logger.h"
 #include "Renderer.h"
+#include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 #include <glad/glad.h>
+
 namespace VW
 {
     BatchRenderer::BatchRenderer(u64 maxInstances) : m_MaxInstances(maxInstances)
     {
-        m_InstanceStorage.reserve(maxInstances);
-
         m_InstanceBuffer = new Buffer(BufferType::Vertex, BufferUsage::Dynamic);
         InstanceData *temp = new InstanceData[maxInstances];
         m_InstanceBuffer->SetData(temp, sizeof(InstanceData) * maxInstances);
@@ -21,8 +21,8 @@ namespace VW
             {8, 32, 4, false},  // Row2
             {9, 48, 4, false},  // Row3
             {10, 64, 4, false}, // Color
-            {11, 80, 1, true},  // Albedo
-            {12, 88, 1, true},  // Normal
+            {11, 80, 2, true},  // AlbedoHandle (uvec2)
+            {12, 88, 2, true},  // NormalHandle (uvec2)
         };
     }
 
@@ -33,17 +33,23 @@ namespace VW
 
     void BatchRenderer::Begin()
     {
-        m_CurrentMesh = nullptr;
-        m_InstanceStorage.clear();
+        m_Batches.clear();
     }
 
-    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const Material &material)
+    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const Material &material,
+                               Shader *shader)
     {
-        if ((m_CurrentMesh && mesh != m_CurrentMesh) || m_InstanceStorage.size() >= m_MaxInstances)
-        {
+        if (!shader)
+            shader = ShaderSystem::GetEngineShader("Object.glsl");
+
+        // check total size across all batches
+        u64 totalItems = 0;
+        for (auto &[s, items] : m_Batches)
+            totalItems += items.size();
+
+        if (totalItems >= m_MaxInstances)
             Flush();
-        }
-        m_CurrentMesh = mesh;
+
         InstanceData data;
         data.Transform = transform;
         data.Material.Color = material.Color.Normalized();
@@ -51,44 +57,58 @@ namespace VW
             material.AlbedoID != 0
                 ? TextureSystem::GetTextureHandle(material.AlbedoID)
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
-
         data.Material.NormalHandle =
             material.NormalID != 0
                 ? TextureSystem::GetTextureHandle(material.NormalID)
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
 
-        m_InstanceStorage.push_back(data);
-
+        m_Batches[shader].push_back({mesh, data});
         Renderer::_GetState().Stats.ItemsSubmited++;
     }
 
     void BatchRenderer::Flush()
     {
-        if (m_InstanceStorage.empty() || !m_CurrentMesh)
-            return;
-
-        m_CurrentMesh->Bind();
-
-        m_InstanceBuffer->Bind();
-        glBufferSubData(GL_ARRAY_BUFFER, 0, m_InstanceStorage.size() * sizeof(InstanceData),
-                        m_InstanceStorage.data());
-
-        if (m_LinkedMeshes.find(m_CurrentMesh) == m_LinkedMeshes.end())
+        for (auto &[shader, items] : m_Batches)
         {
-            m_CurrentMesh->GetVAO()->AddVertexBuffer(m_InstanceBuffer, m_InstanceLayout,
-                                                     VertexInputRate::Instance);
-            m_LinkedMeshes.insert(m_CurrentMesh);
+            if (items.empty() || !shader)
+                continue;
+
+            shader->Use();
+            RendererUtils::CoreUniformsToShader(shader);
+
+            std::unordered_map<Mesh *, std::vector<InstanceData>> meshGroups;
+            for (auto &[mesh, data] : items)
+            {
+                meshGroups[mesh].push_back(data);
+            }
+
+            for (auto &[mesh, instances] : meshGroups)
+            {
+
+                mesh->Bind();
+                m_InstanceBuffer->Bind();
+                glBufferSubData(GL_ARRAY_BUFFER, 0, instances.size() * sizeof(InstanceData),
+                                instances.data());
+
+                if (m_LinkedMeshes.find(mesh) == m_LinkedMeshes.end())
+                {
+                    mesh->GetVAO()->AddVertexBuffer(m_InstanceBuffer, m_InstanceLayout,
+                                                    VertexInputRate::Instance);
+                    m_LinkedMeshes.insert(mesh);
+                }
+
+                glDrawElementsInstanced(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT,
+                                        nullptr, (GLsizei)instances.size());
+                Renderer::_GetState().Stats.DrawCalls++;
+            }
         }
 
-        glDrawElementsInstanced(GL_TRIANGLES, m_CurrentMesh->GetIndexCount(), GL_UNSIGNED_INT,
-                                nullptr, (GLsizei)m_InstanceStorage.size());
-
-        Renderer::_GetState().Stats.DrawCalls++;
-        m_InstanceStorage.clear();
+        m_Batches.clear();
     }
 
     void BatchRenderer::End()
     {
         Flush();
     }
+
 } // namespace VW

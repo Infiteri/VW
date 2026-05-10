@@ -26,11 +26,14 @@ namespace VW
         u64 NormalHandle = 0;
     };
 
-    struct RenderItem
+    struct VW_API RenderItem
     {
         Mesh *Mesh;
         Matrix4 Transform;
         Material Material;
+        Shader *Shader;
+
+        RenderItem();
     };
 
     struct InstanceData
@@ -88,6 +91,11 @@ namespace VW
     private:
         friend class BatchRenderer;
         static State &_GetState();
+    };
+
+    namespace RendererUtils
+    {
+        void CoreUniformsToShader(Shader *shader);
     };
 
 } // namespace VW

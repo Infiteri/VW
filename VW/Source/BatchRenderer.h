@@ -1,9 +1,10 @@
 #pragma once
-
 #include "Base.h"
 #include "Math/Matrix.h"
 #include "Mesh/Mesh.h"
 #include "Renderer.h"
+#include "Shader/Shader.h"
+#include <unordered_map>
 #include <unordered_set>
 
 namespace VW
@@ -14,14 +15,14 @@ namespace VW
         BatchRenderer(u64 maxInstances = 1000);
         ~BatchRenderer();
         void Begin();
-        void Submit(Mesh *mesh, const Matrix4 &transform, const Material &material);
+        void Submit(Mesh *mesh, const Matrix4 &transform, const Material &material,
+                    Shader *shader = nullptr);
         void End();
 
     private:
         void Flush();
         u64 m_MaxInstances;
-        Mesh *m_CurrentMesh = nullptr;
-        std::vector<InstanceData> m_InstanceStorage;
+        std::unordered_map<Shader *, std::vector<std::pair<Mesh *, InstanceData>>> m_Batches;
         Buffer *m_InstanceBuffer;
         VertexLayout m_InstanceLayout;
         std::unordered_set<Mesh *> m_LinkedMeshes;

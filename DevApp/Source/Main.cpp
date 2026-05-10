@@ -12,6 +12,7 @@
 #include "Mesh/Mesh.h"
 #include "Mesh/MeshSystem.h"
 #include "Renderer.h"
+#include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 
 #include <algorithm>
@@ -36,7 +37,7 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 1;
+    static i32 s_GridSize = 5;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
@@ -157,9 +158,11 @@ namespace VW
                         x % 2 != 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
                     item.Material.NormalID =
                         x % 2 != 0 ? 0 : TextureSystem::GetTextureID("normal.png");
-                    item.Mesh = MeshSystem::GetMesh(MeshType::Cube).get();
+                    item.Mesh = x % 4 == 0 ? MeshSystem::GetMesh(MeshType::Cube).get()
+                                           : MeshSystem::GetMesh("a.obj").get();
                     item.Transform = Matrix4::Translate(
                         {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
+                    item.Shader = x % 2 == 0 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
                     renderItems.push_back(item);
                 }
         s_RebuildGrid = false;
@@ -192,7 +195,8 @@ namespace VW
 
         void Init() override
         {
-            CameraSystem::AddCamera("main", std::make_shared<PerspectiveCamera>(120));
+            CameraSystem::AddCamera(
+                "main", std::make_shared<PerspectiveCamera>(120, 16.f / 9, 0.001, 1000.0f));
             CameraSystem::ActivateCamera("main");
             cam = (PerspectiveCamera *)CameraSystem::GetCamera("main");
 
@@ -234,7 +238,7 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                MeshSystem::LoadModel("model", "a.obj");
+                MeshSystem::LoadModel("a.obj", "a.obj");
                 InitLights();
             }
 
@@ -254,7 +258,7 @@ namespace VW
             ImGui::Begin("Stats");
             ImGui::Text("%i draw calls", Renderer::GetStats().DrawCalls);
             ImGui::Text("%i items submitted", (i32)Renderer::GetStats().ItemsSubmited);
-            //   ImGui::Checkbox("Wireframe", &Renderer::GetDebugSettings().RenderWireframe);
+            ImGui::Checkbox("Wireframe", &Renderer::GetDebugSettings().RenderWireframe);
 
             ImGui::Separator();
             ImGui::Text("Grid");

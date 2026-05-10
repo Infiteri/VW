@@ -16,8 +16,13 @@
 namespace VW
 {
     static Renderer::State s_State;
-    static Shader *s_Shader = nullptr; // TODO: MOVE
     static Sky sky;
+
+    RenderItem::RenderItem()
+    {
+        Shader = nullptr;
+        Mesh = nullptr;
+    }
 
     void Renderer::Init()
     {
@@ -37,8 +42,6 @@ namespace VW
         MeshSystem::Init();
         ShaderSystem::Init();
 
-        s_Shader = ShaderSystem::GetEngineShader("Shader.glsl");
-
         CubemapTexture::Configuration config;
         config.Left = "posz.jpg";
         config.Right = "posz.jpg";
@@ -52,8 +55,6 @@ namespace VW
 
     void Renderer::Shutdown()
     {
-        delete s_Shader;
-        s_Shader = nullptr;
     }
 
     // TODO: figure out viewport on 'true' platforms (non dev apps)
@@ -107,19 +108,8 @@ namespace VW
 
     void Renderer::Render()
     {
-        auto camera = CameraSystem::GetActiveCamera();
-        s_Shader->Use();
-        s_Shader->Int((int)s_State.Debug.RenderMode, "uRenderMode");
-
-        if (camera)
-        {
-            s_Shader->Mat4(camera->GetProjection(), "uProj");
-            s_Shader->Mat4(camera->GetView(), "uView");
-        }
-
         LightSystem::UpdateGPUData();
         LightSystem::Bind(3);
-        s_Shader->Int(LightSystem::GetLightCount(), "uLightCount");
     }
 
     void Renderer::Submit(const RenderItem &item)
@@ -138,17 +128,22 @@ namespace VW
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
 
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glDepthMask(true);
+
         s_State.Batch->Begin();
         for (const auto &item : s_State.RenderQueue)
         {
-
+            if (!item.Mesh)
+                continue;
             Vector3 pos = {item.Transform.data[12], item.Transform.data[13],
                            item.Transform.data[14]};
             Vector3 worldCenter = pos + item.Mesh->GetBoundsCenter();
             float worldRadius = item.Mesh->GetBoundsRadius();
             if (s_State.Frustum.IsSphereInside(worldCenter, worldRadius))
             {
-                s_State.Batch->Submit(item.Mesh, item.Transform, item.Material);
+                s_State.Batch->Submit(item.Mesh, item.Transform, item.Material, item.Shader);
             }
         }
         s_State.Batch->End();
@@ -182,5 +177,21 @@ namespace VW
     float Renderer::GetTime()
     {
         return s_State.Time;
+    }
+
+    void RendererUtils::CoreUniformsToShader(Shader *shader)
+    {
+        void CoreUniformsToShader(Shader * shader);
+        auto camera = CameraSystem::GetActiveCamera();
+        if (!shader || !camera)
+            return;
+
+        shader->Use();
+        shader->Int((int)s_State.Debug.RenderMode, "uRenderMode");
+        shader->Mat4(camera->GetProjection(), "uProj");
+        shader->Mat4(camera->GetView(), "uView");
+        shader->Int(LightSystem::GetLightCount(), "uLightCount");
+
+        // TODO: add time based uniforms + others
     }
 } // namespace VW
