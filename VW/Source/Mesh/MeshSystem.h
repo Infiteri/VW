@@ -10,7 +10,11 @@ namespace VW
 {
     enum class MeshType
     {
-        Cube
+        Cube,
+        Sphere,
+        Cylinder,
+        Plane,
+        Torus
     };
 
     class VW_API MeshSystem

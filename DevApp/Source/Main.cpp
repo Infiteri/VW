@@ -158,11 +158,11 @@ namespace VW
                         x % 2 != 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
                     item.Material.NormalID =
                         x % 2 != 0 ? 0 : TextureSystem::GetTextureID("normal.png");
-                    item.Mesh = x % 4 == 0 ? MeshSystem::GetMesh(MeshType::Cube).get()
+                    item.Mesh = x % 4 == 0 ? MeshSystem::GetMesh(MeshType::Torus).get()
                                            : MeshSystem::GetMesh("a.obj").get();
                     item.Transform = Matrix4::Translate(
                         {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
-                    item.Shader = x % 2 == 0 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
+                    // item.Shader = x % 2 == 0 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
                     renderItems.push_back(item);
                 }
         s_RebuildGrid = false;
