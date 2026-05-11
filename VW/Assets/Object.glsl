@@ -199,6 +199,18 @@ vec4 CalculateFinalColor()
             vec3  radiance    = light.Color.rgb * light.Color.w * attenuation * spotFactor;
             finalColor       += vec4(PBR(albedo, N, V, L, radiance, metallic, roughness), 0.0);
         }
+        else if (type == LIGHT_POINT)
+        {
+            vec3  toLight = light.Position.xyz - vWorldPos;
+            float dist    = length(toLight);
+            if (dist > light.Position.w) continue;
+        
+            vec3  L           = toLight / dist;
+            vec3  atten       = light.Attenuation.xyz;
+            float attenuation = 1.0 / (atten.x + atten.y * dist + atten.z * dist * dist);
+            vec3  radiance    = light.Color.rgb * light.Color.w * attenuation;
+            finalColor       += vec4(PBR(albedo, N, V, L, radiance, metallic, roughness), 0.0);
+        }
     }
 
     return finalColor;

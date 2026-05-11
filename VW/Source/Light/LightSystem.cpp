@@ -1,6 +1,7 @@
 #include "LightSystem.h"
 #include "Core/Logger.h"
 #include "Light/DirectionalLight.h"
+#include "Light/PointLight.h"
 #include "Light/SpotLight.h"
 #include "Math/Math.h"
 #include <cmath>
@@ -91,6 +92,17 @@ namespace VW
 
                 gpuLight.Attenuation = Vector4(1.0f, 4.5f / range, 75.0f / (range * range), 0.0f);
 
+                break;
+            }
+
+            case LightType::Point:
+            {
+                auto pointLight = std::static_pointer_cast<PointLight>(light);
+                Vector3 pos = pointLight->GetPosition();
+                float range = pointLight->GetRange();
+                gpuLight.Data.x = 2.0f;
+                gpuLight.Position = Vector4(pos.x, pos.y, pos.z, range);
+                gpuLight.Attenuation = Vector4(1.0f, 4.5f / range, 75.0f / (range * range), 0.0f);
                 break;
             }
 

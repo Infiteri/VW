@@ -9,7 +9,8 @@ namespace VW
     {
         Ambient,
         Directional,
-        Spot
+        Spot,
+        Point
     };
 
     class VW_API Light

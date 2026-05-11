@@ -5,6 +5,7 @@
 #include "Core/Platform.h"
 #include "Light/DirectionalLight.h"
 #include "Light/LightSystem.h"
+#include "Light/PointLight.h"
 #include "Light/SpotLight.h"
 #include "Math/Math.h"
 #include "Math/Matrix.h"
@@ -23,6 +24,8 @@
 #include <imgui.h>
 #include <memory>
 #include <windows.h>
+
+// TODO: todos: add a material system
 
 namespace VW
 {
@@ -44,6 +47,7 @@ namespace VW
     // lights
     static std::shared_ptr<DirectionalLight> s_DirLight;
     static std::shared_ptr<SpotLight> s_SpotLight;
+    static std::shared_ptr<PointLight> s_PointLight;
 
     // imgui state mirrors
     static float s_DirColor[4] = {0.0f, 1.0f, 1.0f, 1.0f};
@@ -57,6 +61,11 @@ namespace VW
     static float s_SpotRange = 20.0f;
     static float s_SpotInner = 20.0f;
     static float s_SpotOuter = 35.0f;
+
+    static float s_PointColor[4] = {1.0f, 0.5f, 0.0f, 1.0f};
+    static float s_PointPos[3] = {0.0f, 3.0f, 0.0f};
+    static float s_PointIntensity = 2.0f;
+    static float s_PointRange = 15.0f;
 
     static void CameraMovement(GLFWwindow *window)
     {
@@ -185,6 +194,13 @@ namespace VW
         s_SpotLight->SetInnerConeAngle(s_SpotInner);
         s_SpotLight->SetOuterConeAngle(s_SpotOuter);
         LightSystem::AddLight(s_SpotLight);
+
+        s_PointLight = std::make_shared<PointLight>();
+        s_PointLight->SetColor({255, 125, 0, 255});
+        s_PointLight->SetIntensity(s_PointIntensity);
+        s_PointLight->SetPosition({s_PointPos[0], s_PointPos[1], s_PointPos[2]});
+        s_PointLight->SetRange(s_PointRange);
+        LightSystem::AddLight(s_PointLight);
     }
 
     class DevAppPlatform : public Platform
@@ -305,6 +321,18 @@ namespace VW
                 s_SpotLight->SetInnerConeAngle(s_SpotInner);
             if (ImGui::DragFloat("Outer Angle", &s_SpotOuter, 0.5f, 0.0f, 90.0f))
                 s_SpotLight->SetOuterConeAngle(s_SpotOuter);
+
+            ImGui::Separator();
+            ImGui::Text("Point Light");
+            if (ImGui::ColorEdit4("Point Color", s_PointColor))
+                s_PointLight->SetColor({s_PointColor[0] * 255, s_PointColor[1] * 255,
+                                        s_PointColor[2] * 255, s_PointColor[3] * 255});
+            if (ImGui::DragFloat3("Point Position", s_PointPos, 0.1f))
+                s_PointLight->SetPosition({s_PointPos[0], s_PointPos[1], s_PointPos[2]});
+            if (ImGui::DragFloat("Point Intensity", &s_PointIntensity, 0.01f, 0.0f, 10.0f))
+                s_PointLight->SetIntensity(s_PointIntensity);
+            if (ImGui::DragFloat("Point Range", &s_PointRange, 0.1f, 0.0f, 200.0f))
+                s_PointLight->SetRange(s_PointRange);
 
             LightSystem::LightUpdated();
 
