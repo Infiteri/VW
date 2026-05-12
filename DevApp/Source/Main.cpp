@@ -25,7 +25,9 @@
 #include <memory>
 #include <windows.h>
 
-// TODO: todos: add a material system
+// TODO: todos: add a material system, fix models being represent as 1 mesh (includes writing a
+// 'mtl' file parser, a.k.a custom .obj and .mlt parser), add missing textures to materials
+// (metallic and roughness)
 
 namespace VW
 {
