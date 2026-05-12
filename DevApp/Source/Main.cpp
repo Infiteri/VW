@@ -7,6 +7,7 @@
 #include "Light/LightSystem.h"
 #include "Light/PointLight.h"
 #include "Light/SpotLight.h"
+#include "Material/Material.h"
 #include "Math/Math.h"
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
@@ -70,6 +71,8 @@ namespace VW
     static float s_PointPos[3] = {.2f, 0.0f, 0.0f};
     static float s_PointIntensity = 5.0f;
     static float s_PointRange = 30.0f;
+
+    static Material material;
 
     static void CameraMovement(GLFWwindow *window)
     {
@@ -178,10 +181,19 @@ namespace VW
                 for (i32 x = 0; x < s_GridSize; x++)
                 {
                     RenderItem item;
-                    item.Material.AlbedoID =
-                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("AK/textures/color.png");
-                    item.Material.NormalID =
-                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("AK/textures/normal.png");
+
+                    // material manipulation
+                    {
+                        if (x % 2 == 0)
+                        {
+                            material.SetAlbedoID(
+                                TextureSystem::GetTextureID("AK/textures/color.png"));
+                            material.SetNormalID(
+                                TextureSystem::GetTextureID("AK/textures/normal.png"));
+                        }
+                    }
+
+                    item.Material = &material;
                     item.Mesh = MeshSystem::GetMesh("a.obj").get();
                     item.Transform = Matrix4::Translate({(float)x * s_Spacing, (float)y * s_Spacing,
                                                          (float)z * s_Spacing}) *

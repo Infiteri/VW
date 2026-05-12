@@ -36,9 +36,12 @@ namespace VW
         m_Batches.clear();
     }
 
-    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, const Material &material,
+    void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, Material *material,
                                Shader *shader)
     {
+        if (!material)
+            return;
+
         if (!shader)
             shader = ShaderSystem::GetEngineShader("Object.glsl");
 
@@ -52,14 +55,14 @@ namespace VW
 
         InstanceData data;
         data.Transform = transform;
-        data.Material.Color = material.Color.Normalized();
+        data.Material.Color = material->GetColor().Normalized();
         data.Material.AlbedoHandle =
-            material.AlbedoID != 0
-                ? TextureSystem::GetTextureHandle(material.AlbedoID)
+            material->GetAlbedoID() != 0
+                ? TextureSystem::GetTextureHandle(material->GetAlbedoID())
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
         data.Material.NormalHandle =
-            material.NormalID != 0
-                ? TextureSystem::GetTextureHandle(material.NormalID)
+            material->GetNormalID() != 0
+                ? TextureSystem::GetTextureHandle(material->GetNormalID())
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
 
         m_Batches[shader].push_back({mesh, data});

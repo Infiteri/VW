@@ -15,7 +15,7 @@ namespace VW
         BatchRenderer(u64 maxInstances = 1000);
         ~BatchRenderer();
         void Begin();
-        void Submit(Mesh *mesh, const Matrix4 &transform, const Material &material,
+        void Submit(Mesh *mesh, const Matrix4 &transform, Material *material,
                     Shader *shader = nullptr);
         void End();
 

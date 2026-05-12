@@ -4,6 +4,7 @@
 #include "Camera/Camera.h"
 #include "Color.h"
 #include "GPUScreen.h"
+#include "Material/Material.h"
 #include "Math/Matrix.h"
 #include "Mesh/Mesh.h"
 #include "RenderDebug.h"
@@ -11,14 +12,6 @@
 
 namespace VW
 {
-
-    struct Material
-    {
-        Color Color;
-        u64 AlbedoID = 0;
-        u64 NormalID = 0;
-    };
-
     struct MaterialGPU
     {
         Color Color;
@@ -30,7 +23,7 @@ namespace VW
     {
         Mesh *Mesh;
         Matrix4 Transform;
-        Material Material;
+        Material *Material;
         Shader *Shader;
 
         RenderItem();
