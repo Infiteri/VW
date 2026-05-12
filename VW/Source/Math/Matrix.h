@@ -21,6 +21,16 @@ namespace VW
 
         Matrix4 operator*(const Matrix4 &other) const;
 
+        float &operator[](size_t index)
+        {
+            return data[index];
+        }
+
+        const float &operator[](size_t index) const
+        {
+            return data[index];
+        }
+
         static Matrix4 Perspective(float fov, float aspect, float nearPlane, float farPlane);
         static Matrix4 Ortho(float left, float right, float top, float bottom, float nearPlane,
                              float farPlane);

@@ -35,14 +35,16 @@ namespace VW
     static bool s_MouseLocked = false;
     static double s_LastMouseX = 0, s_LastMouseY = 0;
     static float s_RotationSpeed = 0.05f;
-    static float s_MoveSpeed = 0.5f;
+    static float s_FastSpeed = 0.6f;
+    static float s_MoveSpeed = 0.4f;
+    static float s_SlowSpeed = 0.1f;
     static float s_Sensitivity = 0.001f;
     static float s_Pitch = 0.0f;
     static float s_Yaw = 0.0f;
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 5;
+    static i32 s_GridSize = 1;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
@@ -52,9 +54,9 @@ namespace VW
     static std::shared_ptr<PointLight> s_PointLight;
 
     // imgui state mirrors
-    static float s_DirColor[4] = {0.0f, 1.0f, 1.0f, 1.0f};
-    static float s_DirDirection[3] = {-0.5f, -1.0f, -0.5f};
-    static float s_DirIntensity = 1.0f;
+    static float s_DirColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    static float s_DirDirection[3] = {-1.5f, -1.0f, -1.0f};
+    static float s_DirIntensity = 4.0f;
 
     static float s_SpotColor[4] = {1.0f, 1.0f, 0.0f, 1.0f};
     static float s_SpotPos[3] = {0.0f, 5.0f, 0.0f};
@@ -64,14 +66,15 @@ namespace VW
     static float s_SpotInner = 20.0f;
     static float s_SpotOuter = 35.0f;
 
-    static float s_PointColor[4] = {1.0f, 0.5f, 0.0f, 1.0f};
-    static float s_PointPos[3] = {0.0f, 3.0f, 0.0f};
-    static float s_PointIntensity = 2.0f;
-    static float s_PointRange = 15.0f;
+    static float s_PointColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    static float s_PointPos[3] = {.2f, 0.0f, 0.0f};
+    static float s_PointIntensity = 5.0f;
+    static float s_PointRange = 30.0f;
 
     static void CameraMovement(GLFWwindow *window)
     {
         bool rotate = false;
+        float speed = s_MoveSpeed;
 
         if (s_MouseLocked)
         {
@@ -85,6 +88,16 @@ namespace VW
             s_Pitch -= dy * s_Sensitivity;
             s_Pitch = std::clamp(s_Pitch, -1.55f, 1.55f);
             rotate = true;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        {
+            speed = s_SlowSpeed;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        {
+            speed = s_FastSpeed;
         }
 
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -122,13 +135,13 @@ namespace VW
                                 Quaternion(Vector3(1, 0, 0), s_Pitch));
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() + cam->Forward() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() + cam->Forward() * speed);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() - cam->Forward() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() - cam->Forward() * speed);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() - cam->Right() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() - cam->Right() * speed);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() + cam->Right() * s_MoveSpeed);
+            cam->SetPosition(cam->GetPosition() + cam->Right() * speed);
     }
 
     static void OnMouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -166,14 +179,14 @@ namespace VW
                 {
                     RenderItem item;
                     item.Material.AlbedoID =
-                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
+                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("AK/textures/color.png");
                     item.Material.NormalID =
-                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("normal.png");
-                    item.Mesh = x % 4 == 0 ? MeshSystem::GetMesh(MeshType::Torus).get()
-                                           : MeshSystem::GetMesh("a.obj").get();
-                    item.Transform = Matrix4::Translate(
-                        {(float)x * s_Spacing, (float)y * s_Spacing, (float)z * s_Spacing});
-                    // item.Shader = x % 2 == 0 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
+                        x % 2 != 0 ? 0 : TextureSystem::GetTextureID("AK/textures/normal.png");
+                    item.Mesh = MeshSystem::GetMesh("a.obj").get();
+                    item.Transform = Matrix4::Translate({(float)x * s_Spacing, (float)y * s_Spacing,
+                                                         (float)z * s_Spacing}) *
+                                     Matrix4::Scale({5, 5, 5});
+                    item.Shader = x % 2 == 1 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
                     renderItems.push_back(item);
                 }
         s_RebuildGrid = false;
@@ -182,7 +195,7 @@ namespace VW
     static void InitLights()
     {
         s_DirLight = std::make_shared<DirectionalLight>();
-        s_DirLight->SetColor({0, 255, 255, 255});
+        s_DirLight->SetColor({255, 255, 255, 255});
         s_DirLight->SetIntensity(s_DirIntensity);
         s_DirLight->SetDirection({s_DirDirection[0], s_DirDirection[1], s_DirDirection[2]});
         LightSystem::AddLight(s_DirLight);
@@ -198,7 +211,7 @@ namespace VW
         LightSystem::AddLight(s_SpotLight);
 
         s_PointLight = std::make_shared<PointLight>();
-        s_PointLight->SetColor({255, 125, 0, 255});
+        s_PointLight->SetColor({255, 255, 255, 255});
         s_PointLight->SetIntensity(s_PointIntensity);
         s_PointLight->SetPosition({s_PointPos[0], s_PointPos[1], s_PointPos[2]});
         s_PointLight->SetRange(s_PointRange);
@@ -256,7 +269,7 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                MeshSystem::LoadModel("a.obj", "a.obj");
+                MeshSystem::LoadModel("a.obj", "AK/source/AK47.glb");
                 InitLights();
             }
 

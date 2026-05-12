@@ -47,7 +47,8 @@ namespace VW
         return m;
     }
 
-    Matrix4 Matrix4::Ortho(float left, float right, float top, float bottom, float nearPlane, float farPlane)
+    Matrix4 Matrix4::Ortho(float left, float right, float top, float bottom, float nearPlane,
+                           float farPlane)
     {
         Matrix4 m;
 

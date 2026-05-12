@@ -206,5 +206,19 @@ vec4 CalculateFinalColor()
 
 void main()
 {
-    FragColor = vec4(vUV, 1,1);
+    vec3 V = normalize(uCamPos - vWorldPos);
+    vec3 N = normalize(vNormal);
+    float fresnel = dot(V, N); // 0=edge, 1=facing
+
+    vec3 a = vec3(0.0, 0.2, 1.0); // blue
+    vec3 b = vec3(0.6, 0.0, 1.0); // purple
+    vec3 c = vec3(1.0, 0.4, 0.7); // pink
+
+    vec3 color;
+    if (fresnel < 0.5)
+        color = mix(c, b, fresnel * 2.0);
+    else
+        color = mix(b, a, (fresnel - 0.5) * 2.0);
+
+    FragColor = vec4(color, 1.0);
 }

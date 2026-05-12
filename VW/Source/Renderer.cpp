@@ -117,6 +117,14 @@ namespace VW
         s_State.RenderQueue.push_back(item);
     }
 
+    static Vector3 TransformPoint(const float matrix[16], const Vector3 &point)
+    {
+        return Vector3(matrix[0] * point.x + matrix[4] * point.y + matrix[8] * point.z + matrix[12],
+                       matrix[1] * point.x + matrix[5] * point.y + matrix[9] * point.z + matrix[13],
+                       matrix[2] * point.x + matrix[6] * point.y + matrix[10] * point.z +
+                           matrix[14]);
+    }
+
     void Renderer::EndFrame()
     {
         if (s_State.Debug.RenderWireframe)
@@ -140,7 +148,10 @@ namespace VW
             Vector3 pos = {item.Transform.data[12], item.Transform.data[13],
                            item.Transform.data[14]};
             Vector3 worldCenter = pos + item.Mesh->GetBoundsCenter();
-            float worldRadius = item.Mesh->GetBoundsRadius();
+            float maxScale =
+                std::max(item.Transform[0], std::max(item.Transform[5], item.Transform[10]));
+
+            float worldRadius = item.Mesh->GetBoundsRadius() * maxScale;
             if (s_State.Frustum.IsSphereInside(worldCenter, worldRadius))
             {
                 s_State.Batch->Submit(item.Mesh, item.Transform, item.Material, item.Shader);
