@@ -3,6 +3,7 @@
 #include "Camera/CameraSystem.h"
 #include "Core/Logger.h"
 #include "Light/LightSystem.h"
+#include "Material/MaterialSystem.h"
 #include "Mesh/MeshSystem.h"
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
@@ -34,13 +35,15 @@ namespace VW
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
 
+        // TODO: configurable
         s_State.Screen.Init();
         s_State.Batch = new BatchRenderer(1000);
 
-        LightSystem::Init();
-        TextureSystem::Init();
-        MeshSystem::Init();
         ShaderSystem::Init();
+        TextureSystem::Init();
+        MaterialSystem::Init();
+        MeshSystem::Init();
+        LightSystem::Init();
 
         CubemapTexture::Configuration config;
         config.Left = "posz.jpg";

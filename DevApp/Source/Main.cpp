@@ -1,5 +1,7 @@
+#include "Camera/Camera.h"
 #include "Camera/CameraSystem.h"
 #include "Camera/PerspectiveCamera.h"
+#include "CameraController.h"
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
@@ -8,6 +10,7 @@
 #include "Light/PointLight.h"
 #include "Light/SpotLight.h"
 #include "Material/Material.h"
+#include "Material/MaterialSystem.h"
 #include "Math/Math.h"
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
@@ -20,7 +23,6 @@
 #include <algorithm>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <backends/imgui_impl_opengl3_loader.h>
 #include <glfw/glfw3.h>
 #include <imgui.h>
 #include <memory>
@@ -33,15 +35,7 @@
 namespace VW
 {
     static PerspectiveCamera *cam;
-    static bool s_MouseLocked = false;
-    static double s_LastMouseX = 0, s_LastMouseY = 0;
-    static float s_RotationSpeed = 0.05f;
-    static float s_FastSpeed = 0.6f;
-    static float s_MoveSpeed = 0.4f;
-    static float s_SlowSpeed = 0.1f;
-    static float s_Sensitivity = 0.001f;
-    static float s_Pitch = 0.0f;
-    static float s_Yaw = 0.0f;
+    static CameraController controller;
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
@@ -72,102 +66,6 @@ namespace VW
     static float s_PointIntensity = 5.0f;
     static float s_PointRange = 30.0f;
 
-    static Material material;
-
-    static void CameraMovement(GLFWwindow *window)
-    {
-        bool rotate = false;
-        float speed = s_MoveSpeed;
-
-        if (s_MouseLocked)
-        {
-            double mouseX, mouseY;
-            glfwGetCursorPos(window, &mouseX, &mouseY);
-            float dx = (float)(mouseX - s_LastMouseX);
-            float dy = (float)(mouseY - s_LastMouseY);
-            s_LastMouseX = mouseX;
-            s_LastMouseY = mouseY;
-            s_Yaw -= dx * s_Sensitivity;
-            s_Pitch -= dy * s_Sensitivity;
-            s_Pitch = std::clamp(s_Pitch, -1.55f, 1.55f);
-            rotate = true;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-        {
-            speed = s_SlowSpeed;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        {
-            speed = s_FastSpeed;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        {
-            s_Pitch += s_RotationSpeed;
-            s_Pitch = std::clamp(s_Pitch, -1.55f, 1.55f);
-            rotate = true;
-        }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        {
-            s_Pitch -= s_RotationSpeed;
-            s_Pitch = std::clamp(s_Pitch, -1.55f, 1.55f);
-            rotate = true;
-        }
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        {
-            s_Yaw += s_RotationSpeed;
-            rotate = true;
-        }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        {
-            s_Yaw -= s_RotationSpeed;
-            rotate = true;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            cam->SetOrientation(cam->GetOrientation() *
-                                Quaternion(Vector3(0, 1, 0), -s_RotationSpeed));
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            cam->SetOrientation(cam->GetOrientation() *
-                                Quaternion(Vector3(0, 1, 0), s_RotationSpeed));
-
-        if (rotate)
-            cam->SetOrientation(Quaternion(Vector3(0, 1, 0), s_Yaw) *
-                                Quaternion(Vector3(1, 0, 0), s_Pitch));
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() + cam->Forward() * speed);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() - cam->Forward() * speed);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() - cam->Right() * speed);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam->SetPosition(cam->GetPosition() + cam->Right() * speed);
-    }
-
-    static void OnMouseButton(GLFWwindow *window, int button, int action, int mods)
-    {
-        if (button == GLFW_MOUSE_BUTTON_RIGHT)
-        {
-            if (action == GLFW_PRESS)
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                s_MouseLocked = true;
-                double x, y;
-                glfwGetCursorPos(window, &x, &y);
-                s_LastMouseX = x;
-                s_LastMouseY = y;
-            }
-            else
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                s_MouseLocked = false;
-            }
-        }
-    }
-
     static void OnResize(GLFWwindow *window, int w, int h)
     {
         Renderer::Viewport(w, h);
@@ -182,19 +80,7 @@ namespace VW
                 {
                     RenderItem item;
 
-                    // material manipulation
-                    {
-                        if (x % 2 == 0)
-                        {
-                            material.SetAlbedoID(
-                                TextureSystem::GetTextureID("AK/textures/color.png"));
-                            material.SetNormalID(
-                                TextureSystem::GetTextureID("AK/textures/normal.png"));
-                            material.SetORMID(TextureSystem::GetTextureID("AK/textures/ORM.png"));
-                        }
-                    }
-
-                    item.Material = &material;
+                    item.Material = MaterialSystem::GetMaterial("mat");
                     item.Mesh = MeshSystem::GetMesh("a.obj").get();
                     item.Transform = Matrix4::Translate({(float)x * s_Spacing, (float)y * s_Spacing,
                                                          (float)z * s_Spacing}) *
@@ -254,7 +140,7 @@ namespace VW
             glfwMakeContextCurrent(m_Handle);
             glfwMaximizeWindow(m_Handle);
             glfwSetWindowSizeCallback(m_Handle, OnResize);
-            glfwSetMouseButtonCallback(m_Handle, OnMouseButton);
+            controller.SetCamera(cam);
             cam->SetPosition({0, 0, 5});
         }
 
@@ -271,10 +157,18 @@ namespace VW
 
         void Render() override
         {
-            CameraMovement(m_Handle);
+            controller.Update(m_Handle);
 
             if (firstFrame)
             {
+
+                // material
+                Material mat;
+                mat.SetAlbedoID(TextureSystem::GetTextureID("AK/textures/color.png"));
+                mat.SetNormalID(TextureSystem::GetTextureID("AK/textures/normal.png"));
+                mat.SetORMID(TextureSystem::GetTextureID("AK/textures/ORM.png"));
+                MaterialSystem::AddMaterial("mat", mat);
+
                 firstFrame = false;
                 IMGUI_CHECKVERSION();
                 ImGui::CreateContext();
