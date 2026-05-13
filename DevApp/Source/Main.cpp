@@ -63,7 +63,7 @@ namespace VW
     static float s_SpotOuter = 35.0f;
 
     static float s_PointColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    static float s_PointPos[3] = {.2f, 0.0f, 0.0f};
+    static float s_PointPos[3] = {.2f, 0.0f, -10.0f};
     static float s_PointIntensity = 5.0f;
     static float s_PointRange = 30.0f;
 
@@ -179,7 +179,11 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                model = MeshSystem::LoadModel("a.obj", "benz/benz.obj");
+                model = MeshSystem::LoadModel("a.obj", "benz/bugatti.obj");
+                for (const auto &sm : model->GetSubmeshes())
+                {
+                    VW_DEBUG("", "%s", sm.Name.c_str());
+                }
 
                 InitLights();
             }
@@ -188,10 +192,16 @@ namespace VW
             {
                 for (const auto &sm : model->GetSubmeshes())
                 {
+                    auto &m = sm.MaterialName;
+                    if (m.find("Studio_Lights") != std::string::npos ||
+                        m.find("back_drop") != std::string::npos ||
+                        m.find("sun") != std::string::npos ||
+                        m.find("white_holders") != std::string::npos)
+                        continue;
                     RenderItem item;
                     item.Mesh = sm.Mesh.get();
                     item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
-                    item.Transform = sm.LocalTransform * Matrix4::Scale({5, 5, 5});
+                    item.Transform = sm.LocalTransform;
                     Renderer::Submit(item);
                 }
             }
