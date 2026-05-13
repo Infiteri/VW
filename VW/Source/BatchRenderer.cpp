@@ -23,6 +23,7 @@ namespace VW
             {10, 64, 4, false}, // Color
             {11, 80, 2, true},  // AlbedoHandle (uvec2)
             {12, 88, 2, true},  // NormalHandle (uvec2)
+            {13, 96, 2, true},  // ORMHandle (uvec2)
         };
     }
 
@@ -63,6 +64,10 @@ namespace VW
         data.Material.NormalHandle =
             material->GetNormalID() != 0
                 ? TextureSystem::GetTextureHandle(material->GetNormalID())
+                : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
+        data.Material.ORMHandle =
+            material->GetORMID() != 0
+                ? TextureSystem::GetTextureHandle(material->GetORMID())
                 : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
 
         m_Batches[shader].push_back({mesh, data});

@@ -45,7 +45,7 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 1;
+    static i32 s_GridSize = 2;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
@@ -190,6 +190,7 @@ namespace VW
                                 TextureSystem::GetTextureID("AK/textures/color.png"));
                             material.SetNormalID(
                                 TextureSystem::GetTextureID("AK/textures/normal.png"));
+                            material.SetORMID(TextureSystem::GetTextureID("AK/textures/ORM.png"));
                         }
                     }
 
@@ -198,7 +199,7 @@ namespace VW
                     item.Transform = Matrix4::Translate({(float)x * s_Spacing, (float)y * s_Spacing,
                                                          (float)z * s_Spacing}) *
                                      Matrix4::Scale({5, 5, 5});
-                    item.Shader = x % 2 == 1 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
+                    item.Shader = x % 2 != 0 ? ShaderSystem::GetShader("Object2.glsl") : nullptr;
                     renderItems.push_back(item);
                 }
         s_RebuildGrid = false;

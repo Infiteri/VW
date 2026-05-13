@@ -2,7 +2,7 @@
 
 namespace VW
 {
-    Material::Material() : m_Color({255, 255, 255, 255}), m_AlbedoID(0), m_NormalID(0)
+    Material::Material() : m_Color({255, 255, 255, 255}), m_AlbedoID(0), m_NormalID(0), m_ORMID(0)
     {
     }
 
@@ -23,6 +23,11 @@ namespace VW
     void Material::SetNormalID(u32 id)
     {
         m_NormalID = id;
+    }
+
+    void Material::SetORMID(u32 id)
+    {
+        m_ORMID = id;
     }
 
 } // namespace VW

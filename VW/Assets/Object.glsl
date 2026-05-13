@@ -16,6 +16,7 @@ layout(location = 9)  in vec4 iRow3;
 layout(location = 10) in vec4 iColor;
 layout(location = 11) in uvec2 iAlbedo;
 layout(location = 12) in uvec2 iNormal;
+layout(location = 13) in uvec2 iORM;
 
 uniform mat4 uProj;
 uniform mat4 uView;
@@ -29,6 +30,7 @@ out vec3 vWorldPos;
 
 flat out uvec2 fAlbedo;
 flat out uvec2 fNormal;
+flat out uvec2 fORM;
 
 void main() {
     mat4 model = mat4(iRow0, iRow1, iRow2, iRow3);
@@ -43,6 +45,7 @@ void main() {
     
     fAlbedo = iAlbedo;
     fNormal = iNormal;
+    fORM = iORM;
 }
 
 // FRAGMENT
@@ -83,7 +86,8 @@ in vec3 vTangent;
 in vec3 vBitangent;
 in vec3 vWorldPos;
 flat in uvec2 fAlbedo;
-flat in uvec2 fNormalMap;
+flat in uvec2 fNormal;
+flat in uvec2 fORM;
 
 out vec4 FragColor;
 
@@ -140,17 +144,27 @@ vec4 CalculateFinalColor()
 
     // normal map
     vec3 N = normalize(vNormal);
-    if (fNormalMap.x != 0u || fNormalMap.y != 0u)
+    if (fNormal.x != 0u || fNormal.y != 0u)
     {
-        sampler2D normalSampler = sampler2D(packUint2x32(fNormalMap));
+        sampler2D normalSampler = sampler2D(packUint2x32(fNormal));
         vec3 n = texture(normalSampler, vUV).rgb * 2.0 - 1.0;
         mat3 TBN = mat3(normalize(vTangent), normalize(vBitangent), N);
         N = normalize(TBN * n);
     }
 
-    vec3 V        = normalize(uCamPos - vWorldPos);
-    float metallic  = 0.0; // TODO: from texture
-    float roughness = 0.5; // TODO: from texture
+    vec3 V = normalize(uCamPos - vWorldPos);
+
+    float metallic  = 0.0;
+    float roughness = 0.5;
+    float ao = 1.0;
+    if (fORM.x != 0u || fORM.y != 0u)
+    {
+        sampler2D ormSampler = sampler2D(packUint2x32(fORM));
+        vec3 orm = texture(ormSampler, vUV).rgb;
+        ao = orm.r;
+        roughness = orm.g;
+        metallic = orm.b;
+    }
 
     vec4 finalColor = vec4(0.0);
 
@@ -161,7 +175,7 @@ vec4 CalculateFinalColor()
 
         if (type == LIGHT_AMBIENT)
         {
-            finalColor += vec4(albedo * light.Color.rgb * light.Color.w, albedoSample.a);
+            finalColor += vec4(albedo * light.Color.rgb * light.Color.w * ao, albedoSample.a);
         }
         else if (type == LIGHT_DIRECTIONAL)
         {
@@ -197,18 +211,6 @@ vec4 CalculateFinalColor()
             vec3  atten       = light.Attenuation.xyz;
             float attenuation = 1.0 / (atten.x + atten.y * dist + atten.z * dist * dist);
             vec3  radiance    = light.Color.rgb * light.Color.w * attenuation * spotFactor;
-            finalColor       += vec4(PBR(albedo, N, V, L, radiance, metallic, roughness), 0.0);
-        }
-        else if (type == LIGHT_POINT)
-        {
-            vec3  toLight = light.Position.xyz - vWorldPos;
-            float dist    = length(toLight);
-            if (dist > light.Position.w) continue;
-        
-            vec3  L           = toLight / dist;
-            vec3  atten       = light.Attenuation.xyz;
-            float attenuation = 1.0 / (atten.x + atten.y * dist + atten.z * dist * dist);
-            vec3  radiance    = light.Color.rgb * light.Color.w * attenuation;
             finalColor       += vec4(PBR(albedo, N, V, L, radiance, metallic, roughness), 0.0);
         }
     }

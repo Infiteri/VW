@@ -17,6 +17,7 @@ namespace VW
         Color Color;
         u64 AlbedoHandle = 0;
         u64 NormalHandle = 0;
+        u64 ORMHandle = 0;
     };
 
     struct VW_API RenderItem

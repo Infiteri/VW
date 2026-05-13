@@ -13,6 +13,7 @@ namespace VW
         void SetColor(const Color &color);
         void SetAlbedoID(u32 id);
         void SetNormalID(u32 id);
+        void SetORMID(u32 id);
 
         inline Color GetColor() const
         {
@@ -29,8 +30,13 @@ namespace VW
             return m_NormalID;
         };
 
+        inline u32 GetORMID() const
+        {
+            return m_ORMID;
+        };
+
     private:
         Color m_Color;
-        u32 m_AlbedoID, m_NormalID;
+        u32 m_AlbedoID, m_NormalID, m_ORMID;
     };
 } // namespace VW
