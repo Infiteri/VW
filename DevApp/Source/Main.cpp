@@ -16,6 +16,7 @@
 #include "Math/Quaternion.h"
 #include "Mesh/Mesh.h"
 #include "Mesh/MeshSystem.h"
+#include "Mesh/Model.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
@@ -39,7 +40,7 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static i32 s_GridSize = 2;
+    static i32 s_GridSize = 0;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
 
@@ -66,6 +67,8 @@ namespace VW
     static float s_PointIntensity = 5.0f;
     static float s_PointRange = 30.0f;
 
+    static std::shared_ptr<Model> model;
+
     static void OnResize(GLFWwindow *window, int w, int h)
     {
         Renderer::Viewport(w, h);
@@ -81,7 +84,7 @@ namespace VW
                     RenderItem item;
 
                     item.Material = MaterialSystem::GetMaterial("mat");
-                    item.Mesh = MeshSystem::GetMesh("a.obj").get();
+                    item.Mesh = MeshSystem::GetMesh(MeshType::Cube).get();
                     item.Transform = Matrix4::Translate({(float)x * s_Spacing, (float)y * s_Spacing,
                                                          (float)z * s_Spacing}) *
                                      Matrix4::Scale({5, 5, 5});
@@ -176,8 +179,19 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                MeshSystem::LoadModel("a.obj", "AK/source/AK47.glb");
+                model = MeshSystem::LoadModel("a.obj", "AK/source/AK47.glb");
                 InitLights();
+            }
+
+            if (model)
+            {
+                for (const auto &sm : model->GetSubmeshes())
+                {
+                    RenderItem item;
+                    item.Mesh = sm.Mesh.get();
+                    item.Material = MaterialSystem::GetDefaultMaterial();
+                    Renderer::Submit(item);
+                }
             }
 
             if (s_RebuildGrid)

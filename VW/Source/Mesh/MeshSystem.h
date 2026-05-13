@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "Mesh/Mesh.h"
+#include "Mesh/Model.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -23,7 +24,7 @@ namespace VW
         struct State
         {
             std::unordered_map<MeshType, std::shared_ptr<Mesh>> BuiltinMeshes;
-            std::unordered_map<std::string, std::shared_ptr<Mesh>> ModelMeshes;
+            std::unordered_map<std::string, std::shared_ptr<Model>> ModelMeshes;
         };
 
     public:
@@ -34,8 +35,8 @@ namespace VW
         static void Shutdown();
 
         static std::shared_ptr<Mesh> GetMesh(MeshType type);
-        static std::shared_ptr<Mesh> GetMesh(const std::string &name);
 
-        static std::shared_ptr<Mesh> LoadModel(const std::string &name, const std::string &path);
+        static std::shared_ptr<Model> GetModel(const std::string &name);
+        static std::shared_ptr<Model> LoadModel(const std::string &name, const std::string &path);
     };
 } // namespace VW

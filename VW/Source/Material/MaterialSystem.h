@@ -24,6 +24,7 @@ namespace VW
         static void Init();
         static void Shutdown();
 
+        static bool Exists(const std::string &name);
         static Material *GetMaterial(const std::string &name);
         static Material *GetDefaultMaterial();
 

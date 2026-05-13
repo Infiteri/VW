@@ -19,7 +19,7 @@ namespace VW
     {
     }
 
-    static bool Exists(const std::string &name)
+    bool MaterialSystem::Exists(const std::string &name)
     {
         return s_State.Mats.find(name) != s_State.Mats.end();
     }
