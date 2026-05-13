@@ -179,7 +179,8 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                model = MeshSystem::LoadModel("a.obj", "AK/source/AK47.glb");
+                model = MeshSystem::LoadModel("a.obj", "benz/benz.obj");
+
                 InitLights();
             }
 
@@ -189,7 +190,8 @@ namespace VW
                 {
                     RenderItem item;
                     item.Mesh = sm.Mesh.get();
-                    item.Material = MaterialSystem::GetDefaultMaterial();
+                    item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
+                    item.Transform = sm.LocalTransform * Matrix4::Scale({5, 5, 5});
                     Renderer::Submit(item);
                 }
             }

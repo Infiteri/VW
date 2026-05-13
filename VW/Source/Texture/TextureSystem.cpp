@@ -90,6 +90,33 @@ namespace VW
         return CreateTexture(path);
     }
 
+    u64 TextureSystem::CreateTextureFromData(const std::string &name,
+                                              const void *data, int w, int h, int channels)
+    {
+        if (s_State.NameToIndex.count(name))
+            return s_State.NameToIndex[name];
+
+        ARBTexture tex;
+        tex.Tex.LoadFromData(data, w, h, channels);
+
+        GLuint texID = tex.Tex.GetID();
+        tex.Handle = glGetTextureHandleARB(texID);
+
+        glMakeTextureHandleResidentARB(tex.Handle);
+
+        if (!glIsTextureHandleResidentARB(tex.Handle))
+        {
+            VW_ERROR("vwrn", "Handle %llu failed to become resident (%s)", tex.Handle,
+                     name.c_str());
+        }
+
+        s_State.Textures.emplace_back(std::move(tex));
+        int index = s_State.Textures.size() - 1;
+        s_State.NameToIndex[name] = index;
+
+        return index;
+    }
+
     u64 TextureSystem::GetDefaultTextureID()
     {
         return s_State.NameToIndex["__DEFAULT_WHITE__"];

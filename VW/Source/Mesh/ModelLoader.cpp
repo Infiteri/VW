@@ -5,9 +5,50 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <stb_image.h>
 #include <vector>
 namespace VW
 {
+    static std::string GetTextureDir(const std::string &modelPath)
+    {
+        auto pos = modelPath.find_last_of("/\\");
+        if (pos != std::string::npos)
+            return modelPath.substr(0, pos + 1) + "textures/";
+        return "textures/";
+    }
+
+    static u32 LoadEmbeddedTexture(const aiScene *scene, const char *path,
+                                    const std::string &cacheKey)
+    {
+        if (path[0] != '*')
+            return (u32)TextureSystem::GetTextureID(path);
+
+        int index = std::atoi(path + 1);
+        if (index < 0 || index >= (int)scene->mNumTextures)
+            return (u32)TextureSystem::GetDefaultTextureID();
+
+        aiTexture *tex = scene->mTextures[index];
+        if (tex->mHeight == 0)
+        {
+            int w, h, c;
+            u8 *pixels = stbi_load_from_memory(
+                reinterpret_cast<const u8 *>(tex->pcData),
+                static_cast<int>(tex->mWidth),
+                &w, &h, &c, 0);
+            if (!pixels)
+            {
+                VW_WARN("vwrn", "Failed to decode embedded texture: %s", cacheKey.c_str());
+                return (u32)TextureSystem::GetDefaultTextureID();
+            }
+            u32 id = (u32)TextureSystem::CreateTextureFromData(cacheKey, pixels, w, h, c);
+            stbi_image_free(pixels);
+            VW_INFO("vwrn", "Loaded embedded texture: %s", cacheKey.c_str());
+            return id;
+        }
+        VW_WARN("vwrn", "Uncompressed embedded texture not supported: %s", cacheKey.c_str());
+        return (u32)TextureSystem::GetDefaultTextureID();
+    }
+
     static std::shared_ptr<Mesh> ProcessMesh(aiMesh *mesh, const aiScene *scene)
     {
         std::vector<Vertex> vertices;
@@ -67,29 +108,42 @@ namespace VW
         for (u32 i = 0; i < node->mNumChildren; i++)
             ProcessNode(node->mChildren[i], scene, submeshes);
     }
-    static void CreateMaterialFromAssimp(aiMaterial *aiMat)
+    static void CreateMaterialFromAssimp(aiMaterial *aiMat, const aiScene *scene,
+                                          const std::string &textureDir)
     {
         aiString name;
         aiMat->Get(AI_MATKEY_NAME, name);
         std::string matName = name.C_Str();
-        if (MaterialSystem::Exists(matName))
+        if (matName.empty() || MaterialSystem::Exists(matName))
             return;
+
         Material mat;
         aiString path;
+
         if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-            mat.SetAlbedoID(TextureSystem::GetTextureID(path.C_Str()));
-        if (aiMat->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
-            mat.SetNormalID(TextureSystem::GetTextureID(path.C_Str()));
-        else if (aiMat->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
-            mat.SetNormalID(TextureSystem::GetTextureID(path.C_Str()));
-        // assimp doesn't have ORM directly, pack from roughness/metallic/ao
-        ai_real val;
-        if (aiMat->Get(AI_MATKEY_METALLIC_FACTOR, val) == AI_SUCCESS)
         {
-            // no separate ORM texture, just use scalar defaults
+            std::string cacheKey = textureDir + matName + "_albedo.png";
+            mat.SetAlbedoID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
         }
-        // TODO: try loading ORM texture from naming convention or custom channel
-        mat.SetORMID(TextureSystem::GetDefaultTextureID());
+
+        if (aiMat->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
+        {
+            std::string cacheKey = textureDir + matName + "_normal.png";
+            mat.SetNormalID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+        }
+        else if (aiMat->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
+        {
+            std::string cacheKey = textureDir + matName + "_normal.png";
+            mat.SetNormalID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+        }
+
+        // GLB metallic-roughness packs occlusion(R), roughness(G), metallic(B)
+        if (aiMat->GetTexture(aiTextureType_METALNESS, 0, &path) == AI_SUCCESS)
+        {
+            std::string cacheKey = textureDir + matName + "_orm.png";
+            mat.SetORMID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+        }
+
         MaterialSystem::AddMaterial(matName, mat);
     }
 
@@ -119,8 +173,9 @@ namespace VW
         }
         if (createMaterials)
         {
+            std::string textureDir = GetTextureDir(path);
             for (u32 i = 0; i < scene->mNumMaterials; i++)
-                CreateMaterialFromAssimp(scene->mMaterials[i]);
+                CreateMaterialFromAssimp(scene->mMaterials[i], scene, textureDir);
         }
         VW_INFO("vwrn", "Loaded model '%s' (%zu submeshes)", path.c_str(),
                 model->m_Submeshes.size());

@@ -19,6 +19,7 @@ namespace VW
         virtual void Unbind() const override;
         virtual void Load() override;
         void Load(const std::string &path);
+        void LoadFromData(const void *data, int width, int height, int channels);
         virtual void Destroy() override;
 
         inline int GetWidth() const

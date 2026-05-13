@@ -36,6 +36,8 @@ namespace VW
         static u64 GetTextureHandle(const std::string &path);
         static u64 GetTextureID(const std::string &path);
         static u64 CreateTexture(const std::string &path);
+        static u64 CreateTextureFromData(const std::string &name,
+                                          const void *data, int w, int h, int channels);
 
         static u64 GetDefaultTextureID();
     };
