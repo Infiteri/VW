@@ -120,6 +120,10 @@ namespace VW
         Material mat;
         aiString path;
 
+        aiColor3D diffuse(1.0f, 1.0f, 1.0f);
+        if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS)
+            mat.SetColor(Color(diffuse.r * 255.0f, diffuse.g * 255.0f, diffuse.b * 255.0f, 255.0f));
+
         if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
         {
             std::string cacheKey = textureDir + matName + "_albedo.png";

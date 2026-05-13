@@ -64,11 +64,11 @@ namespace VW
         data.Material.NormalHandle =
             material->GetNormalID() != 0
                 ? TextureSystem::GetTextureHandle(material->GetNormalID())
-                : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
+                : 0;
         data.Material.ORMHandle =
             material->GetORMID() != 0
                 ? TextureSystem::GetTextureHandle(material->GetORMID())
-                : TextureSystem::GetTextureHandle(TextureSystem::GetDefaultTextureID());
+                : 0;
 
         m_Batches[shader].push_back({mesh, data});
         Renderer::_GetState().Stats.ItemsSubmited++;
