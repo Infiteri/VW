@@ -3,6 +3,7 @@
 #include "Core/Logger.h"
 #include "Core/Platform.h"
 #include "Mesh/MeshSystem.h"
+#include "Mesh/ModelSystem.h"
 #include "Renderer.h"
 #include "Texture/TextureSystem.h"
 #include <windows.h>
@@ -145,7 +146,7 @@ namespace VW
             if (firstFrame)
             {
                 firstFrame = false;
-                MeshSystem::LoadModel("model", "a.obj");
+                ModelSystem::LoadModel("model", "a.obj");
                 BuildScene();
             }
 

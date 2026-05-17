@@ -1,6 +1,4 @@
 #include "MeshSystem.h"
-#include "Mesh/Model.h"
-#include "Mesh/ModelLoader.h"
 #include <math.h>
 
 namespace VW
@@ -328,29 +326,6 @@ namespace VW
             return nullptr;
 
         return s_State.BuiltinMeshes[type];
-    }
-
-    std::shared_ptr<Model> MeshSystem::GetModel(const std::string &name)
-    {
-        if (s_State.ModelMeshes.find(name) == s_State.ModelMeshes.end())
-            return nullptr;
-
-        return s_State.ModelMeshes[name];
-    }
-
-    std::shared_ptr<Model> MeshSystem::LoadModel(const std::string &name, const std::string &path)
-    {
-        if (s_State.ModelMeshes.find(name) != s_State.ModelMeshes.end())
-        {
-            // TODO: warn
-            return s_State.ModelMeshes[name];
-        }
-
-        // TODO: check if real mesh
-        std::shared_ptr<Model> mesh = ModelLoader::Load(path);
-        s_State.ModelMeshes[name] = mesh;
-
-        return s_State.ModelMeshes[name];
     }
 
 } // namespace VW

@@ -17,6 +17,7 @@
 #include "Mesh/Mesh.h"
 #include "Mesh/MeshSystem.h"
 #include "Mesh/Model.h"
+#include "Mesh/ModelSystem.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
@@ -28,10 +29,6 @@
 #include <imgui.h>
 #include <memory>
 #include <windows.h>
-
-// TODO: todos: add a material system, fix models being represent as 1 mesh (includes writing a
-// 'mtl' file parser, a.k.a custom .obj and .mlt parser), add missing textures to materials
-// (metallic and roughness)
 
 namespace VW
 {
@@ -179,7 +176,7 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                model = MeshSystem::LoadModel("a.obj", "benz/bugatti.obj");
+                model = ModelSystem::LoadModel("a.obj", "benz/bugatti.obj");
                 for (const auto &sm : model->GetSubmeshes())
                 {
                     VW_DEBUG("", "%s", sm.Name.c_str());

@@ -1,9 +1,10 @@
+#pragma once
+
 #include "Shader/Shader.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#pragma ocne
 
 #include "Base.h"
 

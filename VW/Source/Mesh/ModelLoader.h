@@ -11,7 +11,7 @@ namespace VW
     {
     public:
         static std::shared_ptr<Model> Load(const std::string &path);
-        static std::shared_ptr<Model> LoadWithMaterial(const std::string &path, bool load);
+        static std::shared_ptr<Model> LoadWithMaterial(const std::string &path, bool createMaterials);
     };
 
 } // namespace VW
