@@ -12,3 +12,5 @@ nul
 .idea/
 *.swp
 *.swo
+.cache/clangd/index/
+.zed/
