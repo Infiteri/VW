@@ -4,6 +4,7 @@
 #include "Material/Material.h"
 #include "Math/Transform.h"
 #include "Mesh/Mesh.h"
+#include "Mesh/Model.h"
 #include "Renderer.h"
 
 namespace VW
@@ -15,10 +16,18 @@ namespace VW
         Component() {};
         virtual ~Component() {};
 
-        virtual void Start() {}
-        virtual void Render() {}
-        virtual void Update() {}
-        virtual void Stop() {}
+        virtual void Start()
+        {
+        }
+        virtual void Render()
+        {
+        }
+        virtual void Update()
+        {
+        }
+        virtual void Stop()
+        {
+        }
 
         virtual inline Actor *GetOwner() const
         {
@@ -29,6 +38,8 @@ namespace VW
         Actor *m_Owner;
         friend class Actor;
     };
+
+    // TODO: more constructors
 
     class VW_API MeshComponent : public Component
     {
@@ -45,5 +56,17 @@ namespace VW
 
     private:
         RenderItem m_Item;
+    };
+
+    class VW_API ModelComponent : public Component
+    {
+    public:
+        ModelComponent(Model *model);
+        ~ModelComponent();
+
+        void Render();
+
+    private:
+        Model *m_Model;
     };
 } // namespace VW

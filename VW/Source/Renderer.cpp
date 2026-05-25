@@ -21,6 +21,7 @@ namespace VW
 
     RenderItem::RenderItem()
     {
+        Material = nullptr;
         Shader = nullptr;
         Mesh = nullptr;
     }
@@ -117,6 +118,10 @@ namespace VW
 
     void Renderer::Submit(const RenderItem &item)
     {
+        // TODO: more clear scaling function (some extract function would be nice)
+        if (!item.Mesh || !item.Shader || !item.Material ||
+            (item.Transform[0] == 0.0f && item.Transform[5] == 0.0f && item.Transform[10] == 0.0f))
+            return;
         s_State.RenderQueue.push_back(item);
     }
 
@@ -135,8 +140,8 @@ namespace VW
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
+        // glEnable(GL_CULL_FACE);
+        // glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
 
         glEnable(GL_DEPTH_TEST);

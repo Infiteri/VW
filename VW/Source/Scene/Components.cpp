@@ -1,5 +1,7 @@
 #include "Components.h"
+#include "Material/MaterialSystem.h"
 #include "Renderer.h"
+#include "Shader/ShaderSystem.h"
 
 namespace VW
 {
@@ -35,5 +37,32 @@ namespace VW
     void MeshComponent::Render()
     {
         Renderer::Submit(m_Item);
+    }
+
+    ModelComponent::ModelComponent(Model *model) : m_Model(model)
+    {
+    }
+
+    ModelComponent::~ModelComponent()
+    {
+    }
+
+    void ModelComponent::Render()
+    {
+        if (!m_Model)
+            return;
+
+        for (const auto &sm : m_Model->GetSubmeshes())
+        {
+            // TODO: empty names shouldn't happen, but handle it by setting the default material
+            if (!sm.Mesh || sm.MaterialName.empty())
+                return;
+
+            RenderItem item;
+            item.Mesh = sm.Mesh.get();
+            item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
+            item.Shader = ShaderSystem::GetEngineShader("Object.glsl");
+            Renderer::Submit(item);
+        }
     }
 } // namespace VW

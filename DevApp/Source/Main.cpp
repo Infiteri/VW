@@ -181,38 +181,19 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-                // model = ModelSystem::LoadModel("a.obj", "benz/bugatti.obj");
-                // for (const auto &sm : model->GetSubmeshes())
-                // {
-                //     VW_DEBUG("", "%s", sm.Name.c_str());
-                // }
+                // FIX: name of an asset that doesn't exist crashes engine, must handle
+                model = ModelSystem::LoadModel("a.obj", "AK/source/AK47.glb");
+                for (const auto &sm : model->GetSubmeshes())
+                {
+                    VW_DEBUG("", "%s", sm.Name.c_str());
+                }
 
                 InitLights();
                 actor.Start();
 
-                auto m =
-                    actor.AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
-                m->SetMesh(MeshSystem::GetMesh(MeshType::Cube).get());
-                m->SetTransform(Transform());
+                auto m = actor.AddComponent<ModelComponent>(model.get());
             }
 
-            // if (model)
-            // {
-            //     for (const auto &sm : model->GetSubmeshes())
-            //     {
-            //         auto &m = sm.MaterialName;
-            //         if (m.find("Studio_Lights") != std::string::npos ||
-            //             m.find("back_drop") != std::string::npos ||
-            //             m.find("sun") != std::string::npos ||
-            //             m.find("white_holders") != std::string::npos)
-            //             continue;
-            //         RenderItem item;
-            //         item.Mesh = sm.Mesh.get();
-            //         item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
-            //         item.Transform = sm.LocalTransform;
-            //         Renderer::Submit(item);
-            //     }
-            // }
             actor.Render();
 
             if (s_RebuildGrid)
