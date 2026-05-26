@@ -38,7 +38,7 @@ namespace VW
 
         template <typename T> T *GetComponent()
         {
-            for (auto comp : m_Components)
+            for (const auto &comp : m_Components)
             {
                 T *tc = dynamic_cast<T *>(comp.get());
                 if (tc)
@@ -51,9 +51,9 @@ namespace VW
         template <typename T> std::vector<T *> GetComponents()
         {
             std::vector<T *> comps;
-            for (auto comp : m_Components)
+            for (const auto &comp : m_Components)
             {
-                T *tc = dynamic_cast<T *>(comp);
+                T *tc = dynamic_cast<T *>(comp.get());
                 if (tc)
                     comps.push_back(tc);
             }
@@ -71,7 +71,7 @@ namespace VW
             int currentIndex = -1;
             for (auto it = m_Components.begin(); it != m_Components.end(); it++)
             {
-                T *tc = dynamic_cast<T *>(*it);
+                T *tc = dynamic_cast<T *>(it->get());
 
                 if (tc)
                 {
@@ -91,7 +91,7 @@ namespace VW
         {
             for (auto it = m_Components.begin(); it != m_Components.end(); it++)
             {
-                T *tc = dynamic_cast<T *>(*it);
+                T *tc = dynamic_cast<T *>(it->get());
 
                 if (tc)
                 {
