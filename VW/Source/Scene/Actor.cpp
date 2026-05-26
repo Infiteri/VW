@@ -10,10 +10,6 @@ namespace VW
     Actor::~Actor()
     {
         Stop();
-        for (auto &component : m_Components)
-        {
-            delete component;
-        }
     }
 
     void Actor::Start()
@@ -55,4 +51,4 @@ namespace VW
             component->Stop();
         }
     }
-}
+} // namespace VW

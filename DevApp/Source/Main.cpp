@@ -22,6 +22,7 @@
 #include "Renderer.h"
 #include "Scene/Actor.h"
 #include "Scene/Components.h"
+#include "Scene/Scene.h"
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 
@@ -40,7 +41,7 @@ namespace VW
     static bool firstFrame = true;
     static std::vector<RenderItem> renderItems;
 
-    static Actor actor;
+    static Scene scene;
 
     static i32 s_GridSize = 0;
     static float s_Spacing = 15.5f;
@@ -189,12 +190,15 @@ namespace VW
                 }
 
                 InitLights();
-                actor.Start();
+                std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                actor->Start();
 
-                auto m = actor.AddComponent<ModelComponent>(model.get());
+                auto m = actor->AddComponent<ModelComponent>(model.get());
+
+                scene.AddActor(std::move(actor));
             }
 
-            actor.Render();
+            scene.Render();
 
             if (s_RebuildGrid)
                 BuildGrid();
