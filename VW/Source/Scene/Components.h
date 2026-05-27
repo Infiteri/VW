@@ -3,6 +3,9 @@
 #include "Base.h"
 #include "Light/AmbientLight.h"
 #include "Light/DirectionalLight.h"
+#include "Light/Light.h"
+#include "Light/PointLight.h"
+#include "Light/SpotLight.h"
 #include "Material/Material.h"
 #include "Math/Transform.h"
 #include "Mesh/Mesh.h"
@@ -117,5 +120,69 @@ namespace VW
         // negligible + it only happens once per component
         // TODO: still worth thinking about the amount of smart pointers
         std::shared_ptr<DirectionalLight> m_Light;
+    };
+
+    class VW_API PointLightComponent : public Component
+    {
+    public:
+        PointLightComponent();
+        ~PointLightComponent();
+
+        void SetColor(const Color &color);
+        const Color &GetColor() const;
+
+        void SetIntensity(float intensity);
+        float GetIntensity() const;
+
+        // TODO: note that setting the position of the light isn't supposed to work this way, lights
+        // should take the actors transform in world space, for now this is a quick fix, also for
+        // now there is no kind of parenting, therefore world space is used and local space is the
+        // same
+        // TODO 2: do i want parenting in general for actors?
+        void SetPosition(const Vector3 &position);
+        const Vector3 &GetPosition() const;
+
+        void SetRange(float range);
+        float GetRange() const;
+
+        void Start();
+
+    private:
+        std::shared_ptr<PointLight> m_Light;
+    };
+
+    // TODO: position reflects the same issues as PointLightComponent above, fixing
+    // PointLightComponent should mean a fix here too
+    class VW_API SpotLightComponent : public Component
+    {
+    public:
+        SpotLightComponent();
+        ~SpotLightComponent();
+
+        void SetColor(const Color &color);
+        const Color &GetColor() const;
+
+        void SetIntensity(float intensity);
+        float GetIntensity() const;
+
+        void SetPosition(const Vector3 &position);
+        const Vector3 &GetPosition() const;
+
+        void SetDirection(const Vector3 &direction);
+        const Vector3 &GetDirection() const;
+
+        void SetRange(float range);
+        float GetRange() const;
+
+        void SetInnerConeAngle(float angle);
+        float GetInnerConeAngle() const;
+
+        void SetOuterConeAngle(float angle);
+        float GetOuterConeAngle() const;
+
+        void Start();
+
+    private:
+        std::shared_ptr<SpotLight> m_Light;
     };
 } // namespace VW

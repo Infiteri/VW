@@ -132,13 +132,25 @@ namespace VW
 
                 // TODO: too much hassle to setup a simple mesh, all of this should be default
                 auto amb = actor->AddComponent<AmbientLightComponent>();
-                amb->SetIntensity(0.8f);
-                amb->SetColor(Color{255, 0, 0, 255});
+                amb->SetIntensity(0.9f);
 
-                auto light = actor->AddComponent<DirectionalLightComponent>();
-                light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
-                light->SetColor(Color{0, 125});
-                light->SetIntensity(2.0f);
+                // auto point = actor->AddComponent<PointLightComponent>();
+                // point->SetPosition(Vector3{0, 3, 0});
+                // point->SetColor(Color{0, 255, 0, 255});
+                // point->SetIntensity(10);
+                // point->SetRange(10);
+
+                // auto spot = actor->AddComponent<SpotLightComponent>();
+                // spot->SetPosition(Vector3{0, -3, -2});
+                // spot->SetColor(Color{0, 0, 255, 255});
+                // spot->SetIntensity(3);
+                // spot->SetRange(100);
+                // spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
+
+                // auto light = actor->AddComponent<DirectionalLightComponent>();
+                // light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
+                // light->SetColor(Color{0, 125});
+                // light->SetIntensity(2.0f);
                 auto m =
                     actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
                 m->SetTransform(Transform{});
