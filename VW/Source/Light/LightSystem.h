@@ -45,6 +45,7 @@ namespace VW
         static u32 GetLightCount();
 
         static void AddLight(std::shared_ptr<Light> light);
+        static void RemoveLight(std::shared_ptr<Light> light);
 
         static void UpdateGPUData();
         static void Bind(u32 spot = 0);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base.h"
+#include "Light/DirectionalLight.h"
 #include "Material/Material.h"
 #include "Math/Transform.h"
 #include "Mesh/Mesh.h"
@@ -68,5 +69,33 @@ namespace VW
 
     private:
         Model *m_Model;
+    };
+
+    class VW_API DirectionalLightComponent : public Component
+    {
+    public:
+        DirectionalLightComponent();
+        ~DirectionalLightComponent();
+
+        void SetDirection(const Vector3 &direction);
+        const Vector3 &GetDirection() const;
+
+        void SetColor(const Color &color);
+        const Color &GetColor() const;
+
+        void SetIntensity(float intensity);
+        float GetIntensity() const;
+
+        void Start();
+
+    private:
+        // TODO: really worth thinking about so much smart_ptr stuff, a lot of code relies on unique
+        // and smart pointers (mesh system, shader system, ...)
+        // TODO: while, yes, opengl related need to be loaded later, Lights are a data structure so
+        // no point in doing extra allocations
+        // TODO: not that speed is noticable, while yes an extra allocation is done, the overhead is
+        // negligible + it only happens once per component
+        // TODO: still worth thinking about the amount of smart pointers
+        std::shared_ptr<DirectionalLight> m_Light;
     };
 } // namespace VW

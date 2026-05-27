@@ -4,17 +4,12 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
-#include "Light/DirectionalLight.h"
-#include "Light/LightSystem.h"
-#include "Light/PointLight.h"
-#include "Light/SpotLight.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
 #include "Mesh/MeshSystem.h"
 #include "Mesh/Model.h"
-#include "Mesh/ModelSystem.h"
 #include "Renderer.h"
 #include "Scene/Actor.h"
 #include "Scene/Components.h"
@@ -134,6 +129,11 @@ namespace VW
                 actor->Start();
 
                 // TODO: too much hassle to setup a simple mesh, all of this should be default
+
+                auto light = actor->AddComponent<DirectionalLightComponent>();
+                light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
+                light->SetColor(Color{0, 125});
+                light->SetIntensity(1.0f);
                 auto m =
                     actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
                 m->SetTransform(Transform{});

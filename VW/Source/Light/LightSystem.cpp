@@ -4,6 +4,7 @@
 #include "Light/PointLight.h"
 #include "Light/SpotLight.h"
 #include "Math/Math.h"
+#include <algorithm>
 #include <cmath>
 #include <glad/glad.h>
 #include <memory>
@@ -34,6 +35,16 @@ namespace VW
     u32 LightSystem::GetLightCount()
     {
         return s_State.Lights.size();
+    }
+
+    void LightSystem::RemoveLight(std::shared_ptr<Light> light)
+    {
+        auto it = std::find(s_State.Lights.begin(), s_State.Lights.end(), light);
+        if (it != s_State.Lights.end())
+        {
+            s_State.Lights.erase(it);
+            s_State.GPUDirty = true;
+        }
     }
 
     void LightSystem::UpdateGPUData()

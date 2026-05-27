@@ -1,4 +1,6 @@
 #include "Components.h"
+#include "Core/Logger.h"
+#include "Light/LightSystem.h"
 #include "Material/MaterialSystem.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
@@ -65,4 +67,57 @@ namespace VW
             Renderer::Submit(item);
         }
     }
+
+    DirectionalLightComponent::DirectionalLightComponent()
+    {
+        m_Light = std::make_shared<DirectionalLight>();
+
+        m_Light->SetDirection({0, -1, 0});
+        m_Light->SetIntensity(10);
+    }
+
+    DirectionalLightComponent::~DirectionalLightComponent()
+    {
+        LightSystem::RemoveLight(m_Light);
+    }
+
+    void DirectionalLightComponent::SetDirection(const Vector3 &direction)
+    {
+        m_Light->SetDirection(direction);
+        LightSystem::LightUpdated();
+    }
+
+    const Vector3 &DirectionalLightComponent::GetDirection() const
+    {
+        return m_Light->GetDirection();
+    }
+
+    void DirectionalLightComponent::SetColor(const Color &color)
+    {
+        m_Light->SetColor(color);
+        LightSystem::LightUpdated();
+    }
+
+    const Color &DirectionalLightComponent::GetColor() const
+    {
+        return m_Light->GetColor();
+    }
+
+    void DirectionalLightComponent::SetIntensity(float intensity)
+    {
+        m_Light->SetIntensity(intensity);
+        LightSystem::LightUpdated();
+    }
+
+    float DirectionalLightComponent::GetIntensity() const
+    {
+        return m_Light->GetIntensity();
+    }
+
+    void DirectionalLightComponent::Start()
+    {
+        LightSystem::AddLight(m_Light);
+        LightSystem::LightUpdated();
+    }
+
 } // namespace VW
