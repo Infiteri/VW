@@ -4,6 +4,7 @@
 #include "Material/MaterialSystem.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
+#include <winnls.h>
 
 namespace VW
 {
@@ -68,12 +69,52 @@ namespace VW
         }
     }
 
+    AmbientLightComponent::AmbientLightComponent()
+    {
+        m_Light = std::make_shared<AmbientLight>();
+        m_Light->SetColor({255, 255, 255, 255});
+        m_Light->SetIntensity(1.0f);
+    }
+
+    AmbientLightComponent::~AmbientLightComponent()
+    {
+        LightSystem::RemoveLight(m_Light);
+    }
+
+    void AmbientLightComponent::SetColor(const Color &color)
+    {
+        m_Light->SetColor(color);
+        LightSystem::LightUpdated();
+    }
+
+    const Color &AmbientLightComponent::GetColor() const
+    {
+        return m_Light->GetColor();
+    }
+
+    void AmbientLightComponent::SetIntensity(float intensity)
+    {
+        m_Light->SetIntensity(intensity);
+        LightSystem::LightUpdated();
+    }
+
+    float AmbientLightComponent::GetIntensity() const
+    {
+        return m_Light->GetIntensity();
+    }
+
+    void AmbientLightComponent::Start()
+    {
+        LightSystem::AddLight(m_Light);
+        LightSystem::LightUpdated();
+    }
+
     DirectionalLightComponent::DirectionalLightComponent()
     {
         m_Light = std::make_shared<DirectionalLight>();
 
         m_Light->SetDirection({0, -1, 0});
-        m_Light->SetIntensity(10);
+        m_Light->SetIntensity(0.5);
     }
 
     DirectionalLightComponent::~DirectionalLightComponent()

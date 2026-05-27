@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Base.h"
+#include "Light/AmbientLight.h"
 #include "Light/DirectionalLight.h"
 #include "Material/Material.h"
 #include "Math/Transform.h"
 #include "Mesh/Mesh.h"
 #include "Mesh/Model.h"
 #include "Renderer.h"
+#include <memory>
 
 namespace VW
 {
@@ -69,6 +71,24 @@ namespace VW
 
     private:
         Model *m_Model;
+    };
+
+    class VW_API AmbientLightComponent : public Component
+    {
+    public:
+        AmbientLightComponent();
+        ~AmbientLightComponent();
+
+        void SetColor(const Color &color);
+        const Color &GetColor() const;
+
+        void SetIntensity(float intensity);
+        float GetIntensity() const;
+
+        void Start();
+
+    private:
+        std::shared_ptr<AmbientLight> m_Light;
     };
 
     class VW_API DirectionalLightComponent : public Component

@@ -4,6 +4,8 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
+#include "Light/AmbientLight.h"
+#include "Light/LightSystem.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Math/Matrix.h"
@@ -129,15 +131,18 @@ namespace VW
                 actor->Start();
 
                 // TODO: too much hassle to setup a simple mesh, all of this should be default
+                auto amb = actor->AddComponent<AmbientLightComponent>();
+                amb->SetIntensity(0.8f);
+                amb->SetColor(Color{255, 0, 0, 255});
 
                 auto light = actor->AddComponent<DirectionalLightComponent>();
                 light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
                 light->SetColor(Color{0, 125});
-                light->SetIntensity(1.0f);
+                light->SetIntensity(2.0f);
                 auto m =
                     actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
                 m->SetTransform(Transform{});
-                m->SetMaterial(MaterialSystem::GetDefaultMaterial());
+                m->SetMaterial(MaterialSystem::GetMaterial("mat"));
                 m->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
 
                 scene.AddActor(std::move(actor));
