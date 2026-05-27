@@ -33,7 +33,7 @@ namespace VW
                 c->Start();
 
             m_Components.push_back(std::move(c));
-            return c.get();
+            return (T *)m_Components.back().get();
         };
 
         template <typename T> T *GetComponent()

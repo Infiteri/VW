@@ -1,4 +1,3 @@
-#include "Camera/Camera.h"
 #include "Camera/CameraSystem.h"
 #include "Camera/PerspectiveCamera.h"
 #include "CameraController.h"
@@ -11,11 +10,8 @@
 #include "Light/SpotLight.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
-#include "Math/Math.h"
 #include "Math/Matrix.h"
 #include "Math/Quaternion.h"
-#include "Math/Transform.h"
-#include "Mesh/Mesh.h"
 #include "Mesh/MeshSystem.h"
 #include "Mesh/Model.h"
 #include "Mesh/ModelSystem.h"
@@ -26,7 +22,6 @@
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 
-#include <algorithm>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glfw/glfw3.h>
@@ -46,29 +41,6 @@ namespace VW
     static i32 s_GridSize = 0;
     static float s_Spacing = 15.5f;
     static bool s_RebuildGrid = true;
-
-    // lights
-    static std::shared_ptr<DirectionalLight> s_DirLight;
-    static std::shared_ptr<SpotLight> s_SpotLight;
-    static std::shared_ptr<PointLight> s_PointLight;
-
-    // imgui state mirrors
-    static float s_DirColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    static float s_DirDirection[3] = {-1.5f, -1.0f, -1.0f};
-    static float s_DirIntensity = 4.0f;
-
-    static float s_SpotColor[4] = {1.0f, 1.0f, 0.0f, 1.0f};
-    static float s_SpotPos[3] = {0.0f, 5.0f, 0.0f};
-    static float s_SpotDir[3] = {0.0f, -1.0f, 0.0f};
-    static float s_SpotIntensity = 2.0f;
-    static float s_SpotRange = 20.0f;
-    static float s_SpotInner = 20.0f;
-    static float s_SpotOuter = 35.0f;
-
-    static float s_PointColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-    static float s_PointPos[3] = {.2f, 0.0f, -10.0f};
-    static float s_PointIntensity = 5.0f;
-    static float s_PointRange = 30.0f;
 
     static std::shared_ptr<Model> model;
 
@@ -95,32 +67,6 @@ namespace VW
                     renderItems.push_back(item);
                 }
         s_RebuildGrid = false;
-    }
-
-    static void InitLights()
-    {
-        s_DirLight = std::make_shared<DirectionalLight>();
-        s_DirLight->SetColor({255, 255, 255, 255});
-        s_DirLight->SetIntensity(s_DirIntensity);
-        s_DirLight->SetDirection({s_DirDirection[0], s_DirDirection[1], s_DirDirection[2]});
-        LightSystem::AddLight(s_DirLight);
-
-        s_SpotLight = std::make_shared<SpotLight>();
-        s_SpotLight->SetColor({255, 255, 0, 255});
-        s_SpotLight->SetIntensity(s_SpotIntensity);
-        s_SpotLight->SetPosition({s_SpotPos[0], s_SpotPos[1], s_SpotPos[2]});
-        s_SpotLight->SetDirection({s_SpotDir[0], s_SpotDir[1], s_SpotDir[2]});
-        s_SpotLight->SetRange(s_SpotRange);
-        s_SpotLight->SetInnerConeAngle(s_SpotInner);
-        s_SpotLight->SetOuterConeAngle(s_SpotOuter);
-        LightSystem::AddLight(s_SpotLight);
-
-        s_PointLight = std::make_shared<PointLight>();
-        s_PointLight->SetColor({255, 255, 255, 255});
-        s_PointLight->SetIntensity(s_PointIntensity);
-        s_PointLight->SetPosition({s_PointPos[0], s_PointPos[1], s_PointPos[2]});
-        s_PointLight->SetRange(s_PointRange);
-        LightSystem::AddLight(s_PointLight);
     }
 
     class DevAppPlatform : public Platform
@@ -183,17 +129,16 @@ namespace VW
                 ImGui_ImplOpenGL3_Init("#version 430");
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
-                model = ModelSystem::LoadModel("a.obj", "AK/source/AK47.glb");
-                for (const auto &sm : model->GetSubmeshes())
-                {
-                    VW_DEBUG("", "%s", sm.Name.c_str());
-                }
 
-                InitLights();
                 std::unique_ptr<Actor> actor = std::make_unique<Actor>();
                 actor->Start();
 
-                auto m = actor->AddComponent<ModelComponent>(model.get());
+                // TODO: too much hassle to setup a simple mesh, all of this should be default
+                auto m =
+                    actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
+                m->SetTransform(Transform{});
+                m->SetMaterial(MaterialSystem::GetDefaultMaterial());
+                m->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
 
                 scene.AddActor(std::move(actor));
             }
@@ -233,50 +178,6 @@ namespace VW
                 if (ImGui::Combo("Render Mode", &current, modes, IM_ARRAYSIZE(modes)))
                     debug.RenderMode = static_cast<RenderDebugMode>(current);
             }
-
-            // Directional light
-            ImGui::Separator();
-            ImGui::Text("Directional Light");
-            if (ImGui::ColorEdit4("Dir Color", s_DirColor))
-                s_DirLight->SetColor({s_DirColor[0] * 255, s_DirColor[1] * 255, s_DirColor[2] * 255,
-                                      s_DirColor[3] * 255});
-            if (ImGui::DragFloat3("Dir Direction", s_DirDirection, 0.01f, -1.0f, 1.0f))
-                s_DirLight->SetDirection({s_DirDirection[0], s_DirDirection[1], s_DirDirection[2]});
-            if (ImGui::DragFloat("Dir Intensity", &s_DirIntensity, 0.01f, 0.0f, 10.0f))
-                s_DirLight->SetIntensity(s_DirIntensity);
-
-            // Spot light
-            ImGui::Separator();
-            ImGui::Text("Spot Light");
-            if (ImGui::ColorEdit4("Spot Color", s_SpotColor))
-                s_SpotLight->SetColor({s_SpotColor[0] * 255, s_SpotColor[1] * 255,
-                                       s_SpotColor[2] * 255, s_SpotColor[3] * 255});
-            if (ImGui::DragFloat3("Spot Position", s_SpotPos, 0.1f))
-                s_SpotLight->SetPosition({s_SpotPos[0], s_SpotPos[1], s_SpotPos[2]});
-            if (ImGui::DragFloat3("Spot Direction", s_SpotDir, 0.01f, -1.0f, 1.0f))
-                s_SpotLight->SetDirection({s_SpotDir[0], s_SpotDir[1], s_SpotDir[2]});
-            if (ImGui::DragFloat("Spot Intensity", &s_SpotIntensity, 0.01f, 0.0f, 10.0f))
-                s_SpotLight->SetIntensity(s_SpotIntensity);
-            if (ImGui::DragFloat("Spot Range", &s_SpotRange, 0.1f, 0.0f, 200.0f))
-                s_SpotLight->SetRange(s_SpotRange);
-            if (ImGui::DragFloat("Inner Angle", &s_SpotInner, 0.5f, 0.0f, 90.0f))
-                s_SpotLight->SetInnerConeAngle(s_SpotInner);
-            if (ImGui::DragFloat("Outer Angle", &s_SpotOuter, 0.5f, 0.0f, 90.0f))
-                s_SpotLight->SetOuterConeAngle(s_SpotOuter);
-
-            ImGui::Separator();
-            ImGui::Text("Point Light");
-            if (ImGui::ColorEdit4("Point Color", s_PointColor))
-                s_PointLight->SetColor({s_PointColor[0] * 255, s_PointColor[1] * 255,
-                                        s_PointColor[2] * 255, s_PointColor[3] * 255});
-            if (ImGui::DragFloat3("Point Position", s_PointPos, 0.1f))
-                s_PointLight->SetPosition({s_PointPos[0], s_PointPos[1], s_PointPos[2]});
-            if (ImGui::DragFloat("Point Intensity", &s_PointIntensity, 0.01f, 0.0f, 10.0f))
-                s_PointLight->SetIntensity(s_PointIntensity);
-            if (ImGui::DragFloat("Point Range", &s_PointRange, 0.1f, 0.0f, 200.0f))
-                s_PointLight->SetRange(s_PointRange);
-
-            LightSystem::LightUpdated();
 
             ImGui::End();
 
