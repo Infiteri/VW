@@ -16,6 +16,7 @@
 #include "Scene/Actor.h"
 #include "Scene/Components.h"
 #include "Scene/Scene.h"
+#include "Scene/Serializer/SceneSerializer.h"
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 
@@ -158,6 +159,9 @@ namespace VW
                 m->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
 
                 scene.AddActor(std::move(actor));
+
+                SceneSerializer ser(&scene);
+                ser.Serialize("Scene.vwscn");
             }
 
             scene.Render();

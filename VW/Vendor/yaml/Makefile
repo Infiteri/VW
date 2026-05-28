@@ -1,4 +1,4 @@
-LIB_NAME = libyaml.so
+LIB_NAME = yaml.dll
 CXX = g++
 CXXFLAGS = -fPIC -O3 -g -Wall -Wformat -Dyaml_cpp_EXPORTS
 CPPFLAGS = -Iinclude  # Adjust this to your actual include path
