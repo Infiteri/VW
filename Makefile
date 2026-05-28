@@ -25,7 +25,7 @@ clean:
 	@rm -r $(BIN)
 	@rm -r $(OBJ)
 
-always: 
+always:
 	@mkdir -p $(BIN)
 	@mkdir -p $(OBJ)
 
@@ -49,6 +49,7 @@ run:
 vendor: always
 	@echo Building vendor...
 	@cp DevApp/Vendor/glfw/lib/glfw3.dll $(BIN)/glfw3.dll
+	@make -j12 -C VW/Vendor/yaml --no-print-directory
 	@make -j12 -C VW/Vendor/glad --no-print-directory
 	@make -j12 -C VW/Vendor/assimp --no-print-directory
 	@cp VW/Vendor/assimp/libassimp*.dll $(BIN)/
