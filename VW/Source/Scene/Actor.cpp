@@ -2,7 +2,7 @@
 
 namespace VW
 {
-    Actor::Actor()
+    Actor::Actor(const std::string &name) : m_Name(name)
     {
         m_MustStartComponents = false;
     }
@@ -10,6 +10,16 @@ namespace VW
     Actor::~Actor()
     {
         Stop();
+    }
+
+    void Actor::SetName(const std::string &name)
+    {
+        m_Name = name;
+    }
+
+    void Actor::SetTransform(const Transform &transform)
+    {
+        m_Transform = transform;
     }
 
     void Actor::Start()

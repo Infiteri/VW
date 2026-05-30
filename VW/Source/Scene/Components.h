@@ -56,12 +56,13 @@ namespace VW
         void SetMesh(Mesh *mesh);
         void SetMaterial(Material *material);
         void SetShader(Shader *shader);
-        void SetTransform(const Transform &transform);
+        void SetDeltaTransform(const Transform &transform);
 
         void Render();
 
     private:
         RenderItem m_Item;
+        Transform m_Delta;
     };
 
     class VW_API ModelComponent : public Component
@@ -70,10 +71,13 @@ namespace VW
         ModelComponent(Model *model);
         ~ModelComponent();
 
+        void SetTransform(const Transform &transform);
+
         void Render();
 
     private:
         Model *m_Model;
+        Transform m_Transform;
     };
 
     class VW_API AmbientLightComponent : public Component

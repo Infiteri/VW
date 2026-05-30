@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "Core/UUID.h"
+#include "Math/Transform.h"
 #include "Scene/Components.h"
 #include <algorithm>
 #include <vector>
@@ -11,7 +12,7 @@ namespace VW
     class VW_API Actor
     {
     public:
-        Actor();
+        Actor(const std::string &name = "Actor");
         ~Actor();
 
         void Start();
@@ -19,9 +20,22 @@ namespace VW
         void Update();
         void Stop();
 
+        void SetTransform(const Transform &transform);
+        inline Transform &GetTransform()
+        {
+            return m_Transform;
+        }
+
         inline const UUID &GetID() const
         {
             return m_ID;
+        }
+
+        void SetName(const std::string &name);
+
+        inline const std::string &GetName() const
+        {
+            return m_Name;
         }
 
         template <typename T, typename... Args> T *AddComponent(Args... args)
@@ -102,8 +116,11 @@ namespace VW
         };
 
     private:
+        std::string m_Name;
         UUID m_ID;
         bool m_MustStartComponents = false;
         std::vector<std::unique_ptr<Component>> m_Components;
+
+        Transform m_Transform;
     };
 } // namespace VW

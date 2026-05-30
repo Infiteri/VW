@@ -2,7 +2,7 @@
 
 namespace VW
 {
-    Scene::Scene()
+    Scene::Scene(const std::string &name) : m_Name(name)
     {
         m_MustStartActors = false;
     }
@@ -45,6 +45,11 @@ namespace VW
             actor->Start();
 
         m_Actors.push_back(std::move(actor));
+    }
+
+    void Scene::SetName(const std::string &name)
+    {
+        m_Name = name;
     }
 
 } // namespace VW

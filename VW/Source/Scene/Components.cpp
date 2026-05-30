@@ -1,4 +1,5 @@
 #include "Components.h"
+#include "Actor.h"
 #include "Core/Logger.h"
 #include "Light/Light.h"
 #include "Light/LightSystem.h"
@@ -33,13 +34,14 @@ namespace VW
         m_Item.Shader = shader;
     }
 
-    void MeshComponent::SetTransform(const Transform &transform)
+    void MeshComponent::SetDeltaTransform(const Transform &transform)
     {
-        m_Item.Transform = transform.GetMatrix();
+        m_Delta = transform;
     }
 
     void MeshComponent::Render()
     {
+        m_Item.Transform = m_Owner->GetTransform().GetMatrix() * m_Delta.GetMatrix();
         Renderer::Submit(m_Item);
     }
 
@@ -49,6 +51,11 @@ namespace VW
 
     ModelComponent::~ModelComponent()
     {
+    }
+
+    void ModelComponent::SetTransform(const Transform &transform)
+    {
+        m_Transform = transform;
     }
 
     void ModelComponent::Render()
@@ -64,6 +71,7 @@ namespace VW
 
             RenderItem item;
             item.Mesh = sm.Mesh.get();
+            item.Transform = m_Transform.GetMatrix();
             item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
             item.Shader = ShaderSystem::GetEngineShader("Object.glsl");
             Renderer::Submit(item);

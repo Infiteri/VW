@@ -1,6 +1,9 @@
 #include "SceneSerializer.h"
 #include "Core/SerializerUtils.h"
-#include "yaml-cpp/emitter.h"
+#include "Scene/Serializer/ActorSerializer.h"
+
+#define YAML_CPP_STATIC_DEFINE
+#include <yaml-cpp/yaml.h>
 
 namespace VW
 {
@@ -13,12 +16,18 @@ namespace VW
         VW_CHECK(m_Scene);
 
         YAML::Emitter out;
-        out << YAML::BeginDoc;
         out << YAML::BeginMap;
-        out << YAML::Key << "a" << YAML::Value << "b";
+        VW_SERIALIZE_FIELD("Name", m_Scene->GetName().c_str());
+        VW_SERIALIZE_FIELD("Actors", YAML::BeginSeq);
 
+        for (const auto &actor : m_Scene->m_Actors)
+        {
+            ActorSerializer serializer(actor.get());
+            serializer.Serialize(out);
+        }
+
+        out << YAML::EndSeq;
         out << YAML::EndMap;
-        out << YAML::EndDoc;
         SerializerUtils::SaveEmitter(out, path);
     }
 

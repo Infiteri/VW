@@ -10,7 +10,7 @@ namespace VW
     class VW_API Scene
     {
     public:
-        Scene();
+        Scene(const std::string &name = "Scene");
         ~Scene();
 
         void Start();
@@ -20,8 +20,18 @@ namespace VW
 
         void AddActor(std::unique_ptr<Actor> actor);
 
+        void SetName(const std::string &name);
+        inline const std::string &GetName() const
+        {
+            return m_Name;
+        }
+
     private:
-    bool m_MustStartActors = false;
+        bool m_MustStartActors = false;
         std::vector<std::unique_ptr<Actor>> m_Actors;
+
+        std::string m_Name;
+
+        friend class SceneSerializer;
     };
 } // namespace VW

@@ -6,7 +6,7 @@ ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
 INCLUDE_FLAGS=-ISource -IVendor/glad/include -IVendor/stb -IVendor/assimp/include -IVendor/assimp/build/include -IVendor/yaml/include
-DEFINES=
+DEFINES=-DYAML_CPP_STATIC_DEFINE
 LINK_FLAGS=-shared -L$(BIN) -LVendor/assimp/build/lib $(OBJ)/glad/glad.o -lassimp -lyaml
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)) $(wildcard $1$2)

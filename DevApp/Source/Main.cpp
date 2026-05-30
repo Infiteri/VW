@@ -4,8 +4,6 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
-#include "Light/AmbientLight.h"
-#include "Light/LightSystem.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Math/Matrix.h"
@@ -109,6 +107,8 @@ namespace VW
         {
             controller.Update(m_Handle);
 
+            // TODO: some kind of `PreInit` instead of current `Init` and `Init` instead of first
+            // frame (`Init` called after OpenGL functions are loaded)
             if (firstFrame)
             {
 
@@ -131,34 +131,39 @@ namespace VW
                 std::unique_ptr<Actor> actor = std::make_unique<Actor>();
                 actor->Start();
 
+                std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
+                actor2->Start();
+
                 // TODO: too much hassle to setup a simple mesh, all of this should be default
                 auto amb = actor->AddComponent<AmbientLightComponent>();
                 amb->SetIntensity(0.9f);
 
-                // auto point = actor->AddComponent<PointLightComponent>();
-                // point->SetPosition(Vector3{0, 3, 0});
-                // point->SetColor(Color{0, 255, 0, 255});
-                // point->SetIntensity(10);
-                // point->SetRange(10);
+                auto point = actor2->AddComponent<PointLightComponent>();
+                point->SetPosition(Vector3{0, 3, 0});
+                point->SetColor(Color{0, 255, 0, 255});
+                point->SetIntensity(10);
+                point->SetRange(10);
 
-                // auto spot = actor->AddComponent<SpotLightComponent>();
-                // spot->SetPosition(Vector3{0, -3, -2});
-                // spot->SetColor(Color{0, 0, 255, 255});
-                // spot->SetIntensity(3);
-                // spot->SetRange(100);
-                // spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
+                auto spot = actor2->AddComponent<SpotLightComponent>();
+                spot->SetPosition(Vector3{0, -3, -2});
+                spot->SetColor(Color{0, 0, 255, 255});
+                spot->SetIntensity(3);
+                spot->SetRange(100);
+                spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
 
-                // auto light = actor->AddComponent<DirectionalLightComponent>();
-                // light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
-                // light->SetColor(Color{0, 125});
-                // light->SetIntensity(2.0f);
+                auto light = actor2->AddComponent<DirectionalLightComponent>();
+                light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
+                light->SetColor(Color{0, 125});
+                light->SetIntensity(2.0f);
+                // TODO: test model transformation, must work but still should be tested
                 auto m =
                     actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
-                m->SetTransform(Transform{});
+                m->SetDeltaTransform(Transform{});
                 m->SetMaterial(MaterialSystem::GetMaterial("mat"));
                 m->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
 
                 scene.AddActor(std::move(actor));
+                scene.AddActor(std::move(actor2));
 
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene.vwscn");
