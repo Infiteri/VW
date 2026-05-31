@@ -1,12 +1,33 @@
 #include "SceneSerializer.h"
 #include "Core/SerializerUtils.h"
+#include "Material/MaterialSystem.h"
 #include "Scene/Serializer/ActorSerializer.h"
 
-#define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
 
 namespace VW
 {
+    static void _SerializeMaterials(YAML::Emitter &out)
+    {
+        auto materials = MaterialSystem::GetMaterials();
+
+        // out << YAML::Key << "Materials" << YAML::Value << YAML::BeginSeq;
+        VW_SERIALIZE_FIELD("Materials", YAML::BeginSeq);
+
+        for (const auto &[name, mat] : materials)
+        {
+            out << YAML::BeginMap;
+            VW_SERIALIZE_FIELD("Name", name);
+            SerializerUtils::SerializeColor(out, "Color", mat.GetColor());
+            VW_SERIALIZE_FIELD("AlbedoPath", mat.GetAlbedo());
+            VW_SERIALIZE_FIELD("NormalPath", mat.GetNormal());
+            VW_SERIALIZE_FIELD("ORMPath", mat.GetORM());
+            out << YAML::EndMap;
+        }
+
+        out << YAML::EndSeq;
+    }
+
     SceneSerializer::SceneSerializer(Scene *scene) : m_Scene(scene)
     {
     }
@@ -18,6 +39,7 @@ namespace VW
         YAML::Emitter out;
         out << YAML::BeginMap;
         VW_SERIALIZE_FIELD("Name", m_Scene->GetName().c_str());
+        _SerializeMaterials(out);
         VW_SERIALIZE_FIELD("Actors", YAML::BeginSeq);
 
         for (const auto &actor : m_Scene->m_Actors)

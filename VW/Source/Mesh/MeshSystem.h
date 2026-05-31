@@ -8,15 +8,6 @@
 
 namespace VW
 {
-    enum class MeshType
-    {
-        Cube,
-        Sphere,
-        Cylinder,
-        Plane,
-        Torus
-    };
-
     class VW_API MeshSystem
     {
     public:

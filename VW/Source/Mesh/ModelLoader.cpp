@@ -1,6 +1,7 @@
 #include "ModelLoader.h"
 #include "Core/Logger.h"
 #include "Material/MaterialSystem.h"
+#include "Mesh/Mesh.h"
 #include "Texture/TextureSystem.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -18,7 +19,7 @@ namespace VW
     }
 
     static u32 LoadEmbeddedTexture(const aiScene *scene, const char *path,
-                                    const std::string &cacheKey)
+                                   const std::string &cacheKey)
     {
         if (path[0] != '*')
             return (u32)TextureSystem::GetTextureID(path);
@@ -31,10 +32,8 @@ namespace VW
         if (tex->mHeight == 0)
         {
             int w, h, c;
-            u8 *pixels = stbi_load_from_memory(
-                reinterpret_cast<const u8 *>(tex->pcData),
-                static_cast<int>(tex->mWidth),
-                &w, &h, &c, 0);
+            u8 *pixels = stbi_load_from_memory(reinterpret_cast<const u8 *>(tex->pcData),
+                                               static_cast<int>(tex->mWidth), &w, &h, &c, 0);
             if (!pixels)
             {
                 VW_WARN("vwrn", "Failed to decode embedded texture: %s", cacheKey.c_str());
@@ -84,7 +83,7 @@ namespace VW
             {4, offsetof(Vertex, Bitangent), 3, false},
         };
         return std::make_shared<Mesh>(vertices.data(), vertices.size() * sizeof(Vertex),
-                                      indices.data(), indices.size(), layout);
+                                      indices.data(), indices.size(), layout, MeshType::Custom);
     }
     static void ProcessNode(aiNode *node, const aiScene *scene,
                             std::vector<ModelSubmesh> &submeshes)
@@ -109,7 +108,7 @@ namespace VW
             ProcessNode(node->mChildren[i], scene, submeshes);
     }
     static void CreateMaterialFromAssimp(aiMaterial *aiMat, const aiScene *scene,
-                                          const std::string &textureDir)
+                                         const std::string &textureDir)
     {
         aiString name;
         aiMat->Get(AI_MATKEY_NAME, name);
@@ -128,17 +127,20 @@ namespace VW
         {
             std::string cacheKey = textureDir + matName + "_albedo.png";
             mat.SetAlbedoID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+            mat.SetAlbedoPath(cacheKey);
         }
 
         if (aiMat->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
         {
             std::string cacheKey = textureDir + matName + "_normal.png";
             mat.SetNormalID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+            mat.SetNormalPath(cacheKey);
         }
         else if (aiMat->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
         {
             std::string cacheKey = textureDir + matName + "_normal.png";
             mat.SetNormalID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+            mat.SetNormalPath(cacheKey);
         }
 
         // GLB metallic-roughness packs occlusion(R), roughness(G), metallic(B)
@@ -146,6 +148,7 @@ namespace VW
         {
             std::string cacheKey = textureDir + matName + "_orm.png";
             mat.SetORMID(LoadEmbeddedTexture(scene, path.C_Str(), cacheKey));
+            mat.SetORMPath(cacheKey);
         }
 
         MaterialSystem::AddMaterial(matName, mat);

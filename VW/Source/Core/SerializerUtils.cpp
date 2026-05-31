@@ -19,5 +19,20 @@ namespace VW
             VW_SERIALIZE_FIELD(field, YAML::Flow);
             out << YAML::BeginSeq << vec.x << vec.y << vec.z << YAML::EndSeq;
         }
+
+        void SerializeColor(YAML::Emitter &out, const char *field, const Color &color)
+        {
+            VW_SERIALIZE_FIELD(field, YAML::Flow);
+            out << YAML::BeginSeq << color.r << color.g << color.b << color.a << YAML::EndSeq;
+        }
+
+        void SerializeTransform(YAML::Emitter &out, const char *field, const Transform &transform)
+        {
+            VW_SERIALIZE_FIELD(field, YAML::BeginMap);
+            SerializerUtils::SerializeVector3(out, "Position", transform.Position);
+            SerializerUtils::SerializeVector3(out, "Rotation", transform.Rotation);
+            SerializerUtils::SerializeVector3(out, "Scale", transform.Scale);
+            out << YAML::EndMap;
+        }
     } // namespace SerializerUtils
 } // namespace VW

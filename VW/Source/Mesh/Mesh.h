@@ -17,11 +17,21 @@ namespace VW
         Vector3 Bitangent;
     };
 
+    enum class MeshType
+    {
+        Cube,
+        Sphere,
+        Cylinder,
+        Plane,
+        Torus,
+        Custom
+    };
+
     class VW_API Mesh
     {
     public:
         Mesh(const Vertex *vertices, u32 vertexSize, u32 *indices, u32 indexCount,
-             const VertexLayout &layout);
+             const VertexLayout &layout, MeshType type);
         ~Mesh();
 
         void Bind() const;
@@ -48,6 +58,11 @@ namespace VW
 
         void AddInstanceBuffer(const Buffer *buffer, const VertexLayout &layout);
 
+        inline MeshType GetType() const
+        {
+            return m_Type;
+        }
+
     private:
         std::unique_ptr<VertexArray> m_VAO;
         std::unique_ptr<Buffer> m_VBO, m_EBO;
@@ -56,5 +71,7 @@ namespace VW
 
         Vector3 m_BoundsCenter;
         float m_BoundRadius;
+
+        MeshType m_Type;
     };
 }; // namespace VW

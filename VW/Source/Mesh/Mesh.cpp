@@ -3,8 +3,8 @@
 namespace VW
 {
     Mesh::Mesh(const Vertex *vertices, u32 vertexSize, u32 *indices, u32 indexCount,
-               const VertexLayout &layout)
-        : m_IndexCount(indexCount)
+               const VertexLayout &layout, MeshType type)
+        : m_IndexCount(indexCount), m_Type(type)
     {
         m_VAO = std::make_unique<VertexArray>();
 

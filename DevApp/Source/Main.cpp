@@ -114,9 +114,9 @@ namespace VW
 
                 // material
                 Material mat;
-                mat.SetAlbedoID(TextureSystem::GetTextureID("AK/textures/color.png"));
-                mat.SetNormalID(TextureSystem::GetTextureID("AK/textures/normal.png"));
-                mat.SetORMID(TextureSystem::GetTextureID("AK/textures/ORM.png"));
+                mat.SetAlbedo(("AK/textures/color.png"));
+                mat.SetNormal(("AK/textures/normal.png"));
+                mat.SetORM(("AK/textures/ORM.png"));
                 MaterialSystem::AddMaterial("mat", mat);
 
                 firstFrame = false;

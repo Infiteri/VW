@@ -1,4 +1,5 @@
 #include "MeshSystem.h"
+#include "Mesh/Mesh.h"
 #include <math.h>
 
 namespace VW
@@ -78,7 +79,7 @@ namespace VW
         };
 
         s_State.BuiltinMeshes[MeshType::Cube] =
-            std::make_shared<Mesh>(vertices, sizeof(vertices), indices, 36, layout);
+            std::make_shared<Mesh>(vertices, sizeof(vertices), indices, 36, layout, MeshType::Cube);
     }
 
     static void LoadSphereMesh()
@@ -132,7 +133,7 @@ namespace VW
 
         s_State.BuiltinMeshes[MeshType::Sphere] =
             std::make_shared<Mesh>(vertices.data(), vertices.size() * sizeof(Vertex),
-                                   indices.data(), indices.size(), layout);
+                                   indices.data(), indices.size(), layout, MeshType::Sphere);
     }
 
     static void LoadPlaneMesh()
@@ -157,7 +158,7 @@ namespace VW
             {4, offsetof(Vertex, Bitangent), 3, false},
         };
         s_State.BuiltinMeshes[MeshType::Plane] =
-            std::make_shared<Mesh>(vertices, sizeof(vertices), indices, 6, layout);
+            std::make_shared<Mesh>(vertices, sizeof(vertices), indices, 6, layout, MeshType::Sphere);
     }
 
     static void LoadCylinderMesh()
@@ -244,7 +245,7 @@ namespace VW
         };
         s_State.BuiltinMeshes[MeshType::Cylinder] =
             std::make_shared<Mesh>(vertices.data(), vertices.size() * sizeof(Vertex),
-                                   indices.data(), indices.size(), layout);
+                                   indices.data(), indices.size(), layout, MeshType::Cylinder);
     }
 
     // TODO: figure out a way different toruses can have different parameters
@@ -303,7 +304,7 @@ namespace VW
         };
         s_State.BuiltinMeshes[MeshType::Torus] =
             std::make_shared<Mesh>(vertices.data(), vertices.size() * sizeof(Vertex),
-                                   indices.data(), indices.size(), layout);
+                                   indices.data(), indices.size(), layout, MeshType::Torus);
     }
 
     void MeshSystem::Init()

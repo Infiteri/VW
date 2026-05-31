@@ -1,4 +1,6 @@
 #include "Material.h"
+#include "Texture/TextureSystem.h"
+#include <ctype.h>
 
 namespace VW
 {
@@ -15,19 +17,43 @@ namespace VW
         m_Color = color;
     }
 
-    void Material::SetAlbedoID(u32 id)
+    void Material::SetAlbedo(const std::string &path)
     {
-        m_AlbedoID = id;
+        if (path.empty())
+        {
+            m_AlbedoID = TextureSystem::GetDefaultTextureID();
+            m_AlbedoPath = "";
+            return;
+        }
+
+        m_AlbedoID = TextureSystem::GetTextureID(path);
+        m_AlbedoPath = path;
     }
 
-    void Material::SetNormalID(u32 id)
+    void Material::SetNormal(const std::string &path)
     {
-        m_NormalID = id;
+        if (path.empty())
+        {
+            m_NormalID = TextureSystem::GetDefaultTextureID();
+            m_NormalPath = "";
+            return;
+        }
+
+        m_NormalID = TextureSystem::GetTextureID(path);
+        m_NormalPath = path;
     }
 
-    void Material::SetORMID(u32 id)
+    void Material::SetORM(const std::string &path)
     {
-        m_ORMID = id;
+        if (path.empty())
+        {
+            m_ORMID = TextureSystem::GetDefaultTextureID();
+            m_ORMPath = "";
+            return;
+        }
+
+        m_ORMID = TextureSystem::GetTextureID(path);
+        m_ORMPath = path;
     }
 
 } // namespace VW

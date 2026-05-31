@@ -10,9 +10,9 @@ namespace VW
 
     void MaterialSystem::Init()
     {
-        s_State.DefaultMat.SetAlbedoID(TextureSystem::GetDefaultTextureID());
-        s_State.DefaultMat.SetNormalID(TextureSystem::GetDefaultTextureID());
-        s_State.DefaultMat.SetORMID(TextureSystem::GetDefaultTextureID());
+        s_State.DefaultMat.SetAlbedo("");
+        s_State.DefaultMat.SetNormal("");
+        s_State.DefaultMat.SetORM("");
     }
 
     void MaterialSystem::Shutdown()
@@ -38,6 +38,24 @@ namespace VW
     Material *MaterialSystem::GetDefaultMaterial()
     {
         return &s_State.DefaultMat;
+    }
+
+    std::string MaterialSystem::GetMaterialName(const Material *mat)
+    {
+        if (!mat)
+            return "";
+
+        for (const auto &pair : s_State.Mats)
+        {
+            if (&pair.second == mat)
+                return pair.first;
+        }
+        return "";
+    }
+
+    const std::unordered_map<std::string, Material> &MaterialSystem::GetMaterials()
+    {
+        return s_State.Mats;
     }
 
     void MaterialSystem::AddMaterial(const std::string &name, const Material &mat)

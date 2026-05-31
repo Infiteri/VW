@@ -58,6 +58,21 @@ namespace VW
         void SetShader(Shader *shader);
         void SetDeltaTransform(const Transform &transform);
 
+        inline Mesh *GetMesh() const
+        {
+            return m_Item.Mesh;
+        }
+
+        inline Material *GetMaterial() const
+        {
+            return m_Item.Material;
+        }
+
+        inline const Transform &GetDeltaTransform() const
+        {
+            return m_Delta;
+        }
+
         void Render();
 
     private:
