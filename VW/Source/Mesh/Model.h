@@ -31,8 +31,14 @@ namespace VW
             return m_Submeshes;
         };
 
+        inline const std::string &GetPath() const
+        {
+            return m_Path;
+        };
+
     private:
         friend class ModelLoader; // TODO: do i really want this?
         std::vector<ModelSubmesh> m_Submeshes;
+        std::string m_Path;
     };
 } // namespace VW

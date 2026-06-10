@@ -90,6 +90,16 @@ namespace VW
 
         void Render();
 
+        inline Model *GetModel() const
+        {
+            return m_Model;
+        }
+
+        inline const Transform &GetTransform() const
+        {
+            return m_Transform;
+        }
+
     private:
         Model *m_Model;
         Transform m_Transform;

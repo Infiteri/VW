@@ -16,7 +16,21 @@ namespace VW
         out << YAML::BeginMap;
         VW_SERIALIZE_FIELD("Type", (int)mesh->GetMesh()->GetType());
         VW_SERIALIZE_FIELD("MaterialName", MaterialSystem::GetMaterialName(mesh->GetMaterial()));
+        SerializerUtils::SerializeTransform(out, "DeltaTransform", mesh->GetDeltaTransform());
         SerializerUtils::SerializeTransform(out, "Delta", mesh->GetDeltaTransform());
+        out << YAML::EndMap;
+    }
+
+    static void _SerializeModelComponent(YAML::Emitter &out, ModelComponent *model, u32 index)
+    {
+        VW_CHECK(model)
+        auto m = model->GetModel();
+
+        out << YAML::Key << "ModelComponent " + std::to_string(index);
+        out << YAML::BeginMap;
+        VW_SERIALIZE_FIELD("Path", m->GetPath());
+        SerializerUtils::SerializeTransform(out, "DeltaTransform",
+                                            model->GetTransform()); // TODO: RENAME TO DELTA
         out << YAML::EndMap;
     }
 
@@ -38,6 +52,7 @@ namespace VW
     }
 
         SERIALIZE_COMPONENT(Mesh);
+        SERIALIZE_COMPONENT(Model);
     }
 
     void ComponentSerializer::Deserialize(YAML::Node &node)

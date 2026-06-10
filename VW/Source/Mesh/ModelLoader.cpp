@@ -186,6 +186,7 @@ namespace VW
         }
         VW_INFO("vwrn", "Loaded model '%s' (%zu submeshes)", path.c_str(),
                 model->m_Submeshes.size());
+        model->m_Path = path;
         return model;
     }
 } // namespace VW
