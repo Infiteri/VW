@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Base.h"
+#include "Material/Material.h"
 #include "Scene/Actor.h"
+#include <string>
+#include <unordered_map>
 
 namespace YAML
 {
@@ -18,7 +20,7 @@ namespace VW
         ~ActorSerializer() = default;
 
         void Serialize(YAML::Emitter &out);
-        void Deserialize(YAML::Node &node);
+        void Deserialize(YAML::Node &node, std::unordered_map<std::string, Material> &materialMap);
 
     private:
         Actor *m_Actor;

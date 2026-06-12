@@ -113,13 +113,6 @@ namespace VW
             if (firstFrame)
             {
 
-                // material
-                Material mat;
-                mat.SetAlbedo(("AK/textures/color.png"));
-                mat.SetNormal(("AK/textures/normal.png"));
-                mat.SetORM(("AK/textures/ORM.png"));
-                MaterialSystem::AddMaterial("mat", mat);
-
                 firstFrame = false;
                 IMGUI_CHECKVERSION();
                 ImGui::CreateContext();
@@ -129,44 +122,61 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
-                // std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-                // actor->Start();
+                std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                actor->Start();
+                auto amb = actor->AddComponent<AmbientLightComponent>();
+                amb->SetIntensity(0.9f);
 
-                // std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
-                // actor2->Start();
+#if 0
+                // material
+                Material mat;
+                mat.SetAlbedo(("AK/textures/color.png"));
+                mat.SetNormal(("AK/textures/normal.png"));
+                mat.SetORM(("AK/textures/ORM.png"));
+                MaterialSystem::AddMaterial("mat", mat);
 
-                // // TODO: too much hassle to setup a simple mesh, all of this should be default
-                // auto amb = actor->AddComponent<AmbientLightComponent>();
-                // amb->SetIntensity(0.9f);
+                std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
+                actor2->Start();
 
-                // auto point = actor2->AddComponent<PointLightComponent>();
-                // point->SetPosition(Vector3{0, 3, 0});
-                // point->SetColor(Color{0, 255, 0, 255});
-                // point->SetIntensity(10);
-                // point->SetRange(10);
 
-                // auto spot = actor2->AddComponent<SpotLightComponent>();
-                // spot->SetPosition(Vector3{0, -3, -2});
-                // spot->SetColor(Color{0, 0, 255, 255});
-                // spot->SetIntensity(3);
-                // spot->SetRange(100);
-                // spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
+                auto point = actor2->AddComponent<PointLightComponent>();
+                point->SetPosition(Vector3{0, 3, 0});
+                point->SetColor(Color{0, 255, 0, 255});
+                point->SetIntensity(10);
+                point->SetRange(10);
 
-                // auto light = actor2->AddComponent<DirectionalLightComponent>();
-                // light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
-                // light->SetColor(Color{0, 125});
-                // light->SetIntensity(2.0f);
-                // // TODO: test model transformation, must work but still should be tested
+                auto spot = actor2->AddComponent<SpotLightComponent>();
+                spot->SetPosition(Vector3{0, -3, -2});
+                spot->SetColor(Color{0, 0, 255, 255});
+                spot->SetIntensity(3);
+                spot->SetRange(100);
+                spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
+
+                auto light = actor2->AddComponent<DirectionalLightComponent>();
+                light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
+                light->SetColor(Color{0, 125});
+                light->SetIntensity(2.0f);
+                // TODO: test model transformation, must work but still should be tested
                 // ModelSystem::LoadModel("AK/source/AK47.glb", "AK/Source/AK47.glb");
-                // auto m = actor->AddComponent<ModelComponent>(
-                //     ModelSystem::GetModel("AK/source/AK47.glb").get());
-                // //                    actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
+                auto m =
+                    // actor->AddComponent<ModelComponent>(
+                    // ModelSystem::GetModel("AK/source/AK47.glb").get());
+                    actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
+                m->SetMaterial(MaterialSystem::GetMaterial("mat"));
+                m->GetDeltaTransform().Position = Vector3{-1, -3, -2};
+                actor->GetTransform().Position = Vector3{2, 5, 0};
 
-                // scene.AddActor(std::move(actor));
-                // scene.AddActor(std::move(actor2));
+                scene.AddActor(std::move(actor));
+                scene.AddActor(std::move(actor2));
 
                 SceneSerializer ser(&scene);
-                ser.Deserialize("Scene.vwscn");
+                ser.Serialize("Scene2.vwscn");
+#else
+                SceneSerializer ser(&scene);
+                ser.Deserialize("Scene2.vwscn");
+#endif
+
+                scene.AddActor(std::move(actor));
             }
 
             scene.Render();

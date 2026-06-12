@@ -3,6 +3,7 @@
 #include "Core/Logger.h"
 #include "Light/Light.h"
 #include "Light/LightSystem.h"
+#include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Renderer.h"
 #include "Shader/ShaderSystem.h"
@@ -39,9 +40,19 @@ namespace VW
         m_Delta = transform;
     }
 
+    void MeshComponent::Start()
+    {
+        if (!m_Item.Material)
+            m_Item.Material = MaterialSystem::GetDefaultMaterial();
+
+        if (!m_Item.Shader)
+            m_Item.Shader = ShaderSystem::GetEngineShader("Object.glsl");
+    }
+
     void MeshComponent::Render()
     {
         m_Item.Transform = m_Owner->GetTransform().GetMatrix() * m_Delta.GetMatrix();
+
         Renderer::Submit(m_Item);
     }
 
@@ -55,7 +66,7 @@ namespace VW
 
     void ModelComponent::SetTransform(const Transform &transform)
     {
-        m_Transform = transform;
+        m_DeltaTransform = transform;
     }
 
     void ModelComponent::Render()
@@ -66,12 +77,13 @@ namespace VW
         for (const auto &sm : m_Model->GetSubmeshes())
         {
             // TODO: empty names shouldn't happen, but handle it by setting the default material
+            // TODO: use actor's world transform * deltatransform for this
             if (!sm.Mesh || sm.MaterialName.empty())
                 return;
 
             RenderItem item;
             item.Mesh = sm.Mesh.get();
-            item.Transform = m_Transform.GetMatrix();
+            item.Transform = m_Owner->GetTransform().GetMatrix() * m_DeltaTransform.GetMatrix();
             item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
             item.Shader = ShaderSystem::GetEngineShader("Object.glsl");
             Renderer::Submit(item);

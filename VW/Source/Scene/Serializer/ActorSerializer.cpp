@@ -9,7 +9,6 @@
 
 namespace VW
 {
-
     ActorSerializer::ActorSerializer(Actor *actor) : m_Actor(actor)
     {
     }
@@ -34,7 +33,8 @@ namespace VW
         out << YAML::EndMap;
     }
 
-    void ActorSerializer::Deserialize(YAML::Node &node)
+    void ActorSerializer::Deserialize(YAML::Node &node,
+                                      std::unordered_map<std::string, Material> &materialMap)
     {
         VW_CHECK(m_Actor);
 
@@ -42,7 +42,7 @@ namespace VW
         m_Actor->SetName(name);
 
         ComponentSerializer componentSerializer(m_Actor);
-        componentSerializer.Deserialize(node);
+        componentSerializer.Deserialize(node, materialMap);
     }
 
 } // namespace VW

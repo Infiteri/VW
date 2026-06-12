@@ -1,6 +1,7 @@
 #include "ComponentSerializer.h"
 
 #include "Base.h"
+#include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
 #include "Material/MaterialSystem.h"
 #include "Mesh/Mesh.h"
@@ -10,11 +11,16 @@
 #include "Scene/Components.h"
 #include "Shader/ShaderSystem.h"
 
+#include <string>
+#include <unordered_map>
 #include <winscard.h>
 #include <yaml-cpp/yaml.h>
 
 namespace VW
 {
+    static std::unordered_map<std::string, Material>
+        *materialMap; // TODO: no 's_' cus this is the worst code ill ever write
+
     static int _GetNodeCount(const std::string &name, YAML::Node node)
     {
         std::string fmt = name + "Count";
@@ -33,7 +39,6 @@ namespace VW
         VW_SERIALIZE_FIELD("Type", (int)mesh->GetMesh()->GetType());
         VW_SERIALIZE_FIELD("MaterialName", MaterialSystem::GetMaterialName(mesh->GetMaterial()));
         SerializerUtils::SerializeTransform(out, "DeltaTransform", mesh->GetDeltaTransform());
-        SerializerUtils::SerializeTransform(out, "Delta", mesh->GetDeltaTransform());
         out << YAML::EndMap;
     }
 
@@ -45,6 +50,21 @@ namespace VW
             MeshSystem::GetMesh((MeshType)node["Type"].as<int>()).get());
 
         mesh->SetMaterial(MaterialSystem::GetDefaultMaterial());
+
+        if (node["MaterialName"].as<std::string>() != "")
+        {
+            auto name = node["MaterialName"].as<std::string>();
+
+            // FIX: if setting the material's path without setting it's ID, the texture ID will be 0 and the material's texture's will not be loaded
+            // This is why below there are the `material.Set...(material.Get...())` calls, the ID's get filled
+            auto &material = materialMap->at(name);
+            material.SetAlbedo(material.GetAlbedo());
+            material.SetNormal(material.GetNormal());
+            material.SetORM(material.GetORM());
+            MaterialSystem::AddMaterial(name, material);
+            mesh->SetMaterial(MaterialSystem::GetMaterial(name));
+        }
+
         mesh->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
     }
 
@@ -57,7 +77,7 @@ namespace VW
         out << YAML::BeginMap;
         VW_SERIALIZE_FIELD("Path", m->GetPath());
         SerializerUtils::SerializeTransform(out, "DeltaTransform",
-                                            model->GetTransform()); // TODO: RENAME TO DELTA
+                                            model->GetDeltaTransform()); // TODO: RENAME TO DELTA
         out << YAML::EndMap;
     }
 
@@ -91,7 +111,8 @@ namespace VW
         SERIALIZE_COMPONENT(Model);
     }
 
-    void ComponentSerializer::Deserialize(YAML::Node &node)
+    void ComponentSerializer::Deserialize(YAML::Node &node,
+                                          std::unordered_map<std::string, Material> &materialMap2)
     {
         VW_CHECK(m_Actor);
 
@@ -99,6 +120,7 @@ namespace VW
     for (int i = 0; i < _GetNodeCount(name, node); i++) \
     fun(node[std::string(name) + std::string(" ") + std::to_string(i)], m_Actor)
 
+        materialMap = &materialMap2;
         DESERIALIZE_COMPONENT("MeshComponent", _DeserializeMeshComponent);
         DESERIALIZE_COMPONENT("ModelComponent", _DeserializeModelComponent);
     }

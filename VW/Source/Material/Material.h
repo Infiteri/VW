@@ -30,17 +30,17 @@ namespace VW
             return m_Color;
         };
 
-        inline std::string GetAlbedo() const
+        inline const std::string& GetAlbedo() const
         {
             return m_AlbedoPath;
         };
 
-        inline std::string GetNormal() const
+        inline const std::string& GetNormal() const
         {
             return m_NormalPath;
         };
 
-        inline std::string GetORM() const
+        inline const std::string& GetORM() const
         {
             return m_ORMPath;
         };

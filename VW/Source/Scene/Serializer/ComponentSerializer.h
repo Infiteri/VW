@@ -17,7 +17,7 @@ namespace VW
         ~ComponentSerializer() = default;
 
         void Serialize(YAML::Emitter &out);
-        void Deserialize(YAML::Node &out);
+        void Deserialize(YAML::Node &out, std::unordered_map<std::string, Material> &materialMap);
 
     private:
         Actor *m_Actor;

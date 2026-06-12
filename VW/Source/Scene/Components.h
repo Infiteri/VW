@@ -53,6 +53,8 @@ namespace VW
         MeshComponent(Mesh *mesh);
         ~MeshComponent();
 
+        void Start();
+
         void SetMesh(Mesh *mesh);
         void SetMaterial(Material *material);
         void SetShader(Shader *shader);
@@ -68,7 +70,7 @@ namespace VW
             return m_Item.Material;
         }
 
-        inline const Transform &GetDeltaTransform() const
+        inline Transform &GetDeltaTransform()
         {
             return m_Delta;
         }
@@ -95,14 +97,14 @@ namespace VW
             return m_Model;
         }
 
-        inline const Transform &GetTransform() const
+        inline const Transform &GetDeltaTransform() const
         {
-            return m_Transform;
+            return m_DeltaTransform;
         }
 
     private:
         Model *m_Model;
-        Transform m_Transform;
+        Transform m_DeltaTransform;
     };
 
     class VW_API AmbientLightComponent : public Component

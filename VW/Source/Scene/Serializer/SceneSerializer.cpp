@@ -1,11 +1,12 @@
 #include "SceneSerializer.h"
-#include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Scene/Actor.h"
 #include "Scene/Serializer/ActorSerializer.h"
 
+#include <string>
+#include <unordered_map>
 #include <yaml-cpp/yaml.h>
 
 namespace VW
@@ -67,6 +68,7 @@ namespace VW
 
         // load materials
         auto materials = data["Materials"];
+        std::unordered_map<std::string, Material> materialMap; // TODO: horrible
         VW_CHECK(materials);
 
         for (const auto &mat : materials)
@@ -74,15 +76,14 @@ namespace VW
             // TODO: load these materials locally and keep track of them, only add the materials the
             // meshes themselves use. this is to fix bad paths related to models, which is an entire
             // issue on its own
-            break;
             std::string name = mat["Name"].as<std::string>();
 
             Material material;
-            material.SetAlbedo(mat["AlbedoPath"].as<std::string>());
-            material.SetNormal(mat["NormalPath"].as<std::string>());
-            material.SetORM(mat["ORMPath"].as<std::string>());
+            material.SetAlbedoPath(mat["AlbedoPath"].as<std::string>());
+            material.SetNormalPath(mat["NormalPath"].as<std::string>());
+            material.SetORMPath(mat["ORMPath"].as<std::string>());
 
-            MaterialSystem::AddMaterial(name, material);
+            materialMap[name] = material;
         }
 
         auto actors = data["Actors"];
@@ -92,7 +93,7 @@ namespace VW
         {
             auto actor = std::make_unique<Actor>();
             ActorSerializer serializer(actor.get());
-            serializer.Deserialize(actorNode);
+            serializer.Deserialize(actorNode, materialMap);
             m_Scene->AddActor(std::move(actor));
         }
     }
