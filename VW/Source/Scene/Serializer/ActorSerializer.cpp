@@ -1,8 +1,10 @@
 #include "ActorSerializer.h"
 #include "Base.h"
+#include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
 #include "Scene/Serializer/ComponentSerializer.h"
 
+#include <string>
 #include <yaml-cpp/yaml.h>
 
 namespace VW
@@ -35,6 +37,12 @@ namespace VW
     void ActorSerializer::Deserialize(YAML::Node &node)
     {
         VW_CHECK(m_Actor);
+
+        std::string name = node["Name"].as<std::string>();
+        m_Actor->SetName(name);
+
+        ComponentSerializer componentSerializer(m_Actor);
+        componentSerializer.Deserialize(node);
     }
 
 } // namespace VW

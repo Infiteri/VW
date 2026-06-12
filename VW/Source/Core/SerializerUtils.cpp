@@ -7,6 +7,15 @@ namespace VW
 {
     namespace SerializerUtils
     {
+        YAML::Node LoadFromPath(const std::string &path)
+        {
+            std::ifstream stream(path);
+            std::stringstream strStream;
+            strStream << stream.rdbuf();
+            YAML::Node data = YAML::Load(strStream.str());
+            return data;
+        }
+
         void SaveEmitter(YAML::Emitter &em, const std::string &path)
         {
             std::ofstream fout(path);

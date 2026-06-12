@@ -1,6 +1,9 @@
 #include "SceneSerializer.h"
+#include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
+#include "Material/Material.h"
 #include "Material/MaterialSystem.h"
+#include "Scene/Actor.h"
 #include "Scene/Serializer/ActorSerializer.h"
 
 #include <yaml-cpp/yaml.h>
@@ -56,5 +59,41 @@ namespace VW
     void SceneSerializer::Deserialize(const std::string &path)
     {
         VW_CHECK(m_Scene);
+
+        YAML::Node data = SerializerUtils::LoadFromPath(path);
+        VW_CHECK(data);
+
+        m_Scene->SetName(data["Name"].as<std::string>());
+
+        // load materials
+        auto materials = data["Materials"];
+        VW_CHECK(materials);
+
+        for (const auto &mat : materials)
+        {
+            // TODO: load these materials locally and keep track of them, only add the materials the
+            // meshes themselves use. this is to fix bad paths related to models, which is an entire
+            // issue on its own
+            break;
+            std::string name = mat["Name"].as<std::string>();
+
+            Material material;
+            material.SetAlbedo(mat["AlbedoPath"].as<std::string>());
+            material.SetNormal(mat["NormalPath"].as<std::string>());
+            material.SetORM(mat["ORMPath"].as<std::string>());
+
+            MaterialSystem::AddMaterial(name, material);
+        }
+
+        auto actors = data["Actors"];
+        VW_CHECK(actors);
+
+        for (auto actorNode : actors)
+        {
+            auto actor = std::make_unique<Actor>();
+            ActorSerializer serializer(actor.get());
+            serializer.Deserialize(actorNode);
+            m_Scene->AddActor(std::move(actor));
+        }
     }
 } // namespace VW

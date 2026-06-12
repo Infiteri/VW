@@ -17,6 +17,8 @@ namespace VW
 {
     namespace SerializerUtils
     {
+        YAML::Node LoadFromPath(const std::string& path);
+
         void SaveEmitter(YAML::Emitter &em, const std::string& path);
         void SerializeVector3(YAML::Emitter &out, const char* field, const Vector3& vec);
         void SerializeColor(YAML::Emitter &out, const char* field, const Color& color);

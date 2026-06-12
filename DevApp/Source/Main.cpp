@@ -1,7 +1,5 @@
 #include "Camera/CameraSystem.h"
 #include "Camera/PerspectiveCamera.h"
-#include "Mesh/ModelSystem.h"
-#include "Mesh/Model.h"
 #include "CameraController.h"
 #include "Core/Entry.h"
 #include "Core/Logger.h"
@@ -12,6 +10,7 @@
 #include "Math/Quaternion.h"
 #include "Mesh/MeshSystem.h"
 #include "Mesh/Model.h"
+#include "Mesh/ModelSystem.h"
 #include "Renderer.h"
 #include "Scene/Actor.h"
 #include "Scene/Components.h"
@@ -159,8 +158,9 @@ namespace VW
                 // light->SetIntensity(2.0f);
                 // // TODO: test model transformation, must work but still should be tested
                 // ModelSystem::LoadModel("AK/source/AK47.glb", "AK/Source/AK47.glb");
-                // auto m =
-                //     actor->AddComponent<ModelComponent>(ModelSystem::GetModel("AK/source/AK47.glb").get());
+                // auto m = actor->AddComponent<ModelComponent>(
+                //     ModelSystem::GetModel("AK/source/AK47.glb").get());
+                // //                    actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
 
                 // scene.AddActor(std::move(actor));
                 // scene.AddActor(std::move(actor2));
