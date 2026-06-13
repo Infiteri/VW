@@ -26,6 +26,11 @@ namespace VW
         {
             u32 Mesh;
             u32 Model;
+            u32 AmbientLight;
+            u32 DirectionalLight;
+            u32 PointLight;
+            u32 SpotLight;
+
         } m_ComponentCounts;
 
     private:

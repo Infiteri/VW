@@ -127,7 +127,7 @@ namespace VW
                 auto amb = actor->AddComponent<AmbientLightComponent>();
                 amb->SetIntensity(0.9f);
 
-#if 0
+#if 1
                 // material
                 Material mat;
                 mat.SetAlbedo(("AK/textures/color.png"));
@@ -137,7 +137,6 @@ namespace VW
 
                 std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
                 actor2->Start();
-
 
                 auto point = actor2->AddComponent<PointLightComponent>();
                 point->SetPosition(Vector3{0, 3, 0});
@@ -172,11 +171,10 @@ namespace VW
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene2.vwscn");
 #else
+                scene.AddActor(std::move(actor));
                 SceneSerializer ser(&scene);
                 ser.Deserialize("Scene2.vwscn");
 #endif
-
-                scene.AddActor(std::move(actor));
             }
 
             scene.Render();

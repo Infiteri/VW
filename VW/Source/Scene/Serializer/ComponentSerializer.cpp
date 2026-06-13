@@ -11,8 +11,10 @@
 #include "Scene/Components.h"
 #include "Shader/ShaderSystem.h"
 
+#include <immintrin.h>
 #include <string>
 #include <unordered_map>
+#include <windows.h>
 #include <winscard.h>
 #include <yaml-cpp/yaml.h>
 
@@ -55,8 +57,9 @@ namespace VW
         {
             auto name = node["MaterialName"].as<std::string>();
 
-            // FIX: if setting the material's path without setting it's ID, the texture ID will be 0 and the material's texture's will not be loaded
-            // This is why below there are the `material.Set...(material.Get...())` calls, the ID's get filled
+            // FIX: if setting the material's path without setting it's ID, the texture ID will be 0
+            // and the material's texture's will not be loaded This is why below there are the
+            // `material.Set...(material.Get...())` calls, the ID's get filled
             auto &material = materialMap->at(name);
             material.SetAlbedo(material.GetAlbedo());
             material.SetNormal(material.GetNormal());
@@ -76,8 +79,7 @@ namespace VW
         out << YAML::Key << "ModelComponent " + std::to_string(index);
         out << YAML::BeginMap;
         VW_SERIALIZE_FIELD("Path", m->GetPath());
-        SerializerUtils::SerializeTransform(out, "DeltaTransform",
-                                            model->GetDeltaTransform()); // TODO: RENAME TO DELTA
+        SerializerUtils::SerializeTransform(out, "DeltaTransform", model->GetDeltaTransform());
         out << YAML::EndMap;
     }
 
@@ -88,6 +90,76 @@ namespace VW
 
         auto m = actor->AddComponent<ModelComponent>(
             ModelSystem::GetModel(node["Path"].as<std::string>()).get());
+    }
+
+    static void _SerializeAmbientLightComponent(YAML::Emitter &out, AmbientLightComponent *ambient,
+                                                u32 index)
+    {
+        VW_CHECK(ambient);
+        out << YAML::Key << "AmbientLightComponent " + std::to_string(index);
+        out << YAML::BeginMap;
+
+        // TODO: this should be common in all lights
+        // TODO: to fix this repetition, there should be a common `LightComponent` class
+        {
+            SerializerUtils::SerializeColor(out, "Color", ambient->GetColor());
+            VW_SERIALIZE_FIELD("Intensity", ambient->GetIntensity());
+        }
+        out << YAML::EndMap;
+    }
+
+    static void _SerializeDirectionalLightComponent(YAML::Emitter &out,
+                                                    DirectionalLightComponent *directional,
+                                                    u32 index)
+    {
+        VW_CHECK(directional);
+        out << YAML::Key << "DirectionalLightComponent " + std::to_string(index);
+        out << YAML::BeginMap;
+
+        SerializerUtils::SerializeVector3(out, "Direction", directional->GetDirection());
+
+        {
+            SerializerUtils::SerializeColor(out, "Color", directional->GetColor());
+            VW_SERIALIZE_FIELD("Intensity", directional->GetIntensity());
+        }
+        out << YAML::EndMap;
+    }
+
+    static void _SerializePointLightComponent(YAML::Emitter &out, PointLightComponent *point,
+                                              u32 index)
+    {
+        VW_CHECK(point);
+        out << YAML::Key << "PointLightComponent " + std::to_string(index);
+        out << YAML::BeginMap;
+        SerializerUtils::SerializeVector3(out, "Position", point->GetPosition());
+        VW_SERIALIZE_FIELD("Range", point->GetRange());
+
+        {
+            SerializerUtils::SerializeColor(out, "Color", point->GetColor());
+            VW_SERIALIZE_FIELD("Intensity", point->GetIntensity());
+        }
+
+        out << YAML::EndMap;
+    }
+
+    static void _SerializeSpotLightComponent(YAML::Emitter &out, SpotLightComponent *spot,
+                                             u32 index)
+    {
+        VW_CHECK(spot);
+        out << YAML::Key << "SpotLightComponent " + std::to_string(index);
+        out << YAML::BeginMap;
+        SerializerUtils::SerializeVector3(out, "Position", spot->GetPosition());
+        SerializerUtils::SerializeVector3(out, "Direction", spot->GetDirection());
+        VW_SERIALIZE_FIELD("Range", spot->GetRange());
+        VW_SERIALIZE_FIELD("InnerConeAngle", spot->GetInnerConeAngle());
+        VW_SERIALIZE_FIELD("OuterConeAngle", spot->GetOuterConeAngle());
+
+        {
+            SerializerUtils::SerializeColor(out, "Color", spot->GetColor());
+            VW_SERIALIZE_FIELD("Intensity", spot->GetIntensity());
+        }
+
+        out << YAML::EndMap;
     }
 
     ComponentSerializer::ComponentSerializer(Actor *actor) : m_Actor(actor)
@@ -109,6 +181,10 @@ namespace VW
 
         SERIALIZE_COMPONENT(Mesh);
         SERIALIZE_COMPONENT(Model);
+        SERIALIZE_COMPONENT(AmbientLight);
+        SERIALIZE_COMPONENT(DirectionalLight);
+        SERIALIZE_COMPONENT(PointLight);
+        SERIALIZE_COMPONENT(SpotLight);
     }
 
     void ComponentSerializer::Deserialize(YAML::Node &node,
@@ -135,5 +211,9 @@ namespace VW
 
         GET_SER_COUNT(Mesh);
         GET_SER_COUNT(Model);
+        GET_SER_COUNT(AmbientLight);
+        GET_SER_COUNT(DirectionalLight);
+        GET_SER_COUNT(PointLight);
+        GET_SER_COUNT(SpotLight);
     }
 } // namespace VW
