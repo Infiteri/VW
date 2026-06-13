@@ -108,6 +108,18 @@ namespace VW
         out << YAML::EndMap;
     }
 
+    static void _DeserializeAmbientLightComponent(YAML::Node node, Actor *actor)
+    {
+        VW_CHECK(actor);
+        auto a = actor->AddComponent<AmbientLightComponent>();
+
+        // TODO: this is also common deserialization for all `LightComponent`s
+        {
+            a->SetIntensity(node["Intensity"].as<float>());
+            a->SetColor(SerializerUtils::DeserializeColor(node["Color"]));
+        }
+    }
+
     static void _SerializeDirectionalLightComponent(YAML::Emitter &out,
                                                     DirectionalLightComponent *directional,
                                                     u32 index)
@@ -125,6 +137,19 @@ namespace VW
         out << YAML::EndMap;
     }
 
+    static void _DeserializeDirectionalLightComponent(YAML::Node node, Actor *actor)
+    {
+        VW_CHECK(actor);
+        auto a = actor->AddComponent<DirectionalLightComponent>();
+
+        {
+            a->SetIntensity(node["Intensity"].as<float>());
+            a->SetColor(SerializerUtils::DeserializeColor(node["Color"]));
+        }
+
+        a->SetDirection(SerializerUtils::DeserializeVector3(node["Direction"]));
+    }
+
     static void _SerializePointLightComponent(YAML::Emitter &out, PointLightComponent *point,
                                               u32 index)
     {
@@ -140,6 +165,20 @@ namespace VW
         }
 
         out << YAML::EndMap;
+    }
+
+    static void _DeserializePointLightComponent(YAML::Node node, Actor *actor)
+    {
+        VW_CHECK(actor);
+        auto a = actor->AddComponent<PointLightComponent>();
+
+        {
+            a->SetIntensity(node["Intensity"].as<float>());
+            a->SetColor(SerializerUtils::DeserializeColor(node["Color"]));
+        }
+
+        a->SetPosition(SerializerUtils::DeserializeVector3(node["Position"]));
+        a->SetRange(node["Range"].as<float>());
     }
 
     static void _SerializeSpotLightComponent(YAML::Emitter &out, SpotLightComponent *spot,
@@ -160,6 +199,23 @@ namespace VW
         }
 
         out << YAML::EndMap;
+    }
+
+    static void _DeserializeSpotLightComponent(YAML::Node node, Actor *actor)
+    {
+        VW_CHECK(actor);
+        auto a = actor->AddComponent<SpotLightComponent>();
+
+        {
+            a->SetIntensity(node["Intensity"].as<float>());
+            a->SetColor(SerializerUtils::DeserializeColor(node["Color"]));
+        }
+
+        a->SetPosition(SerializerUtils::DeserializeVector3(node["Position"]));
+        a->SetDirection(SerializerUtils::DeserializeVector3(node["Direction"]));
+        a->SetRange(node["Range"].as<float>());
+        a->SetInnerConeAngle(node["InnerConeAngle"].as<float>());
+        a->SetOuterConeAngle(node["OuterConeAngle"].as<float>());
     }
 
     ComponentSerializer::ComponentSerializer(Actor *actor) : m_Actor(actor)
@@ -199,6 +255,10 @@ namespace VW
         materialMap = &materialMap2;
         DESERIALIZE_COMPONENT("MeshComponent", _DeserializeMeshComponent);
         DESERIALIZE_COMPONENT("ModelComponent", _DeserializeModelComponent);
+        DESERIALIZE_COMPONENT("AmbientLightComponent", _DeserializeAmbientLightComponent);
+        DESERIALIZE_COMPONENT("DirectionalLightComponent", _DeserializeDirectionalLightComponent);
+        DESERIALIZE_COMPONENT("PointLightComponent", _DeserializePointLightComponent);
+        DESERIALIZE_COMPONENT("SpotLightComponent", _DeserializeSpotLightComponent);
     }
 
     void ComponentSerializer::_GetAndSerializeComponentCounts(YAML::Emitter &out)

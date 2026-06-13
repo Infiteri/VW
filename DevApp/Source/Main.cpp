@@ -122,20 +122,20 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
+#if 1
                 std::unique_ptr<Actor> actor = std::make_unique<Actor>();
                 actor->Start();
                 auto amb = actor->AddComponent<AmbientLightComponent>();
                 amb->SetIntensity(0.9f);
 
-#if 1
                 // material
                 Material mat;
                 mat.SetAlbedo(("AK/textures/color.png"));
                 mat.SetNormal(("AK/textures/normal.png"));
                 mat.SetORM(("AK/textures/ORM.png"));
                 MaterialSystem::AddMaterial("mat", mat);
-
                 std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
+
                 actor2->Start();
 
                 auto point = actor2->AddComponent<PointLightComponent>();
@@ -171,12 +171,14 @@ namespace VW
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene2.vwscn");
 #else
-                scene.AddActor(std::move(actor));
+                //            scene.AddActor(std::move(actor));
                 SceneSerializer ser(&scene);
                 ser.Deserialize("Scene2.vwscn");
+                scene.Start();
 #endif
             }
 
+            // TODO:
             scene.Render();
 
             if (s_RebuildGrid)

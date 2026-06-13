@@ -43,5 +43,18 @@ namespace VW
             SerializerUtils::SerializeVector3(out, "Scale", transform.Scale);
             out << YAML::EndMap;
         }
+
+        Color DeserializeColor(const YAML::Node &node)
+        {
+            // TODO: safety checks
+            return Color(node[0].as<float>(), node[1].as<float>(), node[2].as<float>(),
+                         node[3].as<float>());
+        }
+
+        Vector3 DeserializeVector3(const YAML::Node &node)
+        {
+            // TODO: safety checks
+            return Vector3(node[0].as<float>(), node[1].as<float>(), node[2].as<float>());
+        }
     } // namespace SerializerUtils
 } // namespace VW
