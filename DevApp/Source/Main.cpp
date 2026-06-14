@@ -22,6 +22,7 @@
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <cmath>
 #include <glfw/glfw3.h>
 #include <imgui.h>
 #include <memory>
@@ -123,68 +124,62 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
-#if 0
+#if 1
                 scene.GetSky().SetShaderMode("Sky.glsl");
                 scene.GetSky().GetShaderUniforms().AddUniform("uColor", Color({1, 125, 255, 255}));
                 scene.GetSky().GetShaderUniforms().AddUniform("uIntensity", 1.0f);
                 scene.GetSky().GetShaderUniforms().AddUniform("uTiling", Vector2({4.0f, 4.0f}));
-                scene.GetSky().GetShaderUniforms().AddUniform("uOffset", Vector3({0.5f, 0.0f, 0.0f}));
-                scene.GetSky().GetShaderUniforms().AddUniform("uClipPlane", Vector4({0.0f, 1.0f, 0.0f, 10.0f}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uOffset",
+                                                              Vector3({0.5f, 0.0f, 0.0f}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uClipPlane",
+                                                              Vector4({0.0f, 1.0f, 0.0f, 10.0f}));
                 scene.GetSky().GetShaderUniforms().AddUniform("uSampleCount", 8);
 
-                // CubemapTexture::Configuration config;
-                // config.Left = "posz.jpg";
-                // config.Right = "posz.jpg";
-                // config.Top = "posz.jpg";
-                // config.Bottom = "posz.jpg";
-                // config.Front = "posz.jpg";
-                // config.Back = "posz.jpg";
-                // scene.GetSky().SetSkyboxMode(config);
+                ModelSystem::LoadModel("AK/source/AK47.glb", "a.obj");
 
-                std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-                actor->Start();
-                auto amb = actor->AddComponent<AmbientLightComponent>();
-                amb->SetIntensity(0.9f);
+                {
+                    std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                    actor->Start();
+                    actor->GetTransform().Scale = Vector3{0.05f, 0.05f, 0.05f};
+                    auto amb = actor->AddComponent<AmbientLightComponent>();
+                    amb->SetIntensity(0.6f);
+                    auto mc = actor->AddComponent<ModelComponent>(
+                        ModelSystem::GetModel("AK/source/AK47.glb").get());
+                    scene.AddActor(std::move(actor));
+                }
 
-                // material
-                Material mat;
-                mat.SetAlbedo(("AK/textures/color.png"));
-                mat.SetNormal(("AK/textures/normal.png"));
-                mat.SetORM(("AK/textures/ORM.png"));
-                MaterialSystem::AddMaterial("mat", mat);
-                std::unique_ptr<Actor> actor2 = std::make_unique<Actor>();
+                {
+                    std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                    actor->Start();
+                    auto pl = actor->AddComponent<PointLightComponent>();
+                    pl->SetPosition(Vector3{3, 2, 0});
+                    pl->SetColor(Color{255, 0, 0, 255});
+                    pl->SetIntensity(10);
+                    pl->SetRange(15);
+                    scene.AddActor(std::move(actor));
+                }
 
-                actor2->Start();
+                {
+                    std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                    actor->Start();
+                    auto sl = actor->AddComponent<SpotLightComponent>();
+                    sl->SetPosition(Vector3{0, 5, 0});
+                    sl->SetColor(Color{0, 255, 255, 255});
+                    sl->SetIntensity(5);
+                    sl->SetRange(20);
+                    sl->SetDirection(Vector3{0, -1, 0});
+                    scene.AddActor(std::move(actor));
+                }
 
-                auto point = actor2->AddComponent<PointLightComponent>();
-                point->SetPosition(Vector3{0, 3, 0});
-                point->SetColor(Color{0, 255, 0, 255});
-                point->SetIntensity(10);
-                point->SetRange(10);
-
-                auto spot = actor2->AddComponent<SpotLightComponent>();
-                spot->SetPosition(Vector3{0, -3, -2});
-                spot->SetColor(Color{0, 0, 255, 255});
-                spot->SetIntensity(3);
-                spot->SetRange(100);
-                spot->SetDirection(Vector3{0.0f, 1.0f, 1.0f});
-
-                auto light = actor2->AddComponent<DirectionalLightComponent>();
-                light->SetDirection(Vector3{0.0f, -1.0f, -1.0f});
-                light->SetColor(Color{0, 125});
-                light->SetIntensity(2.0f);
-                // TODO: test model transformation, must work but still should be tested
-                // ModelSystem::LoadModel("AK/source/AK47.glb", "AK/Source/AK47.glb");
-                auto m =
-                    // actor->AddComponent<ModelComponent>(
-                    // ModelSystem::GetModel("AK/source/AK47.glb").get());
-                    actor->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
-                m->SetMaterial(MaterialSystem::GetMaterial("mat"));
-                m->GetDeltaTransform().Position = Vector3{-1, -3, -2};
-                actor->GetTransform().Position = Vector3{2, 5, 0};
-
-                scene.AddActor(std::move(actor));
-                scene.AddActor(std::move(actor2));
+                {
+                    std::unique_ptr<Actor> actor = std::make_unique<Actor>();
+                    actor->Start();
+                    auto dl = actor->AddComponent<DirectionalLightComponent>();
+                    dl->SetDirection(Vector3{0.5f, -1.0f, -0.5f});
+                    dl->SetColor(Color{255, 255, 200, 255});
+                    dl->SetIntensity(1.5f);
+                    scene.AddActor(std::move(actor));
+                }
 
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene2.vwscn");

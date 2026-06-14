@@ -41,7 +41,7 @@ namespace VW
             }
             u32 id = (u32)TextureSystem::CreateTextureFromData(cacheKey, pixels, w, h, c);
             stbi_image_free(pixels);
-            VW_INFO("vwrn", "Loaded embedded texture: %s", cacheKey.c_str());
+            VW_DEBUG("vwrn", "Loaded embedded texture: %s", cacheKey.c_str());
             return id;
         }
         VW_WARN("vwrn", "Uncompressed embedded texture not supported: %s", cacheKey.c_str());
@@ -184,7 +184,7 @@ namespace VW
             for (u32 i = 0; i < scene->mNumMaterials; i++)
                 CreateMaterialFromAssimp(scene->mMaterials[i], scene, textureDir);
         }
-        VW_INFO("vwrn", "Loaded model '%s' (%zu submeshes)", path.c_str(),
+        VW_DEBUG("vwrn", "Loaded model '%s' (%zu submeshes)", path.c_str(),
                 model->m_Submeshes.size());
         model->m_Path = path;
         return model;
