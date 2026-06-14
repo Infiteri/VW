@@ -124,18 +124,22 @@ namespace VW
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
 #if 1
-                // scene.GetSky().SetShaderMode("Sky.glsl");
-                // scene.GetSky().GetShaderUniforms().AddUniform("uColor", Color({1, 125, 255,
-                // 255}));
+                scene.GetSky().SetShaderMode("Sky.glsl");
+                scene.GetSky().GetShaderUniforms().AddUniform("uColor", Color({1, 125, 255, 255}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uIntensity", 1.0f);
+                scene.GetSky().GetShaderUniforms().AddUniform("uTiling", Vector2({4.0f, 4.0f}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uOffset", Vector3({0.5f, 0.0f, 0.0f}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uClipPlane", Vector4({0.0f, 1.0f, 0.0f, 10.0f}));
+                scene.GetSky().GetShaderUniforms().AddUniform("uSampleCount", 8);
 
-                CubemapTexture::Configuration config;
-                config.Left = "posz.jpg";
-                config.Right = "posz.jpg";
-                config.Top = "posz.jpg";
-                config.Bottom = "posz.jpg";
-                config.Front = "posz.jpg";
-                config.Back = "posz.jpg";
-                scene.GetSky().SetSkyboxMode(config);
+                // CubemapTexture::Configuration config;
+                // config.Left = "posz.jpg";
+                // config.Right = "posz.jpg";
+                // config.Top = "posz.jpg";
+                // config.Bottom = "posz.jpg";
+                // config.Front = "posz.jpg";
+                // config.Back = "posz.jpg";
+                // scene.GetSky().SetSkyboxMode(config);
 
                 std::unique_ptr<Actor> actor = std::make_unique<Actor>();
                 actor->Start();

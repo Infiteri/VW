@@ -58,8 +58,7 @@ namespace VW
 
         case SkyMode::Shader:
             VW_SERIALIZE_FIELD("Path", sky->GetShaderPath());
-            // TODO: serialize shader uniforms
-
+            SerializerUtils::SerializeShaderUniforms(out, sky->GetShaderUniforms());
             break;
         }
 
