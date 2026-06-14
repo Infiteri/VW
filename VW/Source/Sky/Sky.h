@@ -35,6 +35,21 @@ namespace VW
             return m_Mode;
         };
 
+        inline Color GetColor() const
+        {
+            return m_ColorData.Color;
+        };
+
+        inline const CubemapTexture::Configuration &GetSkyboxConfig() const
+        {
+            return m_SkyboxData.Config;
+        };
+
+        inline const std::string &GetShaderPath() const
+        {
+            return m_ShaderData.Path;
+        };
+
         inline ShaderUniforms &GetShaderUniforms()
         {
             return m_ShaderData.Uniforms;
@@ -52,11 +67,13 @@ namespace VW
         struct
         {
             CubemapTexture Texture;
+            CubemapTexture::Configuration Config;
         } m_SkyboxData;
 
         struct
         {
             Shader *Shader;
+            std::string Path;
             ShaderUniforms Uniforms;
         } m_ShaderData;
 

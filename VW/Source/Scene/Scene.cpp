@@ -1,10 +1,13 @@
 #include "Scene.h"
+#include "Renderer.h"
 
 namespace VW
 {
     Scene::Scene(const std::string &name) : m_Name(name)
     {
         m_MustStartActors = false;
+
+        m_Sky.SetColorMode({0, 125});
     }
 
     Scene::~Scene()
@@ -16,6 +19,8 @@ namespace VW
         m_MustStartActors = true;
         for (auto &actor : m_Actors)
             actor->Start();
+
+        Renderer::SetSky(&m_Sky);
     }
 
     void Scene::Render()

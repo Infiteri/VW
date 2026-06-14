@@ -8,6 +8,7 @@
 #include "Math/Matrix.h"
 #include "Mesh/Mesh.h"
 #include "RenderDebug.h"
+#include "Sky/Sky.h"
 #include <vector>
 
 namespace VW
@@ -58,6 +59,8 @@ namespace VW
             RendererDebugSettings Debug;
 
             float Time, DeltaTime;
+
+            class Sky *Sky;
         };
 
     public:
@@ -77,6 +80,8 @@ namespace VW
         static void BeginFrame();
         static void Render();
         static void EndFrame();
+
+        static void SetSky(Sky *sky);
 
         // TODO: move to separate file
         static float GetDeltaTime();

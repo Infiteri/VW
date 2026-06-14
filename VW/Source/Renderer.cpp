@@ -8,8 +8,6 @@
 #include "RenderDebug.h"
 #include "Shader/Shader.h"
 #include "Shader/ShaderSystem.h"
-#include "Sky/Sky.h"
-#include "Texture/CubemapTexture.h"
 #include "Texture/TextureSystem.h"
 #include <chrono>
 #include <glad/glad.h>
@@ -17,7 +15,6 @@
 namespace VW
 {
     static Renderer::State s_State;
-    static Sky sky;
 
     RenderItem::RenderItem()
     {
@@ -45,16 +42,6 @@ namespace VW
         MaterialSystem::Init();
         MeshSystem::Init();
         LightSystem::Init();
-
-        CubemapTexture::Configuration config;
-        config.Left = "posz.jpg";
-        config.Right = "posz.jpg";
-        config.Top = "posz.jpg";
-        config.Bottom = "posz.jpg";
-        config.Front = "posz.jpg";
-        config.Back = "posz.jpg";
-        sky.SetShaderMode("Sky.glsl");
-        sky.GetShaderUniforms().AddUniform("uColor", Color({0, 125, 255, 255}));
     }
 
     void Renderer::Shutdown()
@@ -107,7 +94,13 @@ namespace VW
             s_State.Frustum.Extract(vp);
         }
 
-        sky.Render();
+        if (s_State.Sky)
+            s_State.Sky->Render();
+        else
+        {
+            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
     }
 
     void Renderer::Render()
@@ -123,6 +116,11 @@ namespace VW
             (item.Transform[0] == 0.0f && item.Transform[5] == 0.0f && item.Transform[10] == 0.0f))
             return;
         s_State.RenderQueue.push_back(item);
+    }
+
+    void Renderer::SetSky(class Sky *sky)
+    {
+        s_State.Sky = sky;
     }
 
     static Vector3 TransformPoint(const float matrix[16], const Vector3 &point)
@@ -200,7 +198,6 @@ namespace VW
 
     void RendererUtils::CoreUniformsToShader(Shader *shader)
     {
-        void CoreUniformsToShader(Shader * shader);
         auto camera = CameraSystem::GetActiveCamera();
         if (!shader || !camera)
             return;

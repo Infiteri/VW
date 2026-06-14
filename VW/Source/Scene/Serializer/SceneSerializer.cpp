@@ -4,6 +4,8 @@
 #include "Material/MaterialSystem.h"
 #include "Scene/Actor.h"
 #include "Scene/Serializer/ActorSerializer.h"
+#include "Sky/Sky.h"
+#include "yaml-cpp/emittermanip.h"
 
 #include <string>
 #include <unordered_map>
@@ -32,6 +34,38 @@ namespace VW
         out << YAML::EndSeq;
     }
 
+    static void _SerializeSky(YAML::Emitter &out, Sky *sky)
+    {
+        VW_SERIALIZE_FIELD("Sky", YAML::BeginMap);
+        VW_SERIALIZE_FIELD("Mode", (int)sky->GetMode());
+
+        switch (sky->GetMode())
+        {
+        case SkyMode::Color:
+        {
+            SerializerUtils::SerializeColor(out, "Color", sky->GetColor());
+        }
+        break;
+
+        case SkyMode::Skybox:
+            VW_SERIALIZE_FIELD("Left", sky->GetSkyboxConfig().Left);
+            VW_SERIALIZE_FIELD("Right", sky->GetSkyboxConfig().Right);
+            VW_SERIALIZE_FIELD("Top", sky->GetSkyboxConfig().Top);
+            VW_SERIALIZE_FIELD("Bottom", sky->GetSkyboxConfig().Bottom);
+            VW_SERIALIZE_FIELD("Front", sky->GetSkyboxConfig().Front);
+            VW_SERIALIZE_FIELD("Back", sky->GetSkyboxConfig().Back);
+            break;
+
+        case SkyMode::Shader:
+            VW_SERIALIZE_FIELD("Path", sky->GetShaderPath());
+            // TODO: serialize shader uniforms
+
+            break;
+        }
+
+        out << YAML::EndMap;
+    }
+
     SceneSerializer::SceneSerializer(Scene *scene) : m_Scene(scene)
     {
     }
@@ -44,6 +78,7 @@ namespace VW
         out << YAML::BeginMap;
         VW_SERIALIZE_FIELD("Name", m_Scene->GetName().c_str());
         _SerializeMaterials(out);
+        _SerializeSky(out, &m_Scene->GetSky());
         VW_SERIALIZE_FIELD("Actors", YAML::BeginSeq);
 
         for (const auto &actor : m_Scene->m_Actors)

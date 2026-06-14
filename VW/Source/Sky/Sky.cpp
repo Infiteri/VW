@@ -147,6 +147,7 @@ namespace VW
     {
         m_Mode = SkyMode::Skybox;
 
+        m_SkyboxData.Config = config;
         m_SkyboxData.Texture.Destroy();
         m_SkyboxData.Texture.Load(config);
     }
@@ -155,6 +156,7 @@ namespace VW
     {
         m_Mode = SkyMode::Shader;
 
+        m_ShaderData.Path = path;
         m_ShaderData.Shader = ShaderSystem::GetShader(path);
     }
 

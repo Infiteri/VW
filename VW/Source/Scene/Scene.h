@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "Scene/Actor.h"
+#include "Sky/Sky.h"
 #include <memory>
 #include <vector>
 
@@ -26,11 +27,22 @@ namespace VW
             return m_Name;
         }
 
+        // TODO: how would sky setting work?
+        inline Sky &GetSky()
+        {
+            return m_Sky;
+        }
+
     private:
         bool m_MustStartActors = false;
         std::vector<std::unique_ptr<Actor>> m_Actors;
 
         std::string m_Name;
+
+        Sky m_Sky; // TODO: a sky variable here? in the context of a wallpaper engine a `Sky`
+                   // doesn't make the most sense, for 2D scene a `sky` might be called a
+                   // `background`, tho it doesn't matter as i don't imagine most scenes will be in
+                   // 2D
 
         friend class SceneSerializer;
     };

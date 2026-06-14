@@ -19,6 +19,7 @@ void main() {
 in vec3 vUVs;
 uniform float uTime;
 uniform vec3 uCamPos;
+uniform vec4 uColor;
 out vec4 FragColor;
 
 void main()
@@ -36,5 +37,5 @@ void main()
     float sunDot = max(dot(ray, sunDir), 0.0);
     col += vec3(0.3, 0.2, 0.1) * pow(sunDot, 64.0) * 0.08;
 
-    FragColor = vec4(col, 1.0);
+    FragColor = vec4(col * uColor.rgb, 1.0);
 }
