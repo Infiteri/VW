@@ -10,6 +10,7 @@
 #include "Shader/ShaderSystem.h"
 #include "Texture/TextureSystem.h"
 #include <chrono>
+#include <cmath>
 #include <glad/glad.h>
 
 namespace VW
@@ -151,13 +152,18 @@ namespace VW
         {
             if (!item.Mesh)
                 continue;
-            Vector3 pos = {item.Transform.data[12], item.Transform.data[13],
-                           item.Transform.data[14]};
-            Vector3 worldCenter = pos + item.Mesh->GetBoundsCenter();
-            float maxScale =
-                std::max(item.Transform[0], std::max(item.Transform[5], item.Transform[10]));
+            Vector3 worldCenter = TransformPoint(item.Transform.data, item.Mesh->GetBoundsCenter());
 
-            float worldRadius = item.Mesh->GetBoundsRadius() * maxScale;
+            float maxScaleSq = 0.0f;
+            for (int i = 0; i < 3; i++)
+            {
+                float lenSq = item.Transform.data[i * 4] * item.Transform.data[i * 4] +
+                              item.Transform.data[i * 4 + 1] * item.Transform.data[i * 4 + 1] +
+                              item.Transform.data[i * 4 + 2] * item.Transform.data[i * 4 + 2];
+                maxScaleSq = std::max(maxScaleSq, lenSq);
+            }
+
+            float worldRadius = item.Mesh->GetBoundsRadius() * std::sqrt(maxScaleSq);
             if (s_State.Frustum.IsSphereInside(worldCenter, worldRadius))
             {
                 s_State.Batch->Submit(item.Mesh, item.Transform, item.Material, item.Shader);
