@@ -6,8 +6,6 @@ namespace VW
     Scene::Scene(const std::string &name) : m_Name(name)
     {
         m_MustStartActors = false;
-
-        m_Sky.SetColorMode({0, 125});
     }
 
     Scene::~Scene()

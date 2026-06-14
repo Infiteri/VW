@@ -1,10 +1,12 @@
 #include "SceneSerializer.h"
+#include "Base.h"
 #include "Core/SerializerUtils.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Scene/Actor.h"
 #include "Scene/Serializer/ActorSerializer.h"
 #include "Sky/Sky.h"
+#include "Texture/CubemapTexture.h"
 #include "yaml-cpp/emittermanip.h"
 
 #include <string>
@@ -48,21 +50,64 @@ namespace VW
         break;
 
         case SkyMode::Skybox:
+        {
             VW_SERIALIZE_FIELD("Left", sky->GetSkyboxConfig().Left);
             VW_SERIALIZE_FIELD("Right", sky->GetSkyboxConfig().Right);
             VW_SERIALIZE_FIELD("Top", sky->GetSkyboxConfig().Top);
             VW_SERIALIZE_FIELD("Bottom", sky->GetSkyboxConfig().Bottom);
             VW_SERIALIZE_FIELD("Front", sky->GetSkyboxConfig().Front);
             VW_SERIALIZE_FIELD("Back", sky->GetSkyboxConfig().Back);
-            break;
+        }
+        break;
 
         case SkyMode::Shader:
+        {
             VW_SERIALIZE_FIELD("Path", sky->GetShaderPath());
-            SerializerUtils::SerializeShaderUniforms(out, sky->GetShaderUniforms());
-            break;
+            SerializerUtils::SerializeShaderUniforms(out, "Uniforms", sky->GetShaderUniforms());
+        }
+        break;
         }
 
         out << YAML::EndMap;
+    }
+
+    static void _DeserializeSky(const YAML::Node &node, Sky &sky)
+    {
+        SkyMode mode = (SkyMode)node["Mode"].as<int>();
+
+        switch (mode)
+        {
+        case SkyMode::Color:
+        {
+            Color color = SerializerUtils::DeserializeColor(node["Color"]);
+            sky.SetColorMode(color);
+        }
+        break;
+
+        case SkyMode::Skybox:
+        {
+            // TODO: As discussed below, checking if these fields exist, and logging if not present
+            // is a MUST in the future
+            CubemapTexture::Configuration config;
+            config.Left = node["Left"].as<std::string>();
+            config.Right = node["Right"].as<std::string>();
+            config.Top = node["Top"].as<std::string>();
+            config.Bottom = node["Bottom"].as<std::string>();
+            config.Front = node["Front"].as<std::string>();
+            config.Back = node["Back"].as<std::string>();
+            sky.SetSkyboxMode(config);
+        }
+        break;
+
+        case SkyMode::Shader:
+        {
+            std::string path = node["Path"].as<std::string>();
+            sky.SetShaderMode(path);
+
+            SerializerUtils::DeserializeShaderUniforms(node["Uniforms"], sky.GetShaderUniforms());
+        }
+        break;
+        }
     }
 
     SceneSerializer::SceneSerializer(Scene *scene) : m_Scene(scene)
@@ -91,6 +136,12 @@ namespace VW
         SerializerUtils::SaveEmitter(out, path);
     }
 
+    // TODO: really thinking about adding debug logs to the engine because debug logs are really
+    // useful for tracking issues from users, this is a first good place to add logging which
+    // Actors/Components are being deserialized, which scene parts are being deserialized or which
+    // of the aforementioned parts are missing is very useful right now `VW_CHECK` just `return`s
+    // with no log and `Deserialize` doesn't even have a `bool` return type which means there is no
+    // way to know if something went wrong (and what went wrong)
     void SceneSerializer::Deserialize(const std::string &path)
     {
         VW_CHECK(m_Scene);
@@ -99,6 +150,10 @@ namespace VW
         VW_CHECK(data);
 
         m_Scene->SetName(data["Name"].as<std::string>());
+
+        auto sky = data["Sky"];
+        VW_CHECK(sky);
+        _DeserializeSky(sky, m_Scene->GetSky());
 
         // load materials
         auto materials = data["Materials"];

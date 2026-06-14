@@ -22,16 +22,21 @@ namespace VW
         YAML::Node LoadFromPath(const std::string &path);
 
         void SaveEmitter(YAML::Emitter &em, const std::string &path);
+
         void SerializeVector2(YAML::Emitter &out, const char *field, const Vector2 &vec);
         void SerializeVector3(YAML::Emitter &out, const char *field, const Vector3 &vec);
         void SerializeVector4(YAML::Emitter &out, const char *field, const Vector4 &vec);
         void SerializeColor(YAML::Emitter &out, const char *field, const Color &color);
         void SerializeTransform(YAML::Emitter &out, const char *field, const Transform &transform);
 
-        Color DeserializeColor(const YAML::Node &node);
+        Vector2 DeserializeVector2(const YAML::Node &node);
         Vector3 DeserializeVector3(const YAML::Node &node);
+        Vector4 DeserializeVector4(const YAML::Node &node);
+        Color DeserializeColor(const YAML::Node &node);
 
         // NOTE: Specific serialization functions
-        void SerializeShaderUniforms(YAML::Emitter &out, const ShaderUniforms &uniforms);
+        void SerializeShaderUniforms(YAML::Emitter &out, const char *field,
+                                     const ShaderUniforms &uniforms);
+        void DeserializeShaderUniforms(const YAML::Node &node, ShaderUniforms &uniforms);
     } // namespace SerializerUtils
 } // namespace VW

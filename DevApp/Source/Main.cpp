@@ -123,7 +123,7 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
-#if 1
+#if 0
                 scene.GetSky().SetShaderMode("Sky.glsl");
                 scene.GetSky().GetShaderUniforms().AddUniform("uColor", Color({1, 125, 255, 255}));
                 scene.GetSky().GetShaderUniforms().AddUniform("uIntensity", 1.0f);
