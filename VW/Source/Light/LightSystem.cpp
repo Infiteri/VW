@@ -56,7 +56,6 @@ namespace VW
 
         for (auto &light : s_State.Lights)
         {
-
             if (s_State.GPULights.size() >= s_State.MaxLights)
             {
                 VW_WARN("vwrn", "Max lights reached (%u), some lights will not be rendered",
@@ -76,7 +75,7 @@ namespace VW
             case LightType::Directional:
             {
                 auto dirLight = std::static_pointer_cast<DirectionalLight>(light);
-                Vector3 dir = dirLight->GetDirection();
+                Vector3 dir = dirLight->GetDirection().Normalized();
                 gpuLight.Data.x = 1.0f;
                 gpuLight.Direction = Vector4(dir.x, dir.y, dir.z, 0.0f);
                 break;

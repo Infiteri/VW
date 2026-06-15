@@ -4,6 +4,7 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
+#include "Light/LightSystem.h"
 #include "Material/Material.h"
 #include "Material/MaterialSystem.h"
 #include "Math/Matrix.h"
@@ -124,7 +125,11 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
-#if 1
+#if 0
+                // TODO: known issue, calling actor->Start() individually causes issues with
+                // scene.Start(), actor->Start() will get called twice resulting in multiple
+                // component Start function calls FIX: add some flag to know if Start was called and
+                // return if true
                 scene.GetSky().SetShaderMode("Sky.glsl");
                 scene.GetSky().GetShaderUniforms().AddUniform("uColor", Color({1, 125, 255, 255}));
                 scene.GetSky().GetShaderUniforms().AddUniform("uIntensity", 1.0f);
@@ -139,10 +144,11 @@ namespace VW
 
                 {
                     std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-                    actor->Start();
-                    actor->GetTransform().Scale = Vector3{0.05f, 0.05f, 0.05f};
+                    actor->GetTransform().Position = Vector3{0.2f, 0.2f, 0.2f};
+                    actor->GetTransform().Rotation = Vector3{45, 45, 45};
+                    actor->GetTransform().Scale = Vector3{0.2f, 0.2f, 0.2f};
                     auto amb = actor->AddComponent<AmbientLightComponent>();
-                    amb->SetIntensity(0.6f);
+                    amb->SetIntensity(1.0f);
                     auto mc = actor->AddComponent<ModelComponent>(
                         ModelSystem::GetModel("AK/source/AK47.glb").get());
                     scene.AddActor(std::move(actor));
@@ -150,7 +156,6 @@ namespace VW
 
                 {
                     std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-                    actor->Start();
                     auto pl = actor->AddComponent<PointLightComponent>();
                     pl->SetPosition(Vector3{3, 2, 0});
                     pl->SetColor(Color{255, 0, 0, 255});
@@ -161,7 +166,6 @@ namespace VW
 
                 {
                     std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-                    actor->Start();
                     auto sl = actor->AddComponent<SpotLightComponent>();
                     sl->SetPosition(Vector3{0, 5, 0});
                     sl->SetColor(Color{0, 255, 255, 255});
@@ -190,6 +194,7 @@ namespace VW
                 SceneSerializer ser(&scene);
                 ser.Deserialize("Scene2.vwscn");
                 scene.Start();
+                LightSystem::LightUpdated();
 #endif
             }
 

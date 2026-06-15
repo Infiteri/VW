@@ -15,6 +15,6 @@ namespace VW
 
     void DirectionalLight::SetDirection(const Vector3 &direction)
     {
-        m_Direction = direction.Normalized();
+        m_Direction = direction;
     }
 } // namespace VW
