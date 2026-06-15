@@ -1,10 +1,14 @@
+#include "Camera/CameraSystem.h"
 #include "Camera/PerspectiveCamera.h"
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
+#include "Light/LightSystem.h"
 #include "Mesh/MeshSystem.h"
 #include "Mesh/ModelSystem.h"
 #include "Renderer.h"
+#include "Scene/Scene.h"
+#include "Scene/Serializer/SceneSerializer.h"
 #include "Texture/TextureSystem.h"
 #include <windows.h>
 
@@ -18,25 +22,9 @@ namespace VW
     static int g_H = 0;
     static HINSTANCE g_hInst = nullptr;
 
-    static PerspectiveCamera cam;
-    static std::vector<RenderItem> renderItems;
+    static Scene scene;
+    static PerspectiveCamera *cam;
     static bool firstFrame = true;
-
-    static void BuildScene()
-    {
-        renderItems.clear();
-
-        // two meshes, different textures/colors to test batching + sorting
-        for (i32 x = 0; x < 5; x++)
-        {
-            RenderItem item;
-            item.Mesh = MeshSystem::GetMesh("model").get();
-            item.Transform = Matrix4::Translate({(float)x * 2.5f, 0.0f, 0.0f});
-            item.Material.AlbedoID = x % 2 == 0 ? 0 : TextureSystem::GetTextureID("1-akane.jpg");
-            item.Material.Color = x % 2 == 0 ? Color(255, 125, 0, 255) : Color(0, 125, 255, 255);
-            renderItems.push_back(item);
-        }
-    }
 
     class WindowsPlatform : public VW::Platform
     {
@@ -125,8 +113,10 @@ namespace VW
                 return;
             wglMakeCurrent(g_hDC, g_hGLRC);
 
-            cam.SetPosition({0, 0, 5});
-            Renderer::UseCamera(&cam);
+            CameraSystem::AddCamera("main", std::make_shared<PerspectiveCamera>(120, 16.f / 9, 0.001, 1000.0f));
+            CameraSystem::ActivateCamera("main");
+            cam = (PerspectiveCamera *)CameraSystem::GetCamera("main");
+            cam->SetPosition({0, 0, 5});
         }
 
         void Render() override
@@ -146,12 +136,13 @@ namespace VW
             if (firstFrame)
             {
                 firstFrame = false;
-                ModelSystem::LoadModel("model", "a.obj");
-                BuildScene();
+                SceneSerializer ser(&scene);
+                ser.Deserialize("Scene2.vwscn");
+                scene.Start();
+                LightSystem::LightUpdated();
             }
 
-            for (auto &item : renderItems)
-                Renderer::Submit(item);
+            scene.Render();
 
             SwapBuffers(g_hDC);
         }
