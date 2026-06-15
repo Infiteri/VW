@@ -57,7 +57,8 @@ namespace VW
 
     private:
         SkyMode m_Mode;
-        std::unique_ptr<VertexArray> VA;
+        std::unique_ptr<VertexArray> m_VA;
+        std::unique_ptr<Buffer> m_VB;
 
         struct
         {

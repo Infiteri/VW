@@ -31,6 +31,6 @@ namespace VW
         Matrix4 scaleMatrix = Matrix4::Scale(Scale);
         Matrix4 rotationMatrix = quat.GetMatrix();
 
-        return scaleMatrix * (translationMatrix * rotationMatrix);
+        return (translationMatrix * rotationMatrix) * scaleMatrix;
     }
 } // namespace VW

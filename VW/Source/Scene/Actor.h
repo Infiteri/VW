@@ -93,7 +93,6 @@ namespace VW
 
                     if (currentIndex == index)
                     {
-                        delete tc;
                         m_Components.erase(it);
                         break;
                     }
@@ -103,15 +102,14 @@ namespace VW
 
         template <typename T> void RemoveComponents()
         {
-            for (auto it = m_Components.begin(); it != m_Components.end(); it++)
+            for (auto it = m_Components.begin(); it != m_Components.end();)
             {
                 T *tc = dynamic_cast<T *>(it->get());
 
                 if (tc)
-                {
-                    delete tc;
-                    m_Components.erase(it);
-                }
+                    it = m_Components.erase(it);
+                else
+                    ++it;
             }
         };
 

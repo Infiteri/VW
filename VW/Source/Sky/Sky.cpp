@@ -52,7 +52,7 @@ namespace VW
     void Sky::Render()
     {
         _EnsureVA();
-        if (!VA)
+        if (!m_VA)
             return; // TODO: some warning would be nice, no reason to trigger tho
 
         glClearColor(1, 0, 0, 1); // debug color, if sky is <- this color, something is wrong
@@ -90,7 +90,7 @@ namespace VW
             m_SkyboxData.Texture.Use();
             shader->Int(0, "uSkybox");
 
-            VA->Bind();
+            m_VA->Bind();
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         break;
@@ -111,7 +111,7 @@ namespace VW
             _UploadCameraToShader(camera, shader);
             m_ShaderData.Uniforms.Apply(shader);
 
-            VA->Bind();
+            m_VA->Bind();
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         break;
@@ -120,21 +120,21 @@ namespace VW
 
     void Sky::_EnsureVA()
     {
-        if (VA)
+        if (m_VA)
             return;
 
-        VA = std::make_unique<VertexArray>();
-        auto vb = new Buffer(BufferType::Vertex, BufferUsage::Static); // todo: holy this sucks
+        m_VA = std::make_unique<VertexArray>();
+        m_VB = std::make_unique<Buffer>(BufferType::Vertex, BufferUsage::Static);
 
-        vb->SetData(cubeVertices, sizeof(cubeVertices));
-        VA->AddVertexBuffer(vb,
-                            {
-                                .Attributes = {{0, 0, 3, false}},
-                                .Stride = 3 * sizeof(float),
-                            },
-                            VertexInputRate::Vertex);
-        VA->Bind();
-        VA->Unbind();
+        m_VB->SetData(cubeVertices, sizeof(cubeVertices));
+        m_VA->AddVertexBuffer(m_VB.get(),
+                              {
+                                  .Attributes = {{0, 0, 3, false}},
+                                  .Stride = 3 * sizeof(float),
+                              },
+                              VertexInputRate::Vertex);
+        m_VA->Bind();
+        m_VA->Unbind();
     }
 
     void Sky::SetColorMode(const Color &color)

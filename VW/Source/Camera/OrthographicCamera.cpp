@@ -20,8 +20,8 @@ namespace VW
 
     Matrix4 OrthographicCamera::GetProjection()
     {
-        m_View = Matrix4::Ortho(m_Left, m_Right, m_Top, m_Bottom, m_Near, m_Far);
-        return m_View;
+        m_Proj = Matrix4::Ortho(m_Left, m_Right, m_Top, m_Bottom, m_Near, m_Far);
+        return m_Proj;
     }
 
 } // namespace VW

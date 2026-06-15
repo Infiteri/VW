@@ -16,7 +16,7 @@ namespace VW
     class VW_API Light
     {
     public:
-        Light() = default;
+        Light();
         virtual ~Light() = default;
 
         inline float GetIntensity()

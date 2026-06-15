@@ -125,7 +125,7 @@ namespace VW
 
                 // FIX: name of an asset that doesn't exist crashes engine, must handle
 
-#if 0
+#if 1
                 // TODO: known issue, calling actor->Start() individually causes issues with
                 // scene.Start(), actor->Start() will get called twice resulting in multiple
                 // component Start function calls FIX: add some flag to know if Start was called and

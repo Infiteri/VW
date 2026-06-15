@@ -35,6 +35,7 @@ namespace VW
     void BatchRenderer::Begin()
     {
         m_Batches.clear();
+        m_LinkedMeshes.clear();
     }
 
     void BatchRenderer::Submit(Mesh *mesh, const Matrix4 &transform, Material *material,
