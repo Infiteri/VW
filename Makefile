@@ -11,14 +11,14 @@ help:
 	@echo "				all - Run for full project build (dev target)"
 	@echo "				clean - Cleans project (removes Bin and Bin-Obj, run before full rebuilds)"
 	@echo "				win - Builds the windows executable"
-	@echo "				dev - Builds the dev executable"
+	@echo "				editor - Builds the editor executable"
 	@echo "				run - Run the executable"
 	@echo "				vendor - Builds vendor files"
 	@echo "				assets - Copies the assets needed by VW"
 	@echo "				test - Builds the test executable"
 	@echo "				run_tests - Builds and runs the tests"
 
-all: always assets vendor dev
+all: always assets vendor editor
 
 clean:
 	@echo Cleaning...
@@ -33,10 +33,10 @@ assets: always
 	@echo Copying assets...
 	@cp -r VW/Assets/* $(BIN)
 
-dev: always assets
-	@echo Building dev...
+editor: always assets
+	@echo Building editor...
 	@make -j12 -C VW --no-print-directory
-	@make -j12 -C DevApp --no-print-directory
+	@make -j12 -C Editor --no-print-directory
 
 win: always assets
 	@echo Building win...
