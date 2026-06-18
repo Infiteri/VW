@@ -4,6 +4,7 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
+#include "Mesh/MeshSystem.h"
 #include "Mesh/Model.h"
 #include "Mesh/ModelSystem.h"
 #include "Renderer.h"
@@ -109,14 +110,30 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
-#if 0
                 scene.GetSky().SetShaderMode("Sky.glsl");
-                auto a = std::make_unique<Actor>();
-                scene.AddActor(std::move(a));
+
+#if 1
+                // serialize
+                auto pa = std::make_unique<Actor>();
+                pa->SetName("Parent");
+                pa->GetTransform().Position = Vector3(0, 0, 0);
+                pa->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
+
+                auto ca = std::make_unique<Actor>();
+                ca->SetName("Child");
+                ca->GetTransform().Position = Vector3(2, 0, 0);
+                ca->GetTransform().Scale = Vector3(0.1, 0.1, 0.1);
+                ModelSystem::LoadModel("a.obj", "a.obj");
+                ca->AddComponent<ModelComponent>(ModelSystem::GetModel("a.obj").get());
+
+                pa->AddChild(std::move(ca));
+                scene.AddActor(std::move(pa));
 
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene2.vwscn");
-#else
+#endif
+
+#if 0
                 SceneSerializer ser(&scene);
                 ser.Deserialize("Scene2.vwscn");
 #endif

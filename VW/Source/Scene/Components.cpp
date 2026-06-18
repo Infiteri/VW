@@ -51,7 +51,7 @@ namespace VW
 
     void MeshComponent::Render()
     {
-        m_Item.Transform = m_Owner->GetTransform().GetMatrix() * m_Delta.GetMatrix();
+        m_Item.Transform = m_Owner->GetWorldMatrix() * m_Delta.GetMatrix();
 
         Renderer::Submit(m_Item);
     }
@@ -83,7 +83,7 @@ namespace VW
 
             RenderItem item;
             item.Mesh = sm.Mesh.get();
-            item.Transform = m_Owner->GetTransform().GetMatrix() * m_DeltaTransform.GetMatrix();
+            item.Transform = m_Owner->GetWorldMatrix() * m_DeltaTransform.GetMatrix();
             item.Material = MaterialSystem::GetMaterial(sm.MaterialName);
             item.Shader = ShaderSystem::GetEngineShader("Object.glsl");
             Renderer::Submit(item);

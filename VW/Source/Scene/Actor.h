@@ -5,6 +5,7 @@
 #include "Math/Transform.h"
 #include "Scene/Components.h"
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 namespace VW
@@ -113,6 +114,10 @@ namespace VW
             }
         };
 
+        Matrix4 GetWorldMatrix() const;
+        void AddChild(std::unique_ptr<Actor> child);
+        void RemoveChild(Actor *child);
+
     private:
         std::string m_Name;
         UUID m_ID;
@@ -120,6 +125,9 @@ namespace VW
         std::vector<std::unique_ptr<Component>> m_Components;
 
         Transform m_Transform;
+
+        Actor *m_Parent = nullptr;
+        std::vector<std::unique_ptr<Actor>> m_Children;
 
         friend class ActorSerializer;
     };

@@ -44,6 +44,7 @@ namespace VW
         out << YAML::EndMap;
     }
 
+    // TODO: ADD THE ABILITY FOR CUSTOM SHADERS ON MESH AND MODELS
     static void _DeserializeMeshComponent(YAML::Node node, Actor *actor)
     {
         VW_CHECK(actor)

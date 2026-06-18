@@ -12,6 +12,14 @@ namespace VW
         Stop();
     }
 
+    Matrix4 Actor::GetWorldMatrix() const
+    {
+        Matrix4 local = m_Transform.GetMatrix();
+        if (m_Parent)
+            return m_Parent->GetWorldMatrix() * local;
+        return local;
+    }
+
     void Actor::SetName(const std::string &name)
     {
         m_Name = name;
@@ -22,14 +30,33 @@ namespace VW
         m_Transform = transform;
     }
 
+    void Actor::AddChild(std::unique_ptr<Actor> child)
+    {
+        child->m_Parent = this;
+        m_Children.push_back(std::move(child));
+    }
+
+    void Actor::RemoveChild(Actor *child)
+    {
+        for (auto it = m_Children.begin(); it != m_Children.end(); ++it)
+        {
+            if (it->get() == child)
+            {
+                m_Children.erase(it);
+                return;
+            }
+        }
+    }
+
     void Actor::Start()
     {
         m_MustStartComponents = true;
 
         for (auto &component : m_Components)
-        {
             component->Start();
-        }
+
+        for (auto &child : m_Children)
+            child->Start();
     }
 
     void Actor::Render()
@@ -37,9 +64,10 @@ namespace VW
         m_MustStartComponents = true;
 
         for (auto &component : m_Components)
-        {
             component->Render();
-        }
+
+        for (auto &child : m_Children)
+            child->Render();
     }
 
     void Actor::Update()
@@ -47,9 +75,10 @@ namespace VW
         m_MustStartComponents = true;
 
         for (auto &component : m_Components)
-        {
             component->Update();
-        }
+
+        for (auto &child : m_Children)
+            child->Update();
     }
 
     void Actor::Stop()
@@ -57,8 +86,9 @@ namespace VW
         m_MustStartComponents = false;
 
         for (auto &component : m_Components)
-        {
             component->Stop();
-        }
+
+        for (auto &child : m_Children)
+            child->Stop();
     }
 } // namespace VW
