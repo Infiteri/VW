@@ -12,12 +12,12 @@
 #include "Scene/Scene.h"
 #include "Scene/Serializer/SceneSerializer.h"
 
+#include "Color.h"
+#include "Math/Vector.h"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glfw/glfw3.h>
 #include <imgui.h>
-#include "Color.h"
-#include "Math/Vector.h"
 #include <memory>
 #include <windows.h>
 
@@ -102,7 +102,6 @@ namespace VW
             // frame (`Init` called after OpenGL functions are loaded)
             if (firstFrame)
             {
-
                 firstFrame = false;
                 IMGUI_CHECKVERSION();
                 ImGui::CreateContext();
@@ -110,11 +109,17 @@ namespace VW
                 ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
                 ImGui_ImplOpenGL3_Init("#version 430");
 
+#if 0
                 scene.GetSky().SetShaderMode("Sky.glsl");
+                auto a = std::make_unique<Actor>();
+                scene.AddActor(std::move(a));
 
                 SceneSerializer ser(&scene);
                 ser.Serialize("Scene2.vwscn");
-
+#else
+                SceneSerializer ser(&scene);
+                ser.Deserialize("Scene2.vwscn");
+#endif
                 scene.Start();
             }
 
@@ -142,16 +147,20 @@ namespace VW
                 if (ImGui::DragFloat("Disk Outer", &s_BH_DiskOuter, 0.1f))
                     su.GetUniform("uTiling") = Vector2(s_BH_DiskInner, s_BH_DiskOuter);
                 if (ImGui::DragFloat("Lensing", &s_BH_Lensing, 0.1f))
-                    su.GetUniform("uClipPlane") = Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
+                    su.GetUniform("uClipPlane") =
+                        Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
                 if (ImGui::DragFloat("Star Density", &s_BH_StarDensity, 0.1f))
-                    su.GetUniform("uClipPlane") = Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
+                    su.GetUniform("uClipPlane") =
+                        Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
                 if (ImGui::DragFloat("Near Clip", &s_BH_Near, 0.1f))
-                    su.GetUniform("uClipPlane") = Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
+                    su.GetUniform("uClipPlane") =
+                        Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
                 if (ImGui::DragFloat("Far Clip", &s_BH_Far, 0.1f))
-                    su.GetUniform("uClipPlane") = Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
+                    su.GetUniform("uClipPlane") =
+                        Vector4(s_BH_Near, s_BH_Lensing, s_BH_StarDensity, s_BH_Far);
                 if (ImGui::DragInt("Samples", &s_BH_SampleCount, 1))
                     su.GetUniform("uSampleCount") = s_BH_SampleCount;
-                if (ImGui::DragFloat3("Offset", (float*)&s_BH_Offset, 0.1f))
+                if (ImGui::DragFloat3("Offset", (float *)&s_BH_Offset, 0.1f))
                     su.GetUniform("uOffset") = s_BH_Offset;
             }
             ImGui::Separator();

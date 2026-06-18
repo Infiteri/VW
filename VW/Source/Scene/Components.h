@@ -88,7 +88,7 @@ namespace VW
         ModelComponent(Model *model);
         ~ModelComponent();
 
-        void SetTransform(const Transform &transform);
+        void SetDeltaTransform(const Transform &transform);
 
         void Render();
 

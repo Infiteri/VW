@@ -13,6 +13,13 @@ namespace VW
         Scale = {1, 1, 1};
     }
 
+    Transform::Transform(const Vector3 &position, const Vector3 &rotation, const Vector3 &scale)
+    {
+        Position = position;
+        Rotation = rotation;
+        Scale = scale;
+    }
+
     Transform::Transform(const Transform &other)
     {
         Position = other.Position;

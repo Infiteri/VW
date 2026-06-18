@@ -68,6 +68,8 @@ namespace VW
             mesh->SetMaterial(MaterialSystem::GetMaterial(name));
         }
 
+        mesh->SetDeltaTransform(SerializerUtils::DeserializeTransform(node["DeltaTransform"]));
+
         mesh->SetShader(ShaderSystem::GetEngineShader("Object.glsl"));
     }
 
@@ -90,6 +92,8 @@ namespace VW
 
         auto m = actor->AddComponent<ModelComponent>(
             ModelSystem::GetModel(node["Path"].as<std::string>()).get());
+
+        m->SetDeltaTransform(SerializerUtils::DeserializeTransform(node["DeltaTransform"]));
     }
 
     static void _SerializeAmbientLightComponent(YAML::Emitter &out, AmbientLightComponent *ambient,

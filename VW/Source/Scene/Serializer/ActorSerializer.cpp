@@ -2,6 +2,7 @@
 #include "Base.h"
 #include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
+#include "Core/UUID.h"
 #include "Scene/Serializer/ComponentSerializer.h"
 
 #include <string>
@@ -41,12 +42,12 @@ namespace VW
         std::string name = node["Name"].as<std::string>();
         m_Actor->SetName(name);
 
-        {
-            auto &transform = m_Actor->GetTransform();
-            transform.Position = SerializerUtils::DeserializeVector3(node["Transform"]["Position"]);
-            transform.Rotation = SerializerUtils::DeserializeVector3(node["Transform"]["Rotation"]);
-            transform.Scale = SerializerUtils::DeserializeVector3(node["Transform"]["Scale"]);
-        }
+        UUID uuid = node["UUID"].as<u64>();
+        m_Actor->m_ID = uuid;
+
+        YAML::Node transformNode = node["Transform"];
+        if (transformNode.IsMap())
+            m_Actor->SetTransform(SerializerUtils::DeserializeTransform(transformNode));
 
         ComponentSerializer componentSerializer(m_Actor);
         componentSerializer.Deserialize(node, materialMap);

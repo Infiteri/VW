@@ -120,5 +120,7 @@ namespace VW
         std::vector<std::unique_ptr<Component>> m_Components;
 
         Transform m_Transform;
+
+        friend class ActorSerializer;
     };
 } // namespace VW

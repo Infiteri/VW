@@ -1,5 +1,6 @@
 #include "SerializerUtils.h"
 #include "Core/Logger.h"
+#include "Math/Transform.h"
 #include "Shader/ShaderUniforms.h"
 #include <fstream>
 #include <type_traits>
@@ -83,6 +84,13 @@ namespace VW
             // TODO: safety checks
             return Color(node[0].as<float>(), node[1].as<float>(), node[2].as<float>(),
                          node[3].as<float>());
+        }
+
+        Transform DeserializeTransform(const YAML::Node &node)
+        {
+            return Transform(SerializerUtils::DeserializeVector3(node["Position"]),
+                             SerializerUtils::DeserializeVector3(node["Rotation"]),
+                             SerializerUtils::DeserializeVector3(node["Scale"]));
         }
 
         static void _SerializeUniform(YAML::Emitter &out, const char *name,

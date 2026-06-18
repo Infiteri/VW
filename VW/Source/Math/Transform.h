@@ -13,6 +13,7 @@ namespace VW
         Vector3 Scale{1, 1, 1};
 
         Transform();
+        Transform(const Vector3 &position, const Vector3 &rotation, const Vector3 &scale);
         Transform(const Transform &other);
         ~Transform() = default;
 

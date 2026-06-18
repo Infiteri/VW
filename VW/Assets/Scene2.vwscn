@@ -11,7 +11,8 @@ Materials:
     NormalPath: ""
     ORMPath: ""
 Sky:
-  Mode: 2
+  Mode: 0
+  Color: [0, 125, 255, 255]
   Path: Sky.glsl
   Uniforms:
     - Name: uSampleCount

@@ -33,6 +33,7 @@ namespace VW
         Vector3 DeserializeVector3(const YAML::Node &node);
         Vector4 DeserializeVector4(const YAML::Node &node);
         Color DeserializeColor(const YAML::Node &node);
+        Transform DeserializeTransform(const YAML::Node &node);
 
         // NOTE: Specific serialization functions
         void SerializeShaderUniforms(YAML::Emitter &out, const char *field,

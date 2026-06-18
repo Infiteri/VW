@@ -64,7 +64,7 @@ namespace VW
     {
     }
 
-    void ModelComponent::SetTransform(const Transform &transform)
+    void ModelComponent::SetDeltaTransform(const Transform &transform)
     {
         m_DeltaTransform = transform;
     }
