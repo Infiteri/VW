@@ -42,12 +42,14 @@ namespace VW
             actor->Stop();
     }
 
-    void Scene::AddActor(std::unique_ptr<Actor> actor)
+    Actor *Scene::AddActor(std::unique_ptr<Actor> actor)
     {
         if (m_MustStartActors)
             actor->Start();
 
+        Actor *ptr = actor.get();
         m_Actors.push_back(std::move(actor));
+        return ptr;
     }
 
     void Scene::SetName(const std::string &name)

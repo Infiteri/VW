@@ -115,7 +115,7 @@ namespace VW
         };
 
         Matrix4 GetWorldMatrix() const;
-        void AddChild(std::unique_ptr<Actor> child);
+        Actor *AddChild(std::unique_ptr<Actor> child);
         void RemoveChild(Actor *child);
 
     private:

@@ -19,7 +19,7 @@ namespace VW
         void Update();
         void Stop();
 
-        void AddActor(std::unique_ptr<Actor> actor);
+        Actor *AddActor(std::unique_ptr<Actor> actor);
 
         void SetName(const std::string &name);
         inline const std::string &GetName() const

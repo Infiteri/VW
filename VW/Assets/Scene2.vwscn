@@ -11,104 +11,70 @@ Materials:
     NormalPath: ""
     ORMPath: ""
 Sky:
-  Mode: 0
-  Color: [0, 125, 255, 255]
+  Mode: 2
   Path: Sky.glsl
   Uniforms:
-    - Name: uSampleCount
-      Type: 0
-      Value: 8
-    - Name: uClipPlane
-      Type: 4
-      Value: [0, 1, 0, 10]
-    - Name: uOffset
-      Type: 3
-      Value: [0.5, 0, 0]
-    - Name: uTiling
-      Type: 2
-      Value: [4, 4]
-    - Name: uIntensity
+    - Name: uMass
       Type: 1
       Value: 1
+    - Name: uSampleCount
+      Type: 0
+      Value: 48
+    - Name: uClipPlane
+      Type: 4
+      Value: [0.1, 1.5, 0.6, 60]
+    - Name: uOffset
+      Type: 3
+      Value: [0, 0, 0]
+    - Name: uTiling
+      Type: 2
+      Value: [3, 10]
+    - Name: uIntensity
+      Type: 1
+      Value: 1.2
     - Name: uColor
       Type: 5
-      Value: [1, 125, 255, 255]
+      Value: [255, 220, 180, 255]
 Actors:
   - Actor: "?"
-    Name: Actor
-    UUID: 1017154847870628940
+    Name: Parent
+    UUID: 15938555618966149485
     Transform:
-      Position: [0.2, 0.2, 0.2]
-      Rotation: [45, 45, 45]
-      Scale: [0.2, 0.2, 0.2]
-    MeshComponentCount: 0
-    ModelComponentCount: 1
-    AmbientLightComponentCount: 1
+      Position: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponentCount: 1
+    ModelComponentCount: 0
+    AmbientLightComponentCount: 0
     DirectionalLightComponentCount: 0
     PointLightComponentCount: 0
     SpotLightComponentCount: 0
-    ModelComponent 0:
-      Path: a.obj
+    MeshComponent 0:
+      Type: 0
+      MaterialName: ""
       DeltaTransform:
         Position: [0, 0, 0]
         Rotation: [0, 0, 0]
         Scale: [1, 1, 1]
-    AmbientLightComponent 0:
-      Color: [255, 255, 255, 255]
-      Intensity: 1
-  - Actor: "?"
-    Name: Actor
-    UUID: 17642998362561861011
-    Transform:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponentCount: 0
-    ModelComponentCount: 0
-    AmbientLightComponentCount: 0
-    DirectionalLightComponentCount: 0
-    PointLightComponentCount: 1
-    SpotLightComponentCount: 0
-    PointLightComponent 0:
-      Position: [3, 2, 0]
-      Range: 15
-      Color: [255, 0, 0, 255]
-      Intensity: 10
-  - Actor: "?"
-    Name: Actor
-    UUID: 4783409842060330429
-    Transform:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponentCount: 0
-    ModelComponentCount: 0
-    AmbientLightComponentCount: 0
-    DirectionalLightComponentCount: 0
-    PointLightComponentCount: 0
-    SpotLightComponentCount: 1
-    SpotLightComponent 0:
-      Position: [0, 5, 0]
-      Direction: [0, -1, 0]
-      Range: 20
-      InnerConeAngle: 30
-      OuterConeAngle: 45
-      Color: [0, 255, 255, 255]
-      Intensity: 5
-  - Actor: "?"
-    Name: Actor
-    UUID: 14299367478273897095
-    Transform:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    MeshComponentCount: 0
-    ModelComponentCount: 0
-    AmbientLightComponentCount: 0
-    DirectionalLightComponentCount: 1
-    PointLightComponentCount: 0
-    SpotLightComponentCount: 0
-    DirectionalLightComponent 0:
-      Direction: [0.5, -1, -0.5]
-      Color: [255, 255, 200, 255]
-      Intensity: 1.5
+    Children:
+      - Actor: "?"
+        Name: Child
+        UUID: 12663920724210310428
+        Transform:
+          Position: [2, 0, 0]
+          Rotation: [0, 0, 0]
+          Scale: [0.1, 0.1, 0.1]
+        MeshComponentCount: 0
+        ModelComponentCount: 1
+        AmbientLightComponentCount: 0
+        DirectionalLightComponentCount: 0
+        PointLightComponentCount: 0
+        SpotLightComponentCount: 0
+        ModelComponent 0:
+          Path: a.obj
+          DeltaTransform:
+            Position: [0, 0, 0]
+            Rotation: [0, 0, 0]
+            Scale: [1, 1, 1]
+        Children:
+          []

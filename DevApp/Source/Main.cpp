@@ -112,7 +112,7 @@ namespace VW
 
                 scene.GetSky().SetShaderMode("Sky.glsl");
 
-#if 1
+#if 0
                 // serialize
                 auto pa = std::make_unique<Actor>();
                 pa->SetName("Parent");
@@ -133,7 +133,7 @@ namespace VW
                 ser.Serialize("Scene2.vwscn");
 #endif
 
-#if 0
+#if 1
                 SceneSerializer ser(&scene);
                 ser.Deserialize("Scene2.vwscn");
 #endif

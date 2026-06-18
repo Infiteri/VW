@@ -30,10 +30,12 @@ namespace VW
         m_Transform = transform;
     }
 
-    void Actor::AddChild(std::unique_ptr<Actor> child)
+    Actor *Actor::AddChild(std::unique_ptr<Actor> child)
     {
         child->m_Parent = this;
+        Actor *ptr = child.get();
         m_Children.push_back(std::move(child));
+        return ptr;
     }
 
     void Actor::RemoveChild(Actor *child)

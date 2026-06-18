@@ -1,6 +1,5 @@
 #include "ActorSerializer.h"
 #include "Base.h"
-#include "Core/Logger.h"
 #include "Core/SerializerUtils.h"
 #include "Core/UUID.h"
 #include "Scene/Serializer/ComponentSerializer.h"
@@ -31,6 +30,14 @@ namespace VW
         ComponentSerializer componentSerializer(m_Actor);
         componentSerializer.Serialize(out);
 
+        VW_SERIALIZE_FIELD("Children", YAML::BeginSeq);
+
+        for (auto &child : m_Actor->m_Children)
+        {
+            ActorSerializer(child.get()).Serialize(out);
+        }
+
+        out << YAML::EndSeq;
         out << YAML::EndMap;
     }
 
@@ -51,6 +58,17 @@ namespace VW
 
         ComponentSerializer componentSerializer(m_Actor);
         componentSerializer.Deserialize(node, materialMap);
+
+        YAML::Node childrenNode = node["Children"];
+        if (childrenNode.IsSequence())
+        {
+            for (auto childNode : childrenNode)
+            {
+                auto actor = std::make_unique<Actor>();
+                ActorSerializer(actor.get()).Deserialize(childNode, materialMap);
+                m_Actor->AddChild(std::move(actor));
+            }
+        }
     }
 
 } // namespace VW
