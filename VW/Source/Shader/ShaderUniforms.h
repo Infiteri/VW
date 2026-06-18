@@ -4,7 +4,6 @@
 #include "Color.h"
 #include "Math/Vector.h"
 #include "Shader.h"
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -24,6 +23,8 @@ namespace VW
         void RemoveUniform(const std::string &name);
 
         void Apply(Shader *shader);
+
+        UniformValue &GetUniform(const std::string &name);
 
         inline const UniformMap &GetUniforms() const
         {

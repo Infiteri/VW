@@ -6,12 +6,20 @@ namespace VW
 {
     void ShaderUniforms::AddUniform(const std::string &name, const UniformValue &value)
     {
+        if (m_Uniforms.find(name) != m_Uniforms.end())
+            return;
+
         m_Uniforms[name] = value;
     }
 
     void ShaderUniforms::RemoveUniform(const std::string &name)
     {
         m_Uniforms.erase(name);
+    }
+
+    UniformValue &ShaderUniforms::GetUniform(const std::string &name)
+    {
+        return m_Uniforms[name];
     }
 
     void ShaderUniforms::Apply(Shader *shader)
