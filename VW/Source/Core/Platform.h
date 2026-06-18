@@ -11,6 +11,7 @@ namespace VW
         Platform() {};
         virtual ~Platform() {};
 
+        virtual void PreInit() {};
         virtual void Init() {};
         virtual void Render() {};
         virtual void Shutdown() {};

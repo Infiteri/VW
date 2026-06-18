@@ -15,8 +15,9 @@ int main(int argc, const char **argv)
     if (!platform)
         return -1;
 
-    platform->Init();
+    platform->PreInit();
     VW::Renderer::Init();
+    platform->Init();
 
     while (!platform->ShouldShutdown())
     {

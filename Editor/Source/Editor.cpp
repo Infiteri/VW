@@ -4,20 +4,14 @@
 #include "Core/Entry.h"
 #include "Core/Logger.h"
 #include "Core/Platform.h"
-#include "Mesh/MeshSystem.h"
-#include "Mesh/Model.h"
-#include "Mesh/ModelSystem.h"
+#include "GUI.h"
 #include "Renderer.h"
-#include "Scene/Actor.h"
-#include "Scene/Components.h"
 #include "Scene/Scene.h"
 #include "Scene/Serializer/SceneSerializer.h"
+#include "Window.h"
 
 #include "Color.h"
 #include "Math/Vector.h"
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-#include <glfw/glfw3.h>
 #include <imgui.h>
 #include <memory>
 #include <windows.h>
@@ -26,7 +20,6 @@ namespace VW
 {
     static PerspectiveCamera *cam;
     static CameraController controller;
-    static bool firstFrame = true;
 
     static Scene scene;
 
@@ -43,34 +36,24 @@ namespace VW
     static Vector3 s_BH_Offset = {0.0f, 0.0f, 0.0f};
     static float s_BH_Color[4] = {1.0f, 0.86f, 0.7f, 1.0f};
 
-    static void OnResize(GLFWwindow *window, int w, int h)
-    {
-        Renderer::Viewport(w, h);
-    }
-
-    class DevAppPlatform : public Platform
+    class EditorPlatform : public Platform
     {
     public:
-        DevAppPlatform() = default;
-        ~DevAppPlatform() = default;
+        EditorPlatform() = default;
+        ~EditorPlatform() = default;
 
-        void Init() override
+        void PreInit() override
         {
-            CameraSystem::AddCamera(
-                "main", std::make_shared<PerspectiveCamera>(120, 16.f / 9, 0.001, 1000.0f));
-            CameraSystem::ActivateCamera("main");
-            cam = (PerspectiveCamera *)CameraSystem::GetCamera("main");
-
             Logger::GetSettings().FancyFormat = true;
             Logger::GetSettings().Format = "[PREFIX]: MSG";
-            VW_LOG_ADD_CATEGORY("vwdp", "Dev");
-            VW_INFO("vwdp", "Initializing...");
+            VW_LOG_ADD_CATEGORY("vwed", "Editor");
+            VW_INFO("vwed", "Initializing...");
 
-            glfwInit();
-            m_Handle = glfwCreateWindow(100, 100, "DevApp", nullptr, nullptr);
-            glfwMakeContextCurrent(m_Handle);
-            glfwMaximizeWindow(m_Handle);
-            glfwSetWindowSizeCallback(m_Handle, OnResize);
+            CameraSystem::AddCamera("MainEditorCamera", std::make_shared<PerspectiveCamera>(
+                                                            120, 16.f / 9, 0.001, 1000.0f));
+            CameraSystem::ActivateCamera("MainEditorCamera");
+            cam = (PerspectiveCamera *)CameraSystem::GetCamera("MainEditorCamera");
+
             controller.SetCamera(cam);
             cam->SetPosition({0, 0, 15});
 
@@ -86,68 +69,58 @@ namespace VW
 
         bool ShouldShutdown() override
         {
-            return glfwWindowShouldClose(m_Handle);
+            return m_Window.ShouldClose();
         }
 
         void Shutdown() override
         {
-            glfwDestroyWindow(m_Handle);
-            glfwTerminate();
+            GUI::Shutdown();
+        }
+
+        void Init() override
+        {
+            GUI::Init(m_Window);
+
+            scene.GetSky().SetShaderMode("Sky.glsl");
+
+#if 0
+                          // serialize
+                          auto pa = std::make_unique<Actor>();
+                          pa->SetName("Parent");
+                          pa->GetTransform().Position = Vector3(0, 0, 0);
+                          pa->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
+
+                          auto ca = std::make_unique<Actor>();
+                          ca->SetName("Child");
+                          ca->GetTransform().Position = Vector3(2, 0, 0);
+                          ca->GetTransform().Scale = Vector3(0.1, 0.1, 0.1);
+                          ModelSystem::LoadModel("a.obj", "a.obj");
+                          ca->AddComponent<ModelComponent>(ModelSystem::GetModel("a.obj").get());
+
+                          pa->AddChild(std::move(ca));
+                          scene.AddActor(std::move(pa));
+
+                          SceneSerializer ser(&scene);
+                          ser.Serialize("Scene2.vwscn");
+#endif
+
+#if 1
+            SceneSerializer ser(&scene);
+            ser.Deserialize("Scene2.vwscn");
+#endif
+            scene.Start();
         }
 
         void Render() override
         {
-            controller.Update(m_Handle);
-
-            // TODO: some kind of `PreInit` instead of current `Init` and `Init` instead of first
-            // frame (`Init` called after OpenGL functions are loaded)
-            if (firstFrame)
-            {
-                firstFrame = false;
-                IMGUI_CHECKVERSION();
-                ImGui::CreateContext();
-                ImGui::StyleColorsDark();
-                ImGui_ImplGlfw_InitForOpenGL(m_Handle, true);
-                ImGui_ImplOpenGL3_Init("#version 430");
-
-                scene.GetSky().SetShaderMode("Sky.glsl");
-
-#if 0
-                // serialize
-                auto pa = std::make_unique<Actor>();
-                pa->SetName("Parent");
-                pa->GetTransform().Position = Vector3(0, 0, 0);
-                pa->AddComponent<MeshComponent>(MeshSystem::GetMesh(MeshType::Cube).get());
-
-                auto ca = std::make_unique<Actor>();
-                ca->SetName("Child");
-                ca->GetTransform().Position = Vector3(2, 0, 0);
-                ca->GetTransform().Scale = Vector3(0.1, 0.1, 0.1);
-                ModelSystem::LoadModel("a.obj", "a.obj");
-                ca->AddComponent<ModelComponent>(ModelSystem::GetModel("a.obj").get());
-
-                pa->AddChild(std::move(ca));
-                scene.AddActor(std::move(pa));
-
-                SceneSerializer ser(&scene);
-                ser.Serialize("Scene2.vwscn");
-#endif
-
-#if 1
-                SceneSerializer ser(&scene);
-                ser.Deserialize("Scene2.vwscn");
-#endif
-                scene.Start();
-            }
+            controller.Update(m_Window.GetHandle());
 
             scene.Render();
         }
 
         void RenderImGui() override
         {
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
+            GUI::BeginFrame();
 
             ImGui::Begin("Black Hole");
             {
@@ -193,14 +166,12 @@ namespace VW
             }
             ImGui::End();
 
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            glfwSwapBuffers(m_Handle);
-            glfwPollEvents();
+            GUI::EndFrame();
+            m_Window.SwapBuffers();
         }
 
     private:
-        GLFWwindow *m_Handle;
+        Window m_Window;
     };
 } // namespace VW
 
@@ -216,5 +187,5 @@ VW::Platform *VW::InitPlatform()
             SetConsoleMode(hOut, dwMode);
         }
     }
-    return new VW::DevAppPlatform();
+    return new VW::EditorPlatform();
 }

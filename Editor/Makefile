@@ -1,11 +1,11 @@
 BIN ?= ../Bin
 OBJ ?= ../Bin-Obj
 EXE ?= VW
-ASSEMBLY := DevApp
+ASSEMBLY := Editor
 ASSEMBLY_OBJ_DIR := $(OBJ)/$(ASSEMBLY)
 
 COMPILE_FLAGS=-g
-INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include -IVendor/miniaudio -IVendor/imgui
+INCLUDE_FLAGS=-I../VW/Source -IVendor/glfw/include -IVendor/imgui
 DEFINES=
 LINK_FLAGS= -L$(BIN) -lglfw3 -lVW -limgui
 
