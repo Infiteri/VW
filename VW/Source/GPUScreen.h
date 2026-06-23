@@ -25,5 +25,7 @@ namespace VW
         std::unique_ptr<Buffer> m_VBO, m_EBO;
         Shader *m_SS;
         u32 m_IndexCount = 0;
+
+        friend class Renderer;
     };
 } // namespace VW

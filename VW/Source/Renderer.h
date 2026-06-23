@@ -87,6 +87,8 @@ namespace VW
         static float GetDeltaTime();
         static float GetTime();
 
+        static u64 GetPassID(u32 index);
+
     private:
         friend class BatchRenderer;
         static State &_GetState();

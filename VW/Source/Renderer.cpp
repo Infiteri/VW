@@ -216,4 +216,9 @@ namespace VW
 
         // TODO: add time based uniforms + others
     }
+
+    u64 Renderer::GetPassID(u32 index)
+    {
+        return s_State.Screen.m_FB->GetColorAttachmentID(index);
+    }
 } // namespace VW

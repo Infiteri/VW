@@ -36,6 +36,12 @@ namespace VW
     static Vector3 s_BH_Offset = {0.0f, 0.0f, 0.0f};
     static float s_BH_Color[4] = {1.0f, 0.86f, 0.7f, 1.0f};
 
+    struct EditorState
+    {
+        ImVec2 LastFrameViewport;
+    };
+    static EditorState s_State;
+
     class EditorPlatform : public Platform
     {
     public:
@@ -118,9 +124,41 @@ namespace VW
             scene.Render();
         }
 
+        void Viewport()
+        {
+            Renderer::Viewport(s_State.LastFrameViewport.x, s_State.LastFrameViewport.y);
+        }
+
+        void RenderSceneInViewport()
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+            ImGui::Begin("Viewport");
+            ImGui::PopStyleVar();
+
+            // Update renderer viewport
+            ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+            if (viewportSize.x != s_State.LastFrameViewport.x ||
+                viewportSize.y != s_State.LastFrameViewport.y)
+            {
+                s_State.LastFrameViewport = viewportSize;
+                Viewport();
+            }
+
+            GUI::GetDockspaceSettings().ViewportLeftTop = ImGui::GetWindowPos();
+            GUI::GetDockspaceSettings().ViewportRightBottom = ImGui::GetWindowSize();
+
+            ImGui::Image((void *)(u64)(u32)(Renderer::GetPassID(0)), viewportSize, ImVec2{0, 1},
+                         ImVec2{1, 0});
+
+            ImGui::End();
+        }
+
         void RenderImGui() override
         {
             GUI::BeginFrame();
+            GUI::BeginEditorDockspace();
+
+            RenderSceneInViewport();
 
             ImGui::Begin("Black Hole");
             {
@@ -165,6 +203,8 @@ namespace VW
                     debug.RenderMode = static_cast<RenderDebugMode>(current);
             }
             ImGui::End();
+
+            GUI::EndEditorDockspace();
 
             GUI::EndFrame();
             m_Window.SwapBuffers();
