@@ -5,6 +5,8 @@
 #include "Core/Logger.h"
 #include "Core/Platform.h"
 #include "GUI.h"
+#include "Panels/Panel.h"
+#include "Panels/SceneHierarchyPanel.h"
 #include "Renderer.h"
 #include "Scene/Scene.h"
 #include "Scene/Serializer/SceneSerializer.h"
@@ -39,7 +41,10 @@ namespace VW
     struct EditorState
     {
         ImVec2 LastFrameViewport;
+
+        PanelSystem Panels;
     };
+
     static EditorState s_State;
 
     class EditorPlatform : public Platform
@@ -71,6 +76,9 @@ namespace VW
             su.AddUniform("uClipPlane", Vector4(0.1f, 1.5f, 0.6f, 60.0f));
             su.AddUniform("uSampleCount", 48);
             su.AddUniform("uMass", 1.0f);
+
+            // TODO: some scene system, note that 'scene' = 'wallpaper', which means the scene system should be able to swap between wallpapers
+            s_State.Panels.AddPanel(std::make_unique<SceneHierarchyPanel>(&scene));
         }
 
         bool ShouldShutdown() override
@@ -157,6 +165,8 @@ namespace VW
         {
             GUI::BeginFrame();
             GUI::BeginEditorDockspace();
+
+            s_State.Panels.Render();
 
             RenderSceneInViewport();
 

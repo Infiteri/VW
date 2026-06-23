@@ -20,6 +20,20 @@ namespace VW
         void Stop();
 
         Actor *AddActor(std::unique_ptr<Actor> actor);
+        Actor *CreateActor(const std::string &name = "Actor");
+        void DestroyActor(Actor *actor);
+        void Reparent(Actor *child, Actor *newParent);
+        Actor *FindActor(const UUID &id);
+        Actor *FindActor(const std::string &name);
+
+        inline std::vector<std::unique_ptr<Actor>> &GetRoots()
+        {
+            return m_Actors;
+        }
+        inline const std::vector<std::unique_ptr<Actor>> &GetRoots() const
+        {
+            return m_Actors;
+        }
 
         void SetName(const std::string &name);
         inline const std::string &GetName() const
@@ -34,6 +48,7 @@ namespace VW
         }
 
     private:
+        bool _IsDescendant(Actor *ancestor, Actor *child);
         bool m_MustStartActors = false;
         std::vector<std::unique_ptr<Actor>> m_Actors;
 

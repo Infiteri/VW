@@ -115,8 +115,19 @@ namespace VW
         };
 
         Matrix4 GetWorldMatrix() const;
+
+        inline Actor *GetParent() const
+        {
+            return m_Parent;
+        }
+
+        inline const std::vector<std::unique_ptr<Actor>> &GetChildren() const
+        {
+            return m_Children;
+        }
+
         Actor *AddChild(std::unique_ptr<Actor> child);
-        void RemoveChild(Actor *child);
+        std::unique_ptr<Actor> RemoveChild(Actor *child);
 
     private:
         std::string m_Name;

@@ -38,16 +38,19 @@ namespace VW
         return ptr;
     }
 
-    void Actor::RemoveChild(Actor *child)
+    std::unique_ptr<Actor> Actor::RemoveChild(Actor *child)
     {
         for (auto it = m_Children.begin(); it != m_Children.end(); ++it)
         {
             if (it->get() == child)
             {
+                auto ptr = std::move(*it);
                 m_Children.erase(it);
-                return;
+                ptr->m_Parent = nullptr;
+                return ptr;
             }
         }
+        return nullptr;
     }
 
     void Actor::Start()
