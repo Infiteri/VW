@@ -14,6 +14,11 @@ namespace VW
         void SetCamera(Camera *target);
         void Update(GLFWwindow *window);
 
+        inline bool IsMouseLocked() const
+        {
+            return m_MouseLocked;
+        }
+
     private:
         Camera *m_Target;
 

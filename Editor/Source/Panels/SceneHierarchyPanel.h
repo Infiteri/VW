@@ -15,7 +15,13 @@ namespace VW
 
         void RenderNode(Actor *actor);
 
+        inline Actor *GetSelected() const
+        {
+            return m_Selected;
+        }
+
     private:
         Scene *m_Scene;
+        Actor *m_Selected = nullptr;
     };
 } // namespace VW

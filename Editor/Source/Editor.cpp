@@ -127,7 +127,8 @@ namespace VW
 
         void Render() override
         {
-            controller.Update(m_Window.GetHandle());
+            if (m_ViewportHovered || controller.IsMouseLocked())
+                controller.Update(m_Window.GetHandle());
 
             scene.Render();
         }
@@ -142,6 +143,8 @@ namespace VW
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
             ImGui::Begin("Viewport");
             ImGui::PopStyleVar();
+
+            m_ViewportHovered = ImGui::IsWindowHovered();
 
             // Update renderer viewport
             ImVec2 viewportSize = ImGui::GetContentRegionAvail();
@@ -164,6 +167,10 @@ namespace VW
         void RenderImGui() override
         {
             GUI::BeginFrame();
+
+            if (controller.IsMouseLocked())
+                ImGui::GetIO().MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+
             GUI::BeginEditorDockspace();
 
             s_State.Panels.Render();
@@ -221,6 +228,7 @@ namespace VW
         }
 
     private:
+        bool m_ViewportHovered = false;
         Window m_Window;
     };
 } // namespace VW
